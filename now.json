@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "alias": ["kureev.com", "www.kureev.com"],
   "builds": [
     {
