@@ -1,1 +1,11 @@
-{}
+{
+  "version": 1,
+  "alias": ["kureev.com", "www.kureev.com"],
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "public" }
+    }
+  ]
+}
