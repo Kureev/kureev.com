@@ -66,3 +66,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 .skip:focus{top:12px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 @media(prefers-contrast:more){:root{--mute:#b4bde0;--line:rgba(143,155,196,.45)}}
+
+/* calmer status row: state as a dot and a word, not a row of outlined pills */
+.st .pill,.pill{border:0!important;background:none!important;padding:0 14px 0 14px!important;position:relative}
+.st .pill::before,.pill::before{content:'';position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:currentColor}
+.st{gap:6px 18px!important}
+.hud .pill{background:rgba(5,8,23,.86)!important;padding:5px 11px 5px 24px!important;border-radius:99px}.hud .pill::before{left:10px}

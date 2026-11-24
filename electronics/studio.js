@@ -41,10 +41,6 @@ function build(scene,opt){
       g.translate(0,h/2,0);if(lean&&r()<.12){g.rotateZ(-.22);x+=.25}g.translate(x+w/2,y+.11,Z+.05);geos.push(g);x+=w+.015+(r()<.08?.6+r()*1.2:0)}};
    [[X0+.4,X0+6.2,YS[0]],[X0+BW+3.6,X0+2*BW-.4,YS[0]],[X0+2*BW+.4,X0+2*BW+4.4,YS[0]],[X0+.4,X0+3.8,YS[1]],[X0+BW+.4,X0+BW+5.6,YS[1]],[X0+2*BW+5.4,X0+3*BW-.4,YS[1]],[X0+3.4,X0+BW-.4,YS[2]],[X0+2*BW+.4,X0+2*BW+6,YS[2]]].forEach(([a,b,y])=>shelf(a,b,y,true));
    root.add(new T.Mesh(merge(geos),mats))}
-  /* blueprints in thin black frames, faintly backlit */
-  [['bp1.webp',X0+BW*1.5-1.8,7.65,4.6,3.07],['bp2.webp',X0+BW*2+7.0,4.55,3.6,2.4],['bp3.webp',X0+6.6,10.65,2.0,3.0]].forEach(([f,x,y,w,h])=>{
-    const fr=new T.Mesh(new T.BoxGeometry(w+.22,h+.22,.1),new T.MeshStandardMaterial({color:0x07090f,roughness:.4}));fr.position.set(x,y,Z-.55);root.add(fr);
-    const p=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex(f),roughness:.7,emissive:0x2a3f8f,emissiveIntensity:.25}));p.position.set(x,y,Z-.49);root.add(p)});
   /* plants: pots + pothos leaves as instanced cards with a generated leaf texture */
   const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,emissiveMap:leafTex,emissive:0xffffff,emissiveIntensity:.14,alphaTest:.45,side:T.DoubleSide,roughness:.45,color:0xbfd6c8});
   const leafG=new T.PlaneGeometry(.95,.95);leafG.translate(0,.42,0);
