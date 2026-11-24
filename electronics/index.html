@@ -180,7 +180,7 @@ if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeen
 else{
 const stage=$('#stage'),cv=$('#gl'),V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x03050f);scene.fog=new THREE.Fog(0x03050f,20,46);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x03050f);scene.fog=new THREE.Fog(0x03050f,28,70);
 const studio=window.STUDIO?STUDIO.build(scene,{tex:'/electronics/tex/',quality:innerWidth<900?'low':'high',aim:{x:3.4,z:-0.85}}):null;
 scene.add(new THREE.HemisphereLight(0x8f9bc4,0x050817,0.25));const sun=new THREE.DirectionalLight(0xffffff,0.75);sun.position.set(-5,10,7);scene.add(sun);
 {const a=new THREE.DirectionalLight(0x5b9cff,1.1);a.position.set(6,5,-9);scene.add(a);const b=new THREE.DirectionalLight(0x9a7bff,.8);b.position.set(-9,4,-6);scene.add(b);const lamp=new THREE.PointLight(0xffb26b,.9,14);lamp.position.set(6.5,3.2,-2.5);scene.add(lamp)}
@@ -191,29 +191,64 @@ const box=(w,h,d,mat,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w
 const cyl=(r,h,mat,x,y,z,par,rz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat);m.position.set(x,y,z);if(rz)m.rotation.z=rz;(par||scene).add(m);return m};
 /* engineering desk: dark top with a lit front edge, a cutting mat under the board */
 const B0X=-0.8+2*1.8;{const dk=box(18,0.35,18,studio?studio.desk.clone():M(0x0b0d14),0,-0.175,3.55);if(studio){dk.material.color.set(0x5a4e48);dk.material.roughness=.78;dk.material.map=dk.material.map.clone();dk.material.map.repeat.set(2,1.7);dk.material.map.needsUpdate=true}}
-{const mat=box(8.6,0.02,5.8,new THREE.MeshStandardMaterial({color:0x05070f,roughness:.85,metalness:0}),B0X+0.1,0.012,-0.85);const g=new THREE.GridHelper(8,16,0x5b9cff,0x8f9bc4);g.material.transparent=true;g.material.opacity=.07;g.scale.set(1.075,1,.725);g.position.set(B0X+0.1,0.025,-0.85);scene.add(g)}
+
 
 const narrow=document.getElementById('stage').clientWidth<600,labels=[],lab=(t,p,cls)=>{const el=document.createElement('div');el.className='lb '+(cls||'');el.textContent=t;$('#labels').appendChild(el);labels.push({el,p});return el};
 
-/* board with 8 sections */
+/* board with 8 sections on a cutting mat that matches it exactly */
 const B0=V3(-0.8,0,-1.9),CW=1.8,CD=2.3,hits=[];
-const all=isDone(9);
-box(4*CW+0.4,0.1,2*CD+0.4,new THREE.MeshStandardMaterial({color:0x01030e,transparent:!all,opacity:all?1:.28,roughness:.85}),B0.x+2*CW,0.05,B0.z+CD);
-const mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3});
-function sectionParts(i,g){const r=n=>Math.sin(i*12.9898+n*78.233)*0.5+0.5;
-  for(let k=0;k<3;k++)box(CW*0.8,0.02,0.07,mCu,0,0.12,-0.7+k*0.6,g);
-  if(i===0){cyl(0.13,0.6,M(0xddeeff,{transparent:true,opacity:.5}),-0.3,0.25,-0.4,g,Math.PI/2);box(0.5,0.16,0.45,M(0x161616),0.35,0.18,-0.4,g);box(0.6,0.4,0.9,M(0xf2c230),-0.45,0.3,0.55,g)}
-  else for(let k=0;k<4;k++){const t=Math.floor(r(k)*3);if(t===0)cyl(0.18,0.35,M(0x2a4a8a),-0.5+k*0.33,0.28,0.3,g);else if(t===1)box(0.3,0.14,0.2,M(0x9a6a40),-0.5+k*0.33,0.17,0.35,g);else box(0.45,0.12,0.45,M(0x161616),-0.5+k*0.33,0.16,0.3,g)}
-  if(i===6){box(1.1,0.16,1.3,M(0x30353a),0,0.18,0,g);box(0.8,0.1,0.8,M(0xb8c0c4,{metalness:.7}),0,0.3,-0.1,g)}
-  if(i===7)box(0.5,0.35,1.0,M(0x222222),0.5,0.28,0,g)}
+const MX=B0.x+0.2+2*CW,MZ=B0.z+0.2+CD,MW=4*CW+0.6,MD=2*CD+0.6;
+box(MW,0.02,MD,new THREE.MeshStandardMaterial({color:0x080c1a,roughness:.85,metalness:0}),MX,0.012,MZ);
+{const P=[],Q=[],x0=MX-2*CW,z0=MZ-CD;
+ for(let i=0;i<=24;i++){const x=x0+i*CW/6;(i%6?P:Q).push(x,0.024,z0-0.25,x,0.024,z0+2*CD+0.25)}
+ for(let j=0;j<=16;j++){const z=z0+j*CD/8;(j%8?P:Q).push(x0-0.25,0.024,z,x0+4*CW+0.25,0.024,z)}
+ const L=(arr,c,o)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));scene.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:c,transparent:true,opacity:o})))};
+ L(P,0x8f9bc4,.08);L(Q,0x5b9cff,.22)}
+/* what each level builds, as a small model on its section: solid when cleared or current, a ghost when locked */
+const MAT={pcb:M(0x173a8c,{roughness:.6}),blk:M(0x15171f,{roughness:.45}),cu:M(0xd9894a,{metalness:.7,roughness:.3}),al:M(0xb9c2d6,{metalness:.8,roughness:.3}),
+  glass:new THREE.MeshStandardMaterial({color:0xdfe8ff,transparent:true,opacity:.35,roughness:.05}),cap:M(0x1d2752,{roughness:.4}),fer:M(0x2a2d36,{roughness:.8}),
+  led:M(0xffb26b,{emissive:0xff8a3a,emissiveIntensity:1.2,transparent:true,opacity:.9}),sig:new THREE.MeshBasicMaterial({color:0x7da8ff}),servo:M(0x12182f,{roughness:.4,metalness:.25})};
+const ghost=new THREE.MeshStandardMaterial({color:0x8f9bc4,emissive:0x24306a,emissiveIntensity:.6,transparent:true,opacity:.2,depthWrite:false,roughness:.6});
+function model(i){const g=new THREE.Group(),b=(w,h,d,m,x,y,z)=>box(w,h,d,m,x,y,z,g),c=(r,h,m,x,y,z,rz,rx)=>{const o=cyl(r,h,m,x,y,z,g,rz);if(rx)o.rotation.x=rx;return o};
+  const pcb=(w,d)=>b(w,0.06,d,MAT.pcb,0,0.03,0);
+  if(i===0){pcb(1.3,1.0);b(0.42,0.36,0.46,MAT.blk,-0.36,0.24,0);c(0.08,0.2,MAT.al,-0.36,0.27,-0.24,0,Math.PI/2);
+    c(0.09,0.5,MAT.glass,0.2,0.2,-0.2,Math.PI/2);c(0.095,0.09,MAT.al,-0.05,0.2,-0.2,Math.PI/2);c(0.095,0.09,MAT.al,0.45,0.2,-0.2,Math.PI/2);
+    c(0.065,0.3,MAT.blk,0.22,0.15,0.25,Math.PI/2);c(0.067,0.05,MAT.al,0.33,0.15,0.25,Math.PI/2)}
+  if(i===1){pcb(1.2,0.9);[-0.27,0.27].forEach(x=>{c(0.23,0.72,MAT.cap,x,0.42,0);c(0.21,0.02,MAT.al,x,0.79,0);b(0.03,0.6,0.01,M(0xc9d0f2),x-0.1,0.42,0.225)})}
+  if(i===2){const t=new THREE.Mesh(new THREE.TorusGeometry(0.36,0.13,16,40),MAT.fer);t.rotation.x=Math.PI/2;t.position.y=0.18;g.add(t);
+    const pts=[];for(let k=0;k<=360;k++){const a=k/360*Math.PI*2,w=a*18;pts.push(V3(Math.cos(a)*(0.36+Math.cos(w)*0.15),0.18+Math.sin(w)*0.15,Math.sin(a)*(0.36+Math.cos(w)*0.15)))}
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,true),720,0.022,6,true),MAT.cu))}
+  if(i===3){pcb(1.1,0.9);for(let k=0;k<6;k++)b(0.04,0.5,0.6,MAT.al,-0.25+k*0.1,0.31,-0.15);b(0.36,0.42,0.12,MAT.blk,0,0.33,0.22);b(0.36,0.2,0.03,MAT.al,0,0.62,0.17);
+    [-0.12,0,0.12].forEach(x=>c(0.018,0.2,MAT.al,x,0.12,0.3))}
+  if(i===4){pcb(1.1,0.9);b(0.32,0.38,0.11,MAT.blk,-0.2,0.31,0);b(0.32,0.18,0.03,MAT.al,-0.2,0.56,-0.04);[-0.31,-0.2,-0.09].forEach(x=>c(0.016,0.14,MAT.al,x,0.1,0.02));
+    c(0.1,0.18,MAT.led,0.3,0.24,0);const dm=new THREE.Mesh(new THREE.SphereGeometry(0.1,16,8,0,6.3,0,1.6),MAT.led);dm.position.set(0.3,0.33,0);g.add(dm)}
+  if(i===5){pcb(1.2,0.5);for(let k=0;k<6;k++){b(0.1,0.1,0.1,MAT.blk,-0.38+k*0.15,0.11,0);c(0.015,0.32,MAT.al,-0.38+k*0.15,0.24,0)}
+    const w=[[-0.6,0.55],[-0.35,0.55],[-0.35,0.85],[-0.05,0.85],[-0.05,0.55],[0.2,0.55],[0.2,0.85],[0.5,0.85],[0.5,0.55],[0.62,0.55]];
+    for(let k=0;k<w.length-1;k++){const p=V3(w[k][0],w[k][1],0),q=V3(w[k+1][0],w[k+1][1],0),m=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,p.distanceTo(q),6),MAT.sig);m.position.copy(p).add(q).multiplyScalar(.5);m.lookAt(q);m.rotateX(Math.PI/2);g.add(m)}}
+  if(i===6){pcb(1.3,0.62);b(0.5,0.07,0.42,MAT.al,0.22,0.1,0);b(0.2,0.012,0.4,MAT.cu,0.6,0.065,0);b(0.18,0.08,0.12,MAT.al,-0.62,0.09,0);
+    for(let k=0;k<14;k++){b(0.04,0.03,0.04,MAT.al,-0.55+k*0.085,0.075,0.27);b(0.04,0.03,0.04,MAT.al,-0.55+k*0.085,0.075,-0.27)}}
+  if(i===7){b(0.62,0.42,0.42,MAT.servo,0,0.25,0);c(0.15,0.05,MAT.al,0.15,0.48,0);b(0.5,0.03,0.08,MAT.al,0.15,0.5,0);
+    b(0.16,0.08,0.1,M(0xf2f2ee),-0.4,0.12,0.12);b(0.16,0.08,0.1,M(0xf2f2ee),-0.4,0.12,-0.12);
+    const cp=[V3(-0.48,0.12,0.12),V3(-0.8,0.1,0.3),V3(-0.9,0.06,0.7)];g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cp),20,0.035,6),M(0x2a2a2a)))}
+  return g}
 const SECN=['Power input','Capacitors','Inductor','Regulator','Switches','Signals','ESP32 brain','Servo bus'];
-const secLevel=s=>LEVELS.findIndex(L=>L.sec===s);
+const secLevel=s=>LEVELS.findIndex(L=>L.sec===s);const floaters=[];
 for(let s=0;s<8;s++){const c=s%4,rw=Math.floor(s/4),cx=B0.x+0.2+c*CW+CW/2,cz=B0.z+0.2+rw*CD+CD/2,lv=secLevel(s),d=isDone(lv),a=avail(lv)&&built(lv);
   const g=new THREE.Group();g.position.set(cx,0,cz);scene.add(g);
-  if(d){box(CW-0.08,0.04,CD-0.08,M(0x060d33,{roughness:.8}),0,0.1,0,g);sectionParts(s,g)}
-  else{const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW-0.12,0.02,CD-0.12)),new THREE.LineDashedMaterial({color:a?0xffb26b:0xeef1ff,transparent:true,opacity:a?.9:.35,dashSize:0.15,gapSize:0.1}));e.computeLineDistances();e.position.y=0.12;g.add(e);if(a)box(CW-0.14,0.01,CD-0.14,new THREE.MeshBasicMaterial({color:0xffb26b,transparent:true,opacity:.12,depthWrite:false}),0,0.11,0,g)}
-  const hit=box(CW-0.1,0.3,CD-0.1,new THREE.MeshBasicMaterial({visible:false}),0,0.15,0,g);hit.userData.lv=lv;hits.push(hit);
-  lab(narrow?String(lv):`${lv} · ${SECN[s]}`,V3(cx,0.2,cz+CD/2-0.25),d?'done':a?'open':'')}
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW-0.12,0.02,CD-0.12)),d?new THREE.LineBasicMaterial({color:0x5b9cff,transparent:true,opacity:.45}):new THREE.LineDashedMaterial({color:a?0xffb26b:0xeef1ff,transparent:true,opacity:a?.9:.3,dashSize:0.15,gapSize:0.1}));
+  if(!d)e.computeLineDistances();e.position.y=0.035;g.add(e);
+  if(a)box(CW-0.14,0.01,CD-0.14,new THREE.MeshBasicMaterial({color:0xffb26b,transparent:true,opacity:.1,depthWrite:false}),0,0.03,0,g);
+  const m=model(s);m.position.set(0,d?0.03:0.05,-0.15);m.rotation.y=-0.35+s*0.17;
+  if(!d&&!a)m.traverse(o=>{if(o.isMesh)o.material=ghost});
+  if(a){m.position.y=0.25;floaters.push({m,y:0.25,ph:s})}
+  g.add(m);
+  const hit=box(CW-0.1,1.2,CD-0.1,new THREE.MeshBasicMaterial({visible:false}),0,0.6,0,g);hit.userData.lv=lv;hits.push(hit);
+  lab(narrow?String(lv):`${lv} · ${SECN[s]}`,V3(cx,0.06,cz+CD/2-0.18),d?'done':a?'open':'')}
+/* the room below: desk legs and a floor, so a top-down look lands on something */
+{const FY=-7.4,leg=M(0x1a1d27,{roughness:.5,metalness:.6});[[-8.6,-5.0],[8.6,-5.0],[-8.6,12.1],[8.6,12.1]].forEach(([x,z])=>box(0.35,-FY-0.35,0.35,leg,x,(FY-0.35)/2,z));
+ box(17.4,0.3,0.25,leg,0,-0.6,-5.0);
+ const ft=new THREE.TextureLoader().load('/electronics/tex/floor.webp');ft.encoding=THREE.sRGBEncoding;ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(5,5);ft.anisotropy=4;
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({map:ft,color:0xc8b8ad,roughness:.65}));fl.rotation.x=-Math.PI/2;fl.position.y=FY;scene.add(fl);const fill=new THREE.PointLight(0x8fa6ff,1.2,40,1.2);fill.position.set(0,FY+5,4);scene.add(fill);const warm=new THREE.PointLight(0xffb26b,.8,26,1.5);warm.position.set(9,FY+3,-2);scene.add(warm)}
 /* power LED once the input works */
 let ledL=null;if(isDone(1)){const led=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,10),M(0x3fdc6a,{emissive:0x2aff66,emissiveIntensity:2}));led.position.set(B0.x+0.2+CW/2+0.55,0.25,B0.z+0.2+CD/2-0.7);scene.add(led);ledL=new THREE.PointLight(0x40ff70,1.4,4);ledL.position.copy(led.position).add(V3(0,0.4,0));scene.add(ledL)}
 /* multimeter: the lab level */
@@ -247,7 +282,7 @@ const ro=new ResizeObserver(size);ro.observe(stage);size();
 const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
 function frame(){const t=clock.getElapsedTime();ctl.update();
   if(arm&&alive&&!reduce){arm.set('shoulder_pan',Math.sin(t*.4)*.7);arm.set('shoulder_lift',-.2+Math.sin(t*.6)*.35);arm.set('elbow_flex',.7+Math.sin(t*.8)*.35);arm.set('wrist_flex',.9+Math.sin(t*1.0)*.3);arm.set('gripper',.2+Math.max(0,Math.sin(t*1.3))*.9)}
-  if(ledL)ledL.intensity=1.2+Math.sin(t*3)*0.25;if(studio)studio.update(t);
+  if(ledL)ledL.intensity=1.2+Math.sin(t*3)*0.25;floaters.forEach(f=>{f.m.position.y=f.y+Math.sin(t*1.4+f.ph)*0.06;f.m.rotation.y+=0.004});if(studio)studio.update(t);
   gl.render(scene,cam);
   const W=stage.clientWidth,H=stage.clientHeight;
   labels.forEach(L=>{pv.copy(L.p).project(cam);const v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;L.el.style.display=v?'block':'none';if(v){const ow=L.el.offsetWidth,x=Math.max(12+ow/2,Math.min(W-12-ow/2,(pv.x*.5+.5)*W));L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) translate(-50%,-100%)`}});
