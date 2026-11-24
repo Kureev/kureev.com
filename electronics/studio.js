@@ -47,14 +47,14 @@ function build(scene,opt){
    [[X0+.4,X0+6.2,YS[0]],[X0+BW+3.6,X0+2*BW-.4,YS[0]],[X0+2*BW+.4,X0+2*BW+4.4,YS[0]],[X0+.4,X0+3.8,YS[1]],[X0+BW+.4,X0+BW+5.6,YS[1]],[X0+2*BW+5.4,X0+3*BW-.4,YS[1]],[X0+3.4,X0+BW-.4,YS[2]],[X0+2*BW+.4,X0+2*BW+6,YS[2]]].forEach(([a,b,y])=>shelf(a,b,y,true));
    root.add(new T.Mesh(merge(geos),mats))}
   /* plants: pots + pothos leaves as instanced cards with a generated leaf texture */
-  const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,emissiveMap:leafTex,emissive:0xffffff,emissiveIntensity:.14,alphaTest:.45,side:T.DoubleSide,roughness:.45,color:0xbfd6c8});
+  const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,emissiveMap:leafTex,emissive:0xffffff,emissiveIntensity:.06,alphaTest:.45,side:T.DoubleSide,roughness:.7,color:0x7f9187});
   const leafG=new T.PlaneGeometry(.95,.95);leafG.translate(0,.42,0);
   const pots=[],leaves=[];let s2=5;const rr=()=>((s2=s2*16807%2147483647)-1)/2147483646;
   const pot=(x,y,z,r,h,c)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r*.8,h,24),new T.MeshStandardMaterial({color:c,roughness:.75}));m.position.set(x,y+h/2,z);root.add(m);pots.push(m);return y+h};
   const bush=(x,y,z,n,sp)=>{for(let i=0;i<n;i++){const a=rr()*6.283,e=rr();leaves.push({p:V(x+Math.cos(a)*sp*e,y+.1+rr()*sp*.9,z+Math.sin(a)*sp*e*.7),ry:a+Math.PI/2,rx:-.6-rr()*.6,s:.7+rr()*.5})}};
   const vine=(x,y,z,len,sway)=>{const pts=[];for(let k=0;k<=8;k++){const u=k/8;pts.push(V(x+Math.sin(u*2.2)*sway,y-u*len,z+.25+u*.5))}const c=new T.CatmullRomCurve3(pts);
     for(let i=0;i<len*7;i++){const u=i/(len*7),p=c.getPoint(u);leaves.push({p,ry:(i%2?1:-1)*1.1+rr()*.6,rx:.4+rr()*.5,s:.55+rr()*.35*(1-u)})}};
-  let top=pot(X0+BW+6.4,YS[2]+.11,Z+.1,.55,.8,0xd9def7);bush(X0+BW+6.4,top,Z+.1,22,.7);vine(X0+BW+6.2,top,Z+.2,6.5,.6);vine(X0+BW+6.9,top,Z+.3,4.2,-.5);
+  let top;
   top=pot(X0+2*BW+7.6,YS[2]+.11,Z+.1,.5,.75,0x1d2752);bush(X0+2*BW+7.6,top,Z+.1,20,.65);vine(X0+2*BW+7.8,top,Z+.2,3.6,.4);
   top=pot(X0+7.6,YS[0]+.11,Z+.1,.5,.7,0xd9def7);bush(X0+7.6,top,Z+.1,24,.8);
   top=pot(X0+2*BW+4.9,YS[1]+.11,Z+.1,.42,.6,0x8a6bff);bush(X0+2*BW+4.9,top,Z+.1,14,.55);
@@ -68,18 +68,22 @@ function build(scene,opt){
    {const cord=[V(BASE.x+.3,.04,BASE.z-.45),V(BASE.x+.6,.03,-5.0),V(BASE.x+.8,.03,-5.35),V(BASE.x+.85,-.2,-5.52),V(BASE.x+.9,-2,-5.6),V(BASE.x+1.1,-7.3,-5.9),V(BASE.x+2.6,-7.38,-6.4)];
     const cm=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(cord),80,.03,6),new T.MeshStandardMaterial({color:0x111318,roughness:.6}));cm.castShadow=true;root.add(cm)}rod(ELB,LP.clone().addScaledVector(dir,-.35),.05);
    const j=new T.Mesh(new T.SphereGeometry(.09,12,8),m);j.position.copy(ELB);root.add(j);
-   const sh=new T.Mesh(new T.ConeGeometry(.6,.85,32,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));
+   const sh=new T.Mesh(new T.ConeGeometry(.6,.85,72,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.FrontSide}));
    sh.position.copy(LP);sh.quaternion.setFromUnitVectors(V(0,-1,0),dir);sh.castShadow=true;root.add(sh);
-   const bulb=new T.Mesh(new T.SphereGeometry(.17,16,10),new T.MeshBasicMaterial({color:new T.Color(0xffd9a8).multiplyScalar(4)}));bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
+   /* the inside of the shade is warm white enamel, lit by its own bulb */
+   {const inn=new T.Mesh(new T.ConeGeometry(.585,.83,72,1,true),new T.MeshBasicMaterial({map:(()=>{const c=document.createElement('canvas');c.width=4;c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,128);g.addColorStop(0,'#fff4e4');g.addColorStop(.35,'#c99a6c');g.addColorStop(1,'#3a2a22');x.fillStyle=g;x.fillRect(0,0,4,128);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t})(),side:T.BackSide}));inn.position.copy(sh.position);inn.quaternion.copy(sh.quaternion);root.add(inn)}
+   const bulb=new T.Mesh(new T.SphereGeometry(.12,16,10),new T.MeshBasicMaterial({color:new T.Color(0xffd9a8).multiplyScalar(1.5)}));bulb.visible=false;bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
    {const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,214,170,.9)');g.addColorStop(.25,'rgba(255,178,107,.35)');g.addColorStop(1,'rgba(255,178,107,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
     const sp=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));sp.scale.setScalar(1.6);sp.position.copy(bulb.position);root.add(sp)}
-   /* glare: when you look into the shade the bulb blooms and throws diffraction spikes, fading as you look away */
-   {const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.translate(256,256);
-    let g=x.createRadialGradient(0,0,0,0,0,256);g.addColorStop(0,'rgba(255,236,210,1)');g.addColorStop(.06,'rgba(255,214,170,.85)');g.addColorStop(.22,'rgba(255,178,107,.22)');g.addColorStop(1,'rgba(255,178,107,0)');x.fillStyle=g;x.fillRect(-256,-256,512,512);
-    x.globalCompositeOperation='lighter';[[0,1],[Math.PI/2,1],[Math.PI/4,.45],[-Math.PI/4,.45]].forEach(([a,k])=>{x.save();x.rotate(a);const l=x.createLinearGradient(-256,0,256,0);l.addColorStop(0,'rgba(255,220,180,0)');l.addColorStop(.5,`rgba(255,235,210,${.9*k})`);l.addColorStop(1,'rgba(255,220,180,0)');x.fillStyle=l;x.beginPath();x.moveTo(-256,0);x.lineTo(0,-3*k);x.lineTo(256,0);x.lineTo(0,3*k);x.closePath();x.fill();x.restore()});
-    x.strokeStyle='rgba(160,190,255,.10)';x.lineWidth=6;x.beginPath();x.arc(0,0,150,0,Math.PI*2);x.stroke();
-    const gm=new T.SpriteMaterial({map:new T.CanvasTexture(c),blending:T.AdditiveBlending,depthWrite:false,depthTest:false,transparent:true,opacity:0}),gl=new T.Sprite(gm);gl.position.copy(bulb.position);gl.renderOrder=10;root.add(gl);
-    const tv=new T.Vector3();gl.onBeforeRender=(r,sc,cam)=>{tv.copy(cam.position).sub(gl.position).normalize();const a=tv.dot(dir),k=Math.max(0,Math.min(1,(a-.15)/.6));gm.opacity=k*k*.95;gl.scale.setScalar(2+k*7)}}
+   /* glare: look into the shade and the bulb blooms into a soft haze with faint spikes; it fades as you look away */
+   {const mk=(draw)=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.translate(256,256);draw(x);return new T.CanvasTexture(c)};
+    const haze=mk(x=>{const g=x.createRadialGradient(0,0,0,0,0,256);for(let i=0;i<=16;i++){const r=i/16,a=Math.exp(-r*r*5.5);g.addColorStop(r,`rgba(255,${(232+9*a)|0},${(205+15*a)|0},${(.62*a).toFixed(3)})`)};x.fillStyle=g;x.fillRect(-256,-256,512,512)});
+    const star=mk(x=>{x.filter='blur(3px)';[[0,.7],[Math.PI/2,.7],[Math.PI/4,.25],[-Math.PI/4,.25]].forEach(([a,k])=>{x.save();x.rotate(a);const l=x.createLinearGradient(-256,0,256,0);l.addColorStop(0,'rgba(255,220,180,0)');l.addColorStop(.5,`rgba(255,235,215,${.27*k})`);l.addColorStop(1,'rgba(255,220,180,0)');x.fillStyle=l;x.fillRect(-256,-4*k,512,8*k);x.restore()})});
+    const sm=(t)=>new T.SpriteMaterial({map:t,blending:T.AdditiveBlending,depthWrite:false,depthTest:false,transparent:true,opacity:0});
+    const hm=sm(haze),stm=sm(star),h=new T.Sprite(hm),st=new T.Sprite(stm),at=LP.clone().addScaledVector(dir,.05).add(V(0,.6,0));
+    [h,st].forEach(o=>{o.position.copy(at);o.renderOrder=10;root.add(o)});
+    const tv=new T.Vector3();h.onBeforeRender=(r,sc,cam)=>{tv.copy(cam.position).sub(at).normalize();const a=tv.dot(dir),k=Math.max(0,Math.min(1,(a-.1)/.65)),e=k*k;
+      hm.opacity=e*.42;h.scale.setScalar(5+e*15);stm.opacity=e*.45;st.scale.setScalar(4+e*9)}}
    const spot=new T.SpotLight(0xffb26b,7,26,.7,.7,1.5);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
    spot.castShadow=true;spot.shadow.mapSize.set(2048,2048);spot.shadow.bias=-.0004;spot.shadow.radius=4;spot.shadow.camera.near=1;spot.shadow.camera.far=18;root.add(spot,spot.target);
    /* soft volumetric cone: additive, fades along its length and toward the edges */
@@ -112,23 +116,24 @@ function build(scene,opt){
    {const c=document.createElement('canvas');c.width=512;c.height=320;const x=c.getContext('2d');x.fillStyle='#141a2e';x.fillRect(0,0,512,320);x.strokeStyle='#2a3352';x.lineWidth=6;x.strokeRect(18,18,476,284);x.strokeStyle='#1d2440';x.lineWidth=2;x.strokeRect(34,34,444,252);
     for(let i=0;i<4000;i++){x.fillStyle=`rgba(${120+Math.random()*60|0},${130+Math.random()*60|0},200,${Math.random()*.05})`;x.fillRect(Math.random()*512,Math.random()*320,2,2)}
     const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;const r=new T.Mesh(new T.PlaneGeometry(34,21),new T.MeshLambertMaterial({map:t}));r.rotation.x=-Math.PI/2;r.position.set(-1,FY+.02,3.5);r.receiveShadow=true;root.add(r)}
-   /* sofa along the left wall, facing the room */
-   {const g=new T.Group();g.position.set(-RW+5.2,FY,3.6);root.add(g);const L=19,Dp=9;
-    [[-L/2+.6,-Dp/2+.8],[L/2-.6,-Dp/2+.8],[-L/2+.6,Dp/2-.8],[L/2-.6,Dp/2-.8]].forEach(([z,x])=>cy(.22,.16,1.2,blk,x,.6,z,g,10));
-    bx(Dp,2.2,L,fab,0,2.3,0,g);
-    bx(2.4,5.0,L,fab,-Dp/2+1.2,4.4,0,g);{const r=cy(1.2,1.2,L,fab,-Dp/2+1.2,6.9,0,g);r.rotation.x=Math.PI/2}
-    [-1,1].forEach(sd=>{bx(Dp,3.2,1.5,fab,0,2.8,sd*(L/2-.75),g);const r=cy(.75,.75,Dp,fab,0,4.4,sd*(L/2-.75),g);r.rotation.z=Math.PI/2});
-    [-1,0,1].forEach(i=>{bx(Dp-2.8,1.3,(L-3)/3-.12,fab2,1.25,4.05,i*(L-3)/3,g);bx(1.5,3.6,(L-3)/3-.25,fab2,-Dp/2+3.05,6.0,i*(L-3)/3,g).rotation.z=-.12});
-    bx(1.6,1.6,.5,new T.MeshLambertMaterial({color:0x8a5a3a}),.2,5.2,-L/2+3.2,g).rotation.set(.2,0,.35)}
+   /* sofa along the left wall, facing the room: GlamVelvetSofa by Eric Chadwick (Wayfair), CC-BY 4.0, in its navy velvet variant */
+   if(T.GLTFLoader)new T.GLTFLoader().load(base.replace(/tex\/$/,'')+'models/sofa.glb',gl=>{const m=gl.scene;m.scale.setScalar(11);m.rotation.y=Math.PI/2;m.position.set(-RW+7.0,FY,7.6);
+     const navy=gl.parser.getDependency('material',3);
+     m.traverse(o=>{if(o.isLight)o.visible=false;if(o.isMesh){o.castShadow=o.receiveShadow=true}});
+     navy.then(mat=>{mat.color.setHex(0x111b40);mat.roughness=1;if(mat.normalScale)mat.normalScale.set(.45,.45);
+       /* velvet sheen (three r128 ignores KHR_materials_sheen): a soft glow where the pile turns away from the eye, tinted by the light that reaches it */
+       mat.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <lights_fragment_end>','#include <lights_fragment_end>\n float fv=pow(1.0-saturate(dot(geometry.normal,geometry.viewDir)),2.6);\n reflectedLight.directDiffuse+=fv*(0.9*(reflectedLight.directDiffuse/max(diffuseColor.rgb,vec3(0.02)))*vec3(0.32,0.38,0.62)+vec3(0.012,0.016,0.04));')};mat.needsUpdate=true;mat.metalness=0;mat.envMapIntensity=0;m.traverse(o=>{if(o.isMesh&&/fabric/i.test(o.name+(o.parent?o.parent.name:'')))o.material=mat})});
+     root.add(m)});
    /* floor lamp in the corner: drum shade, warm */
-   {const X=-20.2,Z=-7.2;cy(1.3,1.4,.25,blk,X,FY+.12,Z);cy(.1,.1,17,blk,X,FY+8.6,Z,null,10);
-    const sh=new T.Mesh(new T.CylinderGeometry(1.7,1.9,2.6,32,1,true),new T.MeshBasicMaterial({color:new T.Color(1.0,.72,.45),side:T.DoubleSide}));sh.position.set(X,FY+17,Z);root.add(sh);
-    const fl=new T.PointLight(0xffb878,LQ?3.2:2.2,46,1.15);fl.position.set(X+.6,FY+16.6,Z+.6);root.add(fl);
-    glow(10,16,'rgba(255,170,100,.18)',X+.1,FY+18.5,-9.55)}
+   {const X=-24.2,Z=-6.9;cy(1.3,1.4,.25,blk,X,FY+.12,Z);cy(.1,.1,17,blk,X,FY+8.6,Z,null,10);
+    const dc=document.createElement('canvas');dc.width=4;dc.height=128;{const x=dc.getContext('2d'),g=x.createLinearGradient(0,0,0,128);g.addColorStop(0,'#fff0d8');g.addColorStop(.12,'#ffd2a0');g.addColorStop(.5,'#e8a868');g.addColorStop(.88,'#ffd2a0');g.addColorStop(1,'#fff0d8');x.fillStyle=g;x.fillRect(0,0,4,128)}
+    const dt=new T.CanvasTexture(dc);dt.encoding=T.sRGBEncoding;const sh=new T.Mesh(new T.CylinderGeometry(1.7,1.9,2.6,48,1,true),new T.MeshBasicMaterial({map:dt,transparent:true,opacity:.94,side:T.DoubleSide}));sh.position.set(X,FY+17,Z);root.add(sh);
+    const fl=new T.PointLight(0xffb878,LQ?3.2:2.2,46,1.15);fl.position.set(X+.6,FY+15.4,Z+.6);if(LQ){fl.castShadow=true;fl.shadow.mapSize.set(1024,1024);fl.shadow.camera.near=.5;fl.shadow.camera.far=46;fl.shadow.bias=-.003;fl.shadow.radius=6}root.add(fl);
+    glow(9,12,'rgba(255,180,110,.22)',X+.1,FY+23.2,-9.55);{const dn=glow(9,12,'rgba(255,180,110,.16)',X+.1,FY+10.4,-9.55);dn.rotation.z=Math.PI}}
    /* prints on the walls, each in a thin black frame */
    const frame=(tx,w,h,x,y,z,ry)=>{const g=new T.Group();g.position.set(x,y,z);g.rotation.y=ry||0;root.add(g);bx(w+.35,h+.35,.12,blk,0,0,0,g);
      const p=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshLambertMaterial({map:tx}));p.position.z=.07;g.add(p);return g};
-   frame(tex('bp3.webp'),4.6,6.9,-24.2,FY+15.6,-9.45);
+   frame(tex('bp3.webp'),4.6,6.9,-17.6,FY+15.6,-9.45).children[1].material.color.setHex(0x7d8496);
    const big=frame(tex('bp2.webp'),8.4,5.6,21.4,FY+15.6,-9.45);
    /* a typographic print on the right wall */
    {const c=document.createElement('canvas');c.width=600;c.height=840;const x=c.getContext('2d');x.fillStyle='#0b1230';x.fillRect(0,0,600,840);

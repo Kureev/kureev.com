@@ -253,9 +253,9 @@ const hero=document.querySelector('.hero');setTimeout(()=>hero.classList.add('re
 /* name glitch: a few soft frames every 7-12 s, and when you hover it */
 const h=document.getElementById('name');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 function burst(){let n=0;const step=()=>{const r=()=>Math.random()*100;h.style.setProperty('--a',r()+'%');h.style.setProperty('--b',r()*.6+'%');h.style.setProperty('--c',r()+'%');h.style.setProperty('--d',r()*.5+'%');
-  h.style.setProperty('--x',(Math.random()*-8)+'px');h.style.setProperty('--y',(Math.random()*8)+'px');h.style.setProperty('--s',(Math.random()<.3?(Math.random()-.5)*6:0)+'px');h.classList.add('glitch');
+  h.style.setProperty('--x',(Math.random()*-3)+'px');h.style.setProperty('--y',(Math.random()*3)+'px');h.style.setProperty('--s',(Math.random()<.3?(Math.random()-.5)*3:0)+'px');h.classList.add('glitch');
   if(++n<5)setTimeout(step,45+Math.random()*50);else setTimeout(()=>h.classList.remove('glitch'),60)};step()}
-(function loop(){setTimeout(()=>{burst();loop()},7000+Math.random()*5000)})();setTimeout(burst,1200);
+(function loop(){setTimeout(()=>{burst();loop()},7000+Math.random()*5000)})();setTimeout(burst,2600);
 h.style.pointerEvents='auto';h.addEventListener('pointerenter',burst);})();
 </script>
 </body>

@@ -1,6 +1,6 @@
 (async()=>{
 /* "The bench": an SO-101 on a cutting mat moving an LED between two breadboard sockets.
-   The cursor is a marker on the mat; click to grab. Scroll lays the kit out flat (knolling).
+   The arm follows the cursor across the mat; it stays assembled while you scroll.
    Easter eggs: press R twice (Fast Refresh), click the lit LED (Blink). */
 if(!window.THREE||!window.SO101)return;
 const T=THREE,cv=document.getElementById('gl'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -16,16 +16,16 @@ const group=new T.Group();scene.add(group);
 
 /* cutting mat: canvas grid, radial alpha fade so it has no edges */
 const MW=9,MD=5.4,MC=V(1.6,0,.3);
-{const c=document.createElement('canvas');c.width=1024;c.height=Math.round(1024*MD/MW);const x=c.getContext('2d');x.fillStyle='#0a1230';x.fillRect(0,0,c.width,c.height);
+{const c=document.createElement('canvas');c.width=1024;c.height=Math.round(1024*MD/MW);const x=c.getContext('2d');x.fillStyle='#101a44';x.fillRect(0,0,c.width,c.height);
  const u=c.width/MW;for(let i=0;i<=MW*2;i++){x.strokeStyle=i%10?'rgba(91,156,255,.07)':'rgba(91,156,255,.14)';x.lineWidth=1.5;x.beginPath();x.moveTo(i*u/2,0);x.lineTo(i*u/2,c.height);x.stroke()}
  for(let j=0;j<=MD*2;j++){x.strokeStyle=j%10?'rgba(91,156,255,.07)':'rgba(91,156,255,.14)';x.beginPath();x.moveTo(0,j*u/2);x.lineTo(c.width,j*u/2);x.stroke()}
- const a=document.createElement('canvas');a.width=a.height=256;const y=a.getContext('2d'),g=y.createRadialGradient(128,128,10,128,128,128);g.addColorStop(0,'#fff');g.addColorStop(.55,'#ddd');g.addColorStop(1,'#000');y.fillStyle=g;y.fillRect(0,0,256,256);
+ const a=document.createElement('canvas');a.width=a.height=256;const y=a.getContext('2d'),g=y.createRadialGradient(128,128,10,128,128,128);g.addColorStop(0,'#fff');g.addColorStop(.7,'#eee');g.addColorStop(1,'#000');y.fillStyle=g;y.fillRect(0,0,256,256);
  const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;tex.anisotropy=4;
  const mat=new T.Mesh(new T.PlaneGeometry(MW,MD),new T.MeshStandardMaterial({map:tex,alphaMap:new T.CanvasTexture(a),transparent:true,depthWrite:false,roughness:.9}));mat.rotation.x=-Math.PI/2;mat.position.copy(MC);group.add(mat)}
 /* soft contact shadows */
 const shadowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(0,0,0,.6)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)})();
 const shadow=(w,d,x,z)=>{const m=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(x,.004,z);group.add(m);return m};
-shadow(2.4,2.0,.2,0);
+shadow(2.4,2.0,.2,0);shadow(1.3,1.1,.2,0).material.opacity=.9;
 
 /* breadboard with two sockets */
 const BB=V(2.55,0,.75),SOCK=[V(2.05,.12,.75),V(3.05,.12,.75)];
@@ -87,7 +87,7 @@ let rCount=0,rT=0;addEventListener('keydown',e=>{if(e.target.closest&&e.target.c
 let fast=false;
 
 /* state */
-const st={mode:'idle',phase:0,from:0,carry:false,seat:0,ledPos:SOCK[0].clone(),drop:null,timer:0};
+const st={mode:'idle',phase:0,from:0,carry:false,seat:1,ledPos:SOCK[0].clone(),drop:null,timer:0};
 led.position.copy(SOCK[0]);
 const tgt=V(1.8,.9,.4),want=V(0,0,0);let grip=.5,clk=window.__tt||0;
 
@@ -100,38 +100,26 @@ const clock=new T.Clock();let vis=1,pitch=22,qd=new T.Quaternion(),pd=V(0,0,0),p
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);clk+=dt;const now=performance.now();
   const sy=Math.max(0,scrollY),fade=Math.max(0,1-sy/(innerHeight*.9));if(Math.abs(fade-vis)>.001){vis=fade;cv.style.opacity=fade;cap.style.opacity=fade}
   if(fade<=0)return;
-  const knoll=reduce?0:Math.min(1,sy/(innerHeight*.6)),kk=knoll*knoll*(3-2*knoll);
+  const kk=0;
   /* camera: 22° down, easing toward 65° as the kit is laid out */
   pitch=22+43*kk;const pr=pitch*Math.PI/180,d=12.3,aim=V(1.55,1.35-1.0*kk,.35);
   cam.position.set(aim.x,aim.y+Math.sin(pr)*d,aim.z+Math.cos(pr)*d);cam.lookAt(aim);
-  const live=active&&now-last<4000&&!reduce&&kk<.05;
+  const live=active&&now-last<4000&&!reduce;
   group.rotation.y+=((-.55+(live?mx*.08:Math.sin(clk*.13)*.06))-group.rotation.y)*Math.min(1,dt*2);group.updateMatrixWorld();
   /* cursor on the mat */
   let onMat=false;if(live){ray.setFromCamera(ptr,cam);group.getWorldPosition(P);plane.setFromNormalAndCoplanarPoint(V(0,1,0),P);
-    if(ray.ray.intersectPlane(plane,hit)){group.worldToLocal(hit);const r=Math.hypot(hit.x,hit.z);if(r<3.7&&r>.9&&hit.x>-1){onMat=true;ring.position.set(hit.x,.01,hit.z)}}}
+    if(ray.ray.intersectPlane(plane,hit)){group.worldToLocal(hit);let a=Math.atan2(hit.z,hit.x),r=Math.hypot(hit.x,hit.z);a=Math.max(-1.25,Math.min(1.25,a));r=Math.max(1.3,Math.min(3.2,r));hit.set(Math.cos(a)*r,0,Math.sin(a)*r);onMat=true;ring.position.lerp(V(hit.x,(Math.abs(hit.x-BB.x)<.8&&Math.abs(hit.z-BB.z)<.5)?.125:.012,hit.z),Math.min(1,dt*10))}}
   ring.material.opacity+=((onMat?.8:0)-ring.material.opacity)*Math.min(1,dt*6);
-  /* click: the lit LED blinks (egg); otherwise dip and grab or release */
+  /* click on the lit LED: it blinks (egg) */
   if(clickAt>0&&now-clickAt<50){ray.setFromCamera(ptr,cam);
-    if(st.seat&&!st.carry&&ray.intersectObject(led,true).length){clickAt=-1;blinkUntil=now+5000;say('digitalWrite(13, HIGH) · <a href="/electronics">learn why →</a>',5000)}
-    else if(onMat){clickAt=-1;if(!st.carry){if(hit.distanceTo(led.position.clone().setY(0))<.45){st.mode='grab';st.timer=0}else{st.mode='dip';st.timer=0}}else{st.mode='release';st.timer=0;st.drop=hit.clone()}}}
+    if(st.seat&&!st.carry&&ray.intersectObject(led,true).length){clickAt=-1;blinkUntil=now+5000;say('digitalWrite(13, HIGH) · <a href="/electronics">learn why →</a>',5000)}}
+
   if(clickAt>0&&now-clickAt>60)clickAt=-1;
   /* behaviour */
   let gq=.9,dip=false;
-  if(st.mode==='grab'||st.mode==='dip'||st.mode==='release'){st.timer+=dt;const p=st.mode==='release'?st.drop:(st.mode==='grab'?led.position:hit);
-    want.set(p.x,st.timer<.35?.15+(.35-st.timer)*1.2:.15,p.z);dip=true;
-    if(st.timer>.35){if(st.mode==='grab'){st.carry=true;st.seat=0}if(st.mode==='release'){st.carry=false;const s=SOCK.findIndex(q=>q.distanceTo(V(st.drop.x,.12,st.drop.z))<.35);st.seat=s>=0?1:0;st.ledPos=s>=0?SOCK[s].clone():V(st.drop.x,.02,st.drop.z)}}
-    gq=st.mode==='release'?(st.timer>.35?1:0):(st.timer>.3?0:1);if(st.timer>.7)st.mode=live?'user':'idle',st.phase=0}
-  else if(live){st.mode='user';want.set(ring.position.x,st.carry?.75:.6,ring.position.z);gq=st.carry?0:.9}
-  else{/* idle pick-and-place between the two sockets */
-    if(st.mode!=='idle'){st.mode='idle';st.phase=0;st.timer=0;if(st.carry){st.from=SOCK[0].distanceTo(led.position)<SOCK[1].distanceTo(led.position)?1:0;st.phase=3}else st.from=SOCK[0].distanceTo(led.position)<SOCK[1].distanceTo(led.position)?0:1}
-    st.timer+=dt;const A0=SOCK[st.from],B0=SOCK[1-st.from],ph=st.phase,tt=st.timer;
-    const lp=(p,h)=>want.set(p.x,h,p.z);
-    if(ph===0){lp(A0,.9);if(tt>1.4)st.phase=1,st.timer=0}
-    else if(ph===1){lp(A0,.9-.75*Math.min(1,tt/.6));gq=1;if(tt>.7)st.phase=2,st.timer=0}
-    else if(ph===2){lp(A0,.15);gq=0;if(tt>.35){st.carry=true;st.seat=0;st.phase=3;st.timer=0}}
-    else if(ph===3){const u=Math.min(1,tt/1.6),e=u*u*(3-2*u);want.lerpVectors(A0,B0,e);want.y=.15+.8*Math.sin(Math.PI*e)+.1*e;gq=0;if(tt>1.7)st.phase=4,st.timer=0}
-    else if(ph===4){lp(B0,.25-.1*Math.min(1,tt/.3));gq=0;if(tt>.35){st.carry=false;st.seat=1;st.ledPos=B0.clone();st.phase=5;st.timer=0}}
-    else if(ph===5){lp(B0,.15+.75*Math.min(1,tt/.6));gq=1;if(tt>2.6){st.from=1-st.from;st.phase=0;st.timer=0}}}
+  if(live){want.set(ring.position.x,.85,ring.position.z);gq=.9}
+  else{/* idle: the arm hovers over the breadboard and looks around, gripper breathing */
+    const u=clk*.35;want.set(BB.x-.35+Math.sin(u)*.75,1.05+Math.sin(u*1.7)*.2,BB.z+Math.sin(u*.8+1)*.55);gq=.55+.35*Math.sin(clk*.9)}
   if(fast)fast=false;
   tgt.lerp(want,1-Math.pow(dip?.0005:.02,dt));
   if(!reduce)ik(tgt,.35);
@@ -153,7 +141,7 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
       pd.copy(m.userData.knoll);group.localToWorld(pd);qd.copy(group.quaternion).multiply(qBase);pd.sub(g.applyQuaternion(qd));
       pw.lerp(pd,kk);qw.slerp(qd,kk);mw.compose(pw,qw,sc);pinv.copy(m.parent.matrixWorld).invert();mw.premultiply(pinv);mw.decompose(m.position,m.quaternion,_b)}});
   /* caption */
-  if(now>capUntil){const msg=clk<5?'move to aim · click to grab':`Pan ${Math.round(arm.joint.shoulder_pan.userData.q*57.3)}° · Lift ${Math.round(arm.joint.shoulder_lift.userData.q*57.3)}° · Elbow ${Math.round(arm.joint.elbow_flex.userData.q*57.3)}° · Gripper ${Math.round(grip*100)}%`;if(msg!==capMsg){capMsg=msg;cap.textContent=msg}}
+  if(now>capUntil){const msg=clk<5?'move the cursor, the arm follows':`Pan ${Math.round(arm.joint.shoulder_pan.userData.q*57.3)}° · Lift ${Math.round(arm.joint.shoulder_lift.userData.q*57.3)}° · Elbow ${Math.round(arm.joint.elbow_flex.userData.q*57.3)}° · Gripper ${Math.round(grip*100)}%`;if(msg!==capMsg){capMsg=msg;cap.textContent=msg}}
   _a.copy(MC).setZ(MC.z+MD*.38);group.localToWorld(_a);_a.project(cam);cap.style.transform=`translate(${(_a.x*.5+.5)*vw}px,${Math.min((-_a.y*.5+.5)*vh,vh-44)}px) translateX(-50%)`;
   if(!cap.classList.contains('on')&&clk>1.2)cap.classList.add('on');
   gl.render(scene,cam)}

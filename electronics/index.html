@@ -127,7 +127,7 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 .by{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;font-size:14px;font-weight:600;color:var(--mute);text-decoration:none}.by:hover{color:var(--ink)}.by img{border-radius:6px}
 .blk{background:rgba(10,15,40,.84);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:20px}
 .blk.intro h1{margin-top:0}.blk.intro .prog{margin-bottom:0}
-.blk.more .invd{margin:0}.blk.more .foot{margin:12px 0 0}
+.lb{transition:opacity .2s,visibility .2s}.lb.led::after{content:'';position:absolute;left:50%;top:100%;width:1px;height:var(--lead);background:linear-gradient(rgba(140,160,255,.55),rgba(140,160,255,.15))}.blk.more .invd{margin:0}.foot.cr{font-size:13px;color:var(--mute);line-height:1.5}.foot.cr a{color:inherit}.blk.more .foot{margin:12px 0 0}
 .panel .grid{margin:10px 0}
 .lv{background:rgba(10,15,40,.88)!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 @media(min-width:901px){
@@ -161,11 +161,13 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
     <section class="blk more">
     <details class="invd"><summary>Parts you understand <span id="invN"></span></summary><div class="inv" id="inv"></div></details>
     <p class="foot">Progress is saved in this browser. <button class="ghost" id="reset">Reset progress</button></p>
+    <p class="foot cr">Sofa: GlamVelvetSofa by Eric Chadwick, Wayfair, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. SO-101 by TheRobotStudio, Apache-2.0.</p>
     </section>
   </main>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="/so101/so101.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="/electronics/studio.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -305,7 +307,7 @@ for(let s=0;s<8;s++){const c=s%4,rw=Math.floor(s/4),cx=B0.x+0.2+c*CW+CW/2,cz=B0.
  const w=6.4,h=3.2,geo=new THREE.PlaneGeometry(w,h,24,4);const pa=geo.attributes.position;for(let i=0;i<pa.count;i++){const u=(pa.getX(i)+w/2)/w,v=(pa.getY(i)+h/2)/h;const curl=Math.max(0,u-.9)/.1;pa.setZ(i,0.004+.16*curl*curl+.02*Math.sin(v*3.1))}geo.computeVertexNormals();
  const bp=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({map:t,color:0x9aa6c4,emissiveMap:t,emissive:0xffffff,emissiveIntensity:.03,side:THREE.DoubleSide}));bp.rotation.set(-Math.PI/2,0,0.04);bp.position.set(3.6,0.008,-3.75);bp.receiveShadow=true;bp.castShadow=true;scene.add(bp);
  const rl=box(4.2,0.03,0.22,M(0x9aa3b5,{roughness:.35,metalness:.8}),1.9,0.03,-4.55);rl.rotation.y=0.04;rl.castShadow=true;
- const pc=cyl(.05,1.6,ML(0xffb26b),5.1,.06,-2.65,null,Math.PI/2);pc.rotation.set(0,0.6,Math.PI/2);pc.castShadow=true}
+ const pc=cyl(.05,1.6,ML(0xffb26b),5.1,.058,-2.65,null,Math.PI/2);pc.rotation.set(0,0.6,Math.PI/2);pc.castShadow=true}
 /* an enclosed CoreXY printer; its chamber light is another practical in the room */
 {const g=new THREE.Group();g.position.set(-10.2,0,-3.1);g.rotation.y=0.18;scene.add(g);
  const W=4.3,D=4.3,H=5.0,body=ML(0x101217),trim=ML(0x1b1e25);
@@ -345,14 +347,14 @@ const POSE=alive?null:powered?{shoulder_pan:-.2,shoulder_lift:-.4,elbow_flex:.6,
 if(window.SO101)SO101.load('/so101/',{printed:M(powered?0xc9d0f2:0x8d95b8,{roughness:.45}),servo:M(0x12182f,{roughness:.4,metalness:.25})}).then(a=>{arm=a;armHolder.add(a.root);a.parts.forEach(p=>{p.castShadow=true;p.receiveShadow=true});if(POSE)Object.entries(POSE).forEach(([k,v])=>a.set(k,v))}).catch(()=>{});
 lab(narrow?(alive?'Moving':powered?'Powered':'Unpowered'):alive?'SO-101 · moving':powered?'SO-101 · powered, waiting for the brain':'SO-101 · unpowered',V3(-5.2,0.1,0.6),alive?'done':powered?'open':'');
 /* wiring that makes sense: bench supply → power input; servo bus → the arm's driver board. Cables lie on the desk and turn soft corners */
-const cable=(pts,r,col)=>{const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'centripetal'),Math.max(40,pts.length*24),r,8,false),M(col,{roughness:.55}));m.castShadow=true;m.receiveShadow=true;scene.add(m);return m};
+const cable=(pts,r,col)=>{const q=[];pts.forEach((p,i)=>{q.push(p);const n=pts[i+1];if(n&&p.y<.1&&n.y<.1&&p.distanceTo(n)>1.2){const m=p.clone().lerp(n,.5),d=n.clone().sub(p);m.add(V3(-d.z,0,d.x).normalize().multiplyScalar(.28*(i%2?1:-1)));q.push(m)}});pts=q;const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'centripetal'),Math.max(60,pts.length*28),r,10,false),new THREE.MeshStandardMaterial({color:col,roughness:.85,metalness:0}));m.castShadow=true;m.receiveShadow=true;scene.add(m);return m};
 const corner=(arr)=>{const out=[];for(let i=0;i<arr.length;i++){const p=arr[i];if(i===0||i===arr.length-1){out.push(p);continue}const a=arr[i-1],c=arr[i+1];out.push(p.clone().lerp(a,.18/p.distanceTo(a)*2),p,p.clone().lerp(c,.18/p.distanceTo(c)*2))}return out};
 {const y=.045,X8=B0.x+0.2+3*CW+CW/2,Z8=B0.z+0.2+CD+CD/2,Y=.25;
- cable(corner([V3(X8+0.45,Y,Z8),V3(X8+0.75,y,Z8),V3(MX+MW/2+0.35,y,Z8),V3(MX+MW/2+0.35,y,MZ-MD/2-0.35),V3(-3.8,y,MZ-MD/2-0.35),V3(-4.9,y,-2.15),V3(-5.25,.18,-1.75)]),0.045,powered?0x22252e:0x2a2d36);
+ cable(corner([V3(X8+0.45,Y,Z8),V3(X8+0.75,y,Z8),V3(MX+MW/2+0.35,y,Z8),V3(MX+MW/2+0.35,y,MZ-MD/2-0.35),V3(-3.8,y,MZ-MD/2-0.35),V3(-4.9,y,-2.15),V3(-5.25,.18,-1.75)]),0.045,powered?0x101218:0x15171d);
  /* connector plugs at both ends */
  box(0.22,0.14,0.16,M(0xe8e6df,{roughness:.5}),X8+0.42,Y,Z8);
  const X1=B0.x+0.2+CW/2,Z1=B0.z+0.2+CD/2;
- [[0xc8332a,-7.4,0],[0x1c1d22,-7.05,.09]].forEach(([c,tx,o])=>cable(corner([V3(tx,.35,-3.45),V3(tx,.12,-3.15),V3(tx+.2,y,-3.0+o),V3(-3.4,y,-3.0+o),V3(-1.6,y,-1.5+o),V3(X1-0.75,y,Z1-0.12+o),V3(X1-0.5,.12,Z1-0.12+o)]),0.03,c))}
+ [[0xb3261e,-7.4,0],[0x111216,-7.05,.09]].forEach(([c,tx,o])=>cable(corner([V3(tx,.35,-3.45),V3(tx,.12,-3.15),V3(tx+.2,y,-3.0+o),V3(-3.4,y,-3.0+o),V3(-1.6,y,-1.5+o),V3(X1-0.75,y,Z1-0.12+o),V3(X1-0.5,.12,Z1-0.12+o)]),0.03,c))}
 /* picking */
 const showInfo=lv=>{const L=LEVELS[lv];$('#infoT').textContent=`Level ${lv} · ${L.t}`;$('#infoP').textContent=L.g;const ok=avail(lv)&&built(lv);
   $('#infoGo').hidden=!ok;if(ok){$('#infoGo').href=L.href;$('#infoGo').textContent=isDone(lv)?'Replay':'Open level'}
@@ -364,8 +366,8 @@ cv.addEventListener('pointerup',e=>{if(!down)return;const dx=e.clientX-down[0],d
   const r=cv.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,cam);
   const h=ray.intersectObjects(hits,false)[0];if(h)showInfo(h.object.userData.lv)});
 /* camera */
-const FC=V3(-1.8,0,-0.4),FD=V3(0.08,Math.sin(28*Math.PI/180),Math.cos(28*Math.PI/180));
-function fit(){const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*((stage.clientWidth-PW())/stage.clientHeight)),d=Math.max(10.2/Math.tan(hf/2),4.6/Math.tan(vf/2));cam.position.copy(FC).add(FD.clone().normalize().multiplyScalar(d));ctl.target.copy(FC).add(V3(-1.2,1.7,-1.4));ctl.update()}
+const FC=V3(-0.6,0,-0.4),FD=V3(0.08,Math.sin(28*Math.PI/180),Math.cos(28*Math.PI/180));
+function fit(){const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*((stage.clientWidth-PW())/stage.clientHeight)),d=Math.max(11.0/Math.tan(hf/2),4.6/Math.tan(vf/2));cam.position.copy(FC).add(FD.clone().normalize().multiplyScalar(d));ctl.target.copy(FC).add(V3(-1.2,1.7,-1.4));ctl.update()}
 const PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
 let lastW=0;function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;const pw=PW();if(pw)cam.setViewOffset(w,h,Math.round(pw/2),0,w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
 const ro=new ResizeObserver(size);ro.observe(stage);size();
@@ -375,7 +377,16 @@ function frame(){const t=clock.getElapsedTime();ctl.update();
   if(ledL)ledL.intensity=1.2+Math.sin(t*3)*0.25;floaters.forEach(f=>{f.m.position.y=f.y+Math.sin(t*1.4+f.ph)*0.06;f.m.rotation.y+=0.004});if(studio)studio.update(t);
   gl.render(scene,cam);
   const W=stage.clientWidth,H=stage.clientHeight;
-  labels.forEach(L=>{pv.copy(L.p).project(cam);const v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;L.el.style.display=v?'block':'none';if(v){const ow=L.el.offsetWidth,x=Math.max(12+ow/2,Math.min(W-PW()-12-ow/2,(pv.x*.5+.5)*W));L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) translate(-50%,-100%)`}});
+  const pwN=PW(),placed=[];labels.forEach(L=>L.d=L.p.distanceToSquared(cam.position));
+  [...labels].sort((a,b)=>a.d-b.d).forEach(L=>{pv.copy(L.p).project(cam);let v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;const ow=L.el.offsetWidth||80,oh=L.el.offsetHeight||26;
+    const cx=(pv.x*.5+.5)*W,y=(-pv.y*.5+.5)*H;if(v&&cx+ow/2>W-pwN)v=false;
+    const x=Math.max(12+ow/2,cx),box=[x-ow/2-4,y-oh-4,x+ow/2+4,y+4];
+    /* nearer labels win; one that would overlap a label already placed steps back */
+    const hitB=bx=>placed.some(b=>b[0]<bx[2]&&bx[0]<b[2]&&b[1]<bx[3]&&bx[1]<b[3]);let lead=0;
+    if(v&&hitB(box)){v=false;for(let k=1;k<=3;k++){const dy=k*(oh+8),bx=[box[0],box[1]-dy,box[2],box[3]-dy];if(!hitB(bx)){box[1]-=dy;box[3]-=dy;lead=dy;v=true;break}}}
+    if(v)placed.push(box);
+    L.el.style.setProperty('--lead',lead+'px');L.el.classList.toggle('led',lead>0);
+    L.el.style.opacity=v?1:0;L.el.style.visibility=v?'visible':'hidden';if(pv.z<1)L.el.style.transform=`translate(${x}px,${y-lead}px) translate(-50%,-100%)`});
   requestAnimationFrame(frame)}
 frame();
 }
