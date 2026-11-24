@@ -21,11 +21,11 @@ function build(scene,opt){
   const parts=[];const plank=(w,h,d,x,y,z,uvs)=>{const g=new T.BoxGeometry(w,h,d);g.translate(x,y,z);const a=g.attributes.uv;for(let i=0;i<a.count;i++)a.setXY(i,a.getX(i)*uvs[0]+uvs[2],a.getY(i)*uvs[1]+uvs[3]);parts.push(g)};
   for(let b=0;b<=3;b++)plank(.28,13.4,D,X0+b*BW,6.7,Z,[.2,2,b*.23,0]);
   YS.forEach((y,i)=>plank(BW*3+.28,.22,D,X0+BW*1.5,y,Z,[3,.05,0,i*.21]));
-  root.add(new T.Mesh(merge(parts),mWood));
+  {const sm=new T.Mesh(merge(parts),mWood);sm.receiveShadow=true;root.add(sm)}
   /* LED strips under each board, blue to violet across the bays, plus a few real lights */
   YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
       const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(.75)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
-  [[-10,6.0,-7.2,0x4d86ff],[0,9.0,-7.2,0x7a63ff],[10,6.0,-7.2,0x8a5bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,.9,9,1.6);l.position.set(x,y,z);root.add(l)});
+  [[-10,6.0,-7.2,0x4d86ff],[0,9.0,-7.2,0x7a63ff],[10,6.0,-7.2,0x8a5bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,1.4,8,1.8);l.position.set(x,y,z);root.add(l)});
   /* books: one merged mesh, spines from a generated atlas, tops and pages in plain regions */
   {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
    const shelf=(x0,x1,y,lean)=>{let x=x0;while(x<x1){const w=.22+r()*.22,h=1.4+r()*.9,d=1.1+r()*.3;if(x+w>x1)break;const g=new T.BoxGeometry(w,h,d);
@@ -51,26 +51,29 @@ function build(scene,opt){
   top=pot(X0+7.6,YS[0]+.11,Z+.1,.5,.7,0xd9def7);bush(X0+7.6,top,Z+.1,24,.8);
   top=pot(X0+2*BW+4.9,YS[1]+.11,Z+.1,.42,.6,0x8a6bff);bush(X0+2*BW+4.9,top,Z+.1,14,.55);
   {const im=new T.InstancedMesh(leafG,mLeaf,leaves.length),o=new T.Object3D();leaves.forEach((l,i)=>{o.position.copy(l.p);o.rotation.set(l.rx,l.ry,0,'YXZ');o.scale.setScalar(l.s);o.updateMatrix();im.setMatrixAt(i,o.matrix)});root.add(im)}
-  /* desk lamp on the right: warm cone of light, dust drifting through it */
-  const LP=V(6.1,4.3,-3.4);
+  /* desk lamp on the right: an articulated arm whose shade points at the board; warm cone of light, dust drifting through it */
+  const AIM=V(opt.aim?opt.aim.x:3,0,opt.aim?opt.aim.z:.6),BASE=V(8.7,0,-3.9),ELB=V(9.1,3.4,-4.5),LP=V(7.5,4.6,-3.0),dir=AIM.clone().sub(LP).normalize();
   {const m=new T.MeshStandardMaterial({color:0x1a1f33,roughness:.35,metalness:.6});
-   const b=new T.Mesh(new T.CylinderGeometry(.5,.6,.12,24),m);b.position.set(LP.x+1.2,.06,LP.z-.8);root.add(b);
-   const arm1=new T.Mesh(new T.CylinderGeometry(.05,.05,3.2,8),m);arm1.position.set(LP.x+1.0,1.6,LP.z-.6);arm1.rotation.z=.25;root.add(arm1);
-   const arm2=new T.Mesh(new T.CylinderGeometry(.05,.05,2.0,8),m);arm2.position.set(LP.x+.45,3.6,LP.z-.3);arm2.rotation.z=-1.0;root.add(arm2);
-   const sh=new T.Mesh(new T.ConeGeometry(.55,.8,28,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));sh.position.copy(LP);sh.rotation.z=.5;root.add(sh);
-   const bulb=new T.Mesh(new T.SphereGeometry(.16,16,10),new T.MeshBasicMaterial({color:0xffd9a8}));bulb.position.copy(LP).add(V(-.1,-.25,0));root.add(bulb);
-   const spot=new T.SpotLight(0xffc48a,2.2,16,.55,.6,1.4);spot.position.copy(LP);spot.target.position.set(opt.aim?opt.aim.x:LP.x-2.6,0,opt.aim?opt.aim.z:LP.z+1.4);root.add(spot,spot.target);
+   const rod=(p,q,r)=>{const g=new T.Mesh(new T.CylinderGeometry(r,r,p.distanceTo(q),10),m);g.position.copy(p).add(q).multiplyScalar(.5);g.quaternion.setFromUnitVectors(V(0,1,0),q.clone().sub(p).normalize());g.castShadow=true;root.add(g)};
+   const b=new T.Mesh(new T.CylinderGeometry(.55,.65,.14,28),m);b.position.copy(BASE).setY(.07);b.castShadow=b.receiveShadow=true;root.add(b);
+   rod(V(BASE.x,.1,BASE.z),ELB,.055);rod(ELB,LP.clone().addScaledVector(dir,-.35),.05);
+   const j=new T.Mesh(new T.SphereGeometry(.09,12,8),m);j.position.copy(ELB);root.add(j);
+   const sh=new T.Mesh(new T.ConeGeometry(.6,.85,32,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));
+   sh.position.copy(LP);sh.quaternion.setFromUnitVectors(V(0,-1,0),dir);sh.castShadow=true;root.add(sh);
+   const bulb=new T.Mesh(new T.SphereGeometry(.17,16,10),new T.MeshBasicMaterial({color:0xffe2bd}));bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
+   const spot=new T.SpotLight(0xffc48a,3.2,22,.62,.55,1.3);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
+   spot.castShadow=true;spot.shadow.mapSize.set(1536,1536);spot.shadow.bias=-.0008;spot.shadow.radius=4;spot.shadow.camera.near=1;spot.shadow.camera.far=18;root.add(spot,spot.target);
    /* soft volumetric cone: additive, fades along its length and toward the edges */
    const cg=new T.ConeGeometry(2.6,5,40,1,true);cg.translate(0,-2.5,0);
    const cm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:{uT:{value:0}},
      vertexShader:'varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){vP=position;vec4 w=modelViewMatrix*vec4(position,1.);vV=normalize(-w.xyz);vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*w;}',
      fragmentShader:'uniform float uT;varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){float along=clamp(-vP.y/5.,0.,1.);float rim=pow(abs(dot(vN,vV)),1.6);float n=.85+.15*sin(vP.y*3.+uT*.6)*sin(vP.x*4.-uT*.4);gl_FragColor=vec4(vec3(1.,.78,.55)*.07*rim*(1.-along)*(1.-along)*n,1.);}'});
-   const cone=new T.Mesh(cg,cm);cone.position.copy(LP);cone.lookAt(spot.target.position);cone.rotateX(-Math.PI/2);root.add(cone);upd.push(t=>cm.uniforms.uT.value=t);
+   const cone=new T.Mesh(cg,cm);cone.position.copy(LP).addScaledVector(dir,.2);cone.quaternion.setFromUnitVectors(V(0,1,0),dir.clone().negate());root.add(cone);upd.push(t=>cm.uniforms.uT.value=t);
    /* dust motes */
-   const N=opt.quality==='low'?70:120,pp=new Float32Array(N*3),ph=new Float32Array(N);for(let i=0;i<N;i++){pp.set([LP.x-3.5+Math.random()*4.5,Math.random()*4.4,LP.z-1+Math.random()*3.5],i*3);ph[i]=Math.random()*6.28}
+   const N=opt.quality==='low'?70:120,pp=new Float32Array(N*3),ph=new Float32Array(N);for(let i=0;i<N;i++){pp.set([AIM.x+(LP.x-AIM.x)*Math.random()+(Math.random()-.5)*2,Math.random()*4.4,AIM.z+(LP.z-AIM.z)*Math.random()+(Math.random()-.5)*2],i*3);ph[i]=Math.random()*6.28}
    const dg=new T.BufferGeometry();dg.setAttribute('position',new T.BufferAttribute(pp,3));dg.setAttribute('aPh',new T.BufferAttribute(ph,1));
-   const dm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:{uT:{value:0},uL:{value:LP},uS:{value:innerHeight*.012}},
-     vertexShader:'uniform float uT;uniform vec3 uL;uniform float uS;attribute float aPh;varying float vA;void main(){vec3 p=position;p.y=mod(p.y+uT*.05+aPh,4.4);p.x+=sin(uT*.2+aPh)*.25;p.z+=cos(uT*.17+aPh*1.3)*.25;float d=length(p.xz-vec2(uL.x-1.3,uL.z+.6));vA=smoothstep(2.4,.2,d)*(.4+.6*sin(uT*.8+aPh*3.)*.5+.3);vec4 w=modelViewMatrix*vec4(p,1.);gl_PointSize=uS*2.5/-w.z;gl_Position=projectionMatrix*w;}',
+   const dm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:{uT:{value:0},uL:{value:LP.clone().lerp(AIM,.5)},uS:{value:innerHeight*.012}},
+     vertexShader:'uniform float uT;uniform vec3 uL;uniform float uS;attribute float aPh;varying float vA;void main(){vec3 p=position;p.y=mod(p.y+uT*.05+aPh,4.4);p.x+=sin(uT*.2+aPh)*.25;p.z+=cos(uT*.17+aPh*1.3)*.25;float d=length(p.xz-vec2(uL.x,uL.z));vA=smoothstep(2.4,.2,d)*(.4+.6*sin(uT*.8+aPh*3.)*.5+.3);vec4 w=modelViewMatrix*vec4(p,1.);gl_PointSize=uS*2.5/-w.z;gl_Position=projectionMatrix*w;}',
      fragmentShader:'varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.85,.65)*smoothstep(.5,0.,d)*vA*.9,1.);}'});
    root.add(new T.Points(dg,dm));upd.push(t=>dm.uniforms.uT.value=t)}
   return {root,desk:mWood,update:t=>upd.forEach(f=>f(t))}}
