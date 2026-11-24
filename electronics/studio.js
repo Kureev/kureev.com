@@ -11,16 +11,22 @@ function merge(geos){let n=0,iN=0;geos.forEach(g=>{n+=g.attributes.position.coun
 function build(scene,opt){
   opt=opt||{};const L=new T.TextureLoader(),base=opt.tex||'/electronics/tex/',tex=n=>{const t=L.load(base+n);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t};
   const root=new T.Group();scene.add(root);const upd=[];
-  const wood=tex('wood.webp');wood.wrapS=wood.wrapT=T.RepeatWrapping;
-  const mWood=new T.MeshStandardMaterial({map:wood,color:0x8a7a70,roughness:.55,metalness:0});
+  const rep=(n,lin)=>{const t=lin?L.load(base+n):tex(n);t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t};
+  /* walnut with grain relief and uneven sheen: colour, bump and roughness maps */
+  const mWood=new T.MeshStandardMaterial({map:rep('shelf.webp'),bumpMap:rep('shelf_bump.webp',1),bumpScale:.025,roughnessMap:rep('shelf_rough.webp',1),color:0xb59a88,roughness:1,metalness:0});
+  const mDesk=new T.MeshStandardMaterial({map:rep('desk.webp'),bumpMap:rep('desk_bump.webp',1),bumpScale:.035,roughnessMap:rep('desk_rough.webp',1),color:0xc9a993,roughness:1,metalness:0});
   /* back wall: deep navy plaster with a faint vertical gradient baked into vertex colours */
   {const g=new T.PlaneGeometry(60,22,1,8),c=[];for(let i=0;i<g.attributes.position.count;i++){const y=g.attributes.position.getY(i),k=.55+.45*(y+11)/22;c.push(.022*k,.028*k,.055*k)}
    g.setAttribute('color',new T.Float32BufferAttribute(c,3));const w=new T.Mesh(g,new T.MeshStandardMaterial({vertexColors:true,roughness:.95}));w.position.set(0,8,-9.6);root.add(w)}
   /* shelving: three bays of walnut uprights and boards */
   const X0=-15,BW=10,YS=[3.2,6.2,9.2,12.2],D=1.7,Z=-8.6;
-  const parts=[];const plank=(w,h,d,x,y,z,uvs)=>{const g=new T.BoxGeometry(w,h,d);g.translate(x,y,z);const a=g.attributes.uv;for(let i=0;i<a.count;i++)a.setXY(i,a.getX(i)*uvs[0]+uvs[2],a.getY(i)*uvs[1]+uvs[3]);parts.push(g)};
-  for(let b=0;b<=3;b++)plank(.28,13.4,D,X0+b*BW,6.7,Z,[.2,2,b*.23,0]);
-  YS.forEach((y,i)=>plank(BW*3+.28,.22,D,X0+BW*1.5,y,Z,[3,.05,0,i*.21]));
+  const parts=[];let pk=0;
+  /* world-scaled UVs, grain along the long side of every face */
+  const plank=(w,h,d,x,y,z)=>{const g=new T.BoxGeometry(w,h,d);const a=g.attributes.uv,dims=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]],o=(pk++*.37)%1;
+    for(let f=0;f<6;f++){const [fu,fv]=dims[f],sw=fv>fu;for(let k=0;k<4;k++){const i=f*4+k,u=a.getX(i),v=a.getY(i);const U=(sw?v*fv:u*fu)/4+o,V=(sw?u*fu:v*fv)/4+o*.5;a.setXY(i,U,V)}}
+    g.translate(x,y,z);parts.push(g)};
+  for(let b=0;b<=3;b++)plank(.28,13.4,D,X0+b*BW,6.7,Z);
+  YS.forEach((y,i)=>plank(BW*3+.28,.22,D,X0+BW*1.5,y,Z));
   {const sm=new T.Mesh(merge(parts),mWood);sm.receiveShadow=true;root.add(sm)}
   /* LED strips under each board, blue to violet across the bays, plus a few real lights */
   YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
@@ -52,11 +58,13 @@ function build(scene,opt){
   top=pot(X0+2*BW+4.9,YS[1]+.11,Z+.1,.42,.6,0x8a6bff);bush(X0+2*BW+4.9,top,Z+.1,14,.55);
   {const im=new T.InstancedMesh(leafG,mLeaf,leaves.length),o=new T.Object3D();leaves.forEach((l,i)=>{o.position.copy(l.p);o.rotation.set(l.rx,l.ry,0,'YXZ');o.scale.setScalar(l.s);o.updateMatrix();im.setMatrixAt(i,o.matrix)});root.add(im)}
   /* desk lamp on the right: an articulated arm whose shade points at the board; warm cone of light, dust drifting through it */
-  const AIM=V(opt.aim?opt.aim.x:3,0,opt.aim?opt.aim.z:.6),BASE=V(8.7,0,-3.9),ELB=V(9.1,3.4,-4.5),LP=V(7.5,4.6,-3.0),dir=AIM.clone().sub(LP).normalize();
+  const AIM=V(opt.aim?opt.aim.x:3,0,opt.aim?opt.aim.z:.6),BASE=V(7.4,0,-4.0),ELB=V(7.9,3.5,-4.6),LP=V(6.5,4.6,-3.0),dir=AIM.clone().sub(LP).normalize();
   {const m=new T.MeshStandardMaterial({color:0x1a1f33,roughness:.35,metalness:.6});
    const rod=(p,q,r)=>{const g=new T.Mesh(new T.CylinderGeometry(r,r,p.distanceTo(q),10),m);g.position.copy(p).add(q).multiplyScalar(.5);g.quaternion.setFromUnitVectors(V(0,1,0),q.clone().sub(p).normalize());g.castShadow=true;root.add(g)};
    const b=new T.Mesh(new T.CylinderGeometry(.55,.65,.14,28),m);b.position.copy(BASE).setY(.07);b.castShadow=b.receiveShadow=true;root.add(b);
-   rod(V(BASE.x,.1,BASE.z),ELB,.055);rod(ELB,LP.clone().addScaledVector(dir,-.35),.05);
+   rod(V(BASE.x,.1,BASE.z),ELB,.055);
+   {const cord=[V(BASE.x+.3,.04,BASE.z-.45),V(BASE.x+.6,.03,-5.0),V(BASE.x+.8,.03,-5.35),V(BASE.x+.85,-.2,-5.52),V(BASE.x+.9,-2,-5.6),V(BASE.x+1.1,-7.3,-5.9),V(BASE.x+2.6,-7.38,-6.4)];
+    const cm=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(cord),80,.03,6),new T.MeshStandardMaterial({color:0x111318,roughness:.6}));cm.castShadow=true;root.add(cm)}rod(ELB,LP.clone().addScaledVector(dir,-.35),.05);
    const j=new T.Mesh(new T.SphereGeometry(.09,12,8),m);j.position.copy(ELB);root.add(j);
    const sh=new T.Mesh(new T.ConeGeometry(.6,.85,32,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));
    sh.position.copy(LP);sh.quaternion.setFromUnitVectors(V(0,-1,0),dir);sh.castShadow=true;root.add(sh);
@@ -78,6 +86,6 @@ function build(scene,opt){
      vertexShader:'uniform float uT;uniform vec3 uL;uniform float uS;attribute float aPh;varying float vA;void main(){vec3 p=position;p.y=mod(p.y+uT*.05+aPh,4.4);p.x+=sin(uT*.2+aPh)*.25;p.z+=cos(uT*.17+aPh*1.3)*.25;float d=length(p.xz-vec2(uL.x,uL.z));vA=smoothstep(2.4,.2,d)*(.4+.6*sin(uT*.8+aPh*3.)*.5+.3);vec4 w=modelViewMatrix*vec4(p,1.);gl_PointSize=uS*2.5/-w.z;gl_Position=projectionMatrix*w;}',
      fragmentShader:'varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.85,.65)*smoothstep(.5,0.,d)*vA*.9,1.);}'});
    root.add(new T.Points(dg,dm));upd.push(t=>dm.uniforms.uT.value=t)}
-  return {root,desk:mWood,update:t=>upd.forEach(f=>f(t))}}
+  return {root,desk:mDesk,update:t=>upd.forEach(f=>f(t))}}
 window.STUDIO={build};
 })();
