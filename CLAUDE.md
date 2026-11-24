@@ -100,6 +100,13 @@ Commits: author `Alexey Kureev <Kureev@users.noreply.github.com>`. Push to `main
   - **Integration:** a mixed end check plus an "I can" self-check.
 - Keep the text plain and specific. Numbers and electrical claims must be correct; check them before writing.
 
+## Languages
+
+- English is the source text. Russian lives in `electronics/i18n/ru.js` (shared) and `ru.<page>.js` (`ru.hub.js`, `ru.lessonN.js`), keyed by the exact English string.
+- `electronics/i18n.js` picks the language (`?lang=`, then the saved choice, then the browser), loads the dictionaries, formats numbers and units with `Intl` (`I18N.nf`, `I18N.u`) and adds the EN/RU switch.
+- In page code wrap every user-facing string in `_t()`; templates use placeholders: `_t('Lowest {0}', fV(v))`. Static markup is translated by `I18N.apply`; pedagogy data by `I18N.deep` inside `PED.init`.
+- Change an English string and its Russian key must change with it, or that string falls back to English. Before shipping, open each page with `?lang=ru`, click through all steps and check `I18N.miss` is empty. Bump `v=` in `i18n.js` when dictionaries change.
+
 ## Checklist before saying "done"
 
 1. Rendered and looked at it (desktop + mobile, several angles for 3D).

@@ -10,6 +10,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>Level 0: The lab</title>
+<script src="/electronics/i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
@@ -317,11 +318,12 @@ input[type=range]{accent-color:#7d8cff}
 <script>
 {
 const $=s=>document.querySelector(s);
-const nf=(x,d)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fV=v=>nf(v,1)+' V';
-const fI=i=>i>=1?nf(i,2)+' A':nf(i*1000,i*1000<10?2:1)+' mA';
-const fR=r=>r===0?'0 Ω':r>=1000?nf(r/1000,r%1000?1:0)+' kΩ':r+' Ω';
-const fP=p=>p<1?nf(p*1000,0)+' mW':nf(p,2)+' W';
+I18N.apply(document.body);$('.ph').appendChild(I18N.switcher());const _t=I18N.t,_u=I18N.u;
+const nf=(x,d)=>I18N.nf(x,d);
+const fV=v=>nf(v,1)+' '+_u('V');
+const fI=i=>i>=1?nf(i,2)+' '+_u('A'):nf(i*1000,i*1000<10?2:1)+' '+_u('mA');
+const fR=r=>r===0?'0 '+_u('Ω'):r>=1000?nf(r/1000,r%1000?1:0)+' '+_u('kΩ'):r+' '+_u('Ω');
+const fP=p=>p<1?nf(p*1000,0)+' '+_u('mW'):nf(p,2)+' '+_u('W');
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 
 /* ---------- state & physics ---------- */
@@ -346,7 +348,7 @@ function solve(){
   return{V,R,I,Vb,Vm,gap,UR,UL,P:I*I*R,PL:UL*I,tp:{TP1:V,TP2:Vb,TP3:Vm,TP4:0}};
 }
 
-if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. Check your connection and reload the page.</div>')}
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">'+_t('3D failed to load. Check your connection and reload the page.')+'</div>')}
 else{
 const stage=$('#stage'),cv=$('#gl');
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
@@ -373,7 +375,7 @@ function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);c
 /* labels */
 const labels=[];
 const TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
-const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=txt;$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=_t(txt);$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
 
 /* ---------- water scene ---------- */
 const Y0=0.3,K=0.25,RP=0.28;
@@ -391,7 +393,7 @@ let wTh=null,wCol=null;
 const pump=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.0,1.0),M(0x2a302d));pump.position.set(-3,Y0,0);scW.add(pump);
 const imp=new THREE.Group();imp.position.set(-3,Y0,0.52);scW.add(imp);
 for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.12,0.04),M(0xe8332a));b.rotation.z=i*Math.PI/4;imp.add(b)}
-for(let v=0;v<=12;v+=3){const l=new THREE.Mesh(new THREE.BoxGeometry(8.2,0.025,0.02),new THREE.MeshBasicMaterial({color:v?0x2a4035:0x4a6a58}));l.position.set(-0.4,Y0+v*K,-0.8);scW.add(l);lab('w',v+' V',V3(3.75,Y0+v*K,-0.8),'lvl',null,'right')}
+for(let v=0;v<=12;v+=3){const l=new THREE.Mesh(new THREE.BoxGeometry(8.2,0.025,0.02),new THREE.MeshBasicMaterial({color:v?0x2a4035:0x4a6a58}));l.position.set(-0.4,Y0+v*K,-0.8);scW.add(l);lab('w',v+' '+_u('V'),V3(3.75,Y0+v*K,-0.8),'lvl',null,'right')}
 const mWater=new THREE.MeshBasicMaterial({color:0x6fc3ff}),NW=60;
 const drops=new THREE.InstancedMesh(new THREE.SphereGeometry(0.09,10,8),mWater,NW);scW.add(drops);
 let WP=[V3(-3,Y0,0),V3(-3,Y0+3,0),V3(0.6,Y0+3,0),V3(3,Y0,0)],WL=[],WLT=1;
@@ -506,7 +508,7 @@ res:['Resistor','A narrow section of pipe: it resists current, more ohms means l
 led:['LED','A step about 1.9 V high (for red). Below the step it’s shut, above it opens wide and barely limits current by itself. That’s why it always needs a resistor. Passes current in one direction only.'],
 cu:['Copper trace','A wide pipe: resistance is almost zero, so no voltage is lost along it.'],
 tp:['Test point','A pad that’s easy to touch with a multimeter probe.']};
-const showInfo=k=>{$('#infoT').textContent=INFO[k][0];$('#infoP').textContent=INFO[k][1];$('#info').hidden=false};
+const showInfo=k=>{$('#infoT').textContent=_t(INFO[k][0]);$('#infoP').textContent=_t(INFO[k][1]);$('#info').hidden=false};
 $('#infoX').onclick=()=>$('#info').hidden=true;
 
 /* picking */
@@ -569,8 +571,9 @@ const STEPS=[
  b:'<p>A real-life problem: an LED powered from USB (5 V), and we want 15 mA. How many ohms do we need?</p><p class="note">From I = U / R it follows that <b>R = U / I</b>. First find the voltage across the resistor (5 V minus 1.9 V), then divide it by the current in amps.</p><div class="quiz"><input id="qa" inputmode="decimal" placeholder="Answer in ohms" aria-label="Answer in ohms"><button id="qb">Check</button></div><p class="fb" id="qf"></p>',
  task:'Solve the problem',ok:()=>S.quiz},
 {sc:'b',part:'At home',t:'Homework on real hardware',s:"Four multimeter measurements on your own hardware.",bt:["Next"],ui:[],build:ALL,map:false,
- b:'<ul class="hw">'+['Multimeter: black probe in the COM jack, red in the V jack. Set the dial to DC voltage (V with a straight line), 20 V range.','Measure your power supply: black on minus, red on plus. If it shows “−12”, the probes are swapped, no harm done.','Connect the ESP32 over USB and measure between the 3V3 and GND pins. It should read about 3.3 V.','On the same board, between 5V and GND: about 5 V from USB.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${t}</label></li>`).join('')+'</ul><p class="warnbox">Voltage is measured <b>in parallel</b>: probes on two points. Current is measured <b>in series</b>: you break the circuit and route the current through the meter. So never put the probes across a source while the red one is in the A or mA jack: inside it’s almost a wire, and you’ll get a short circuit.</p><p class="note">Next up, lesson 1: 12 V input, fuse, diode, reverse-polarity protection and a voltage divider.</p>',
+ b:'<ul class="hw">'+['Multimeter: black probe in the COM jack, red in the V jack. Set the dial to DC voltage (V with a straight line), 20 V range.','Measure your power supply: black on minus, red on plus. If it shows “−12”, the probes are swapped, no harm done.','Connect the ESP32 over USB and measure between the 3V3 and GND pins. It should read about 3.3 V.','On the same board, between 5V and GND: about 5 V from USB.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="warnbox">Voltage is measured <b>in parallel</b>: probes on two points. Current is measured <b>in series</b>: you break the circuit and route the current through the meter. So never put the probes across a source while the red one is in the A or mA jack: inside it’s almost a wire, and you’ll get a short circuit.</p><p class="note">Next up, lesson 1: 12 V input, fuse, diode, reverse-polarity protection and a voltage divider.</p>'),
  task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
 
 function setUI(ui){
   document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
@@ -600,7 +603,7 @@ function renderStep(){
   $('#stepN').innerHTML=`<span class="part">${st.part}</span>`;$('#stepC').textContent=`${S.step+1} / ${STEPS.length}`;$('#stepT').textContent=st.t;renderBody(st);
   $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1;
   if(S.step===4){const go=()=>{const v=parseFloat(($('#q1a').value||'').replace(',','.'));
-      if(v===4700){S.q1=true;$('#q1f').textContent='Correct: 4k7 = 4.7 kΩ = 4700 Ω.'}else $('#q1f').textContent=v===4.7?'That’s in kilohms. And in ohms?':'Not quite. k means “thousand”, and the letter sits where the decimal point goes: 4.7 × 1000.';update()};
+      if(v===4700){S.q1=true;$('#q1f').textContent=_t('Correct: 4k7 = 4.7 kΩ = 4700 Ω.')}else $('#q1f').textContent=_t(v===4.7?'That’s in kilohms. And in ohms?':'Not quite. k means “thousand”, and the letter sits where the decimal point goes: 4.7 × 1000.');update()};
     $('#q1b').onclick=go;$('#q1a').onkeydown=e=>{if(e.key==='Enter')go()}}
   if(S.step===12){const go=()=>{const v=parseFloat(($('#qa').value||'').replace(',','.'));let m;
       if(v>=180&&v<=240){S.quiz=true;m='Correct: (5 − 1.9) / 0.015 ≈ 207 Ω. That value doesn’t exist, so take the nearest standard one: 220 Ω. <button id="qs">Put it on the board</button>'}
@@ -609,13 +612,13 @@ function renderStep(){
       else if(v>0&&v<0.05)m='You divided the wrong way round: current by voltage. You need R = U / I. Unit check: volts / amps = ohms.';
       else if(v>0&&v<1)m='That resistance is too small, it’s almost a wire and the LED will burn. R = U / I = (5 − 1.9) / 0.015.';
       else m='Not quite. How many volts are left for the resistor? Divide that by 0.015 A.';
-      $('#qf').innerHTML=m;const qs=$('#qs');if(qs)qs.onclick=()=>{S.V=5;S.ri=5;S.closed=true;update()};update()};
+      $('#qf').innerHTML=_t(m);const qs=$('#qs');if(qs)qs.onclick=()=>{S.V=5;S.ri=5;S.closed=true;update()};update()};
     $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
   if(S.step===13)[0,1,2,3].forEach(i=>$('#hw'+i).onchange=e=>{hw[i]=e.target.checked;try{localStorage.setItem('l0hw',JSON.stringify(hw))}catch(_){}update()});
   buildWater();place();update();
 }
 $('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
-$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="Step ${i+1}: ${st.t}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="${_t('Step {0}: {1}',i+1,st.t)}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
 [...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
 
 $('#tu').oninput=e=>{S.tU=+e.target.value;S.tMoved=true;buildWater();update()};
@@ -640,8 +643,8 @@ function update(){
   const w=water();
   $('#tu').value=S.tU;$('#tr').value=S.tri;$('#tuO').textContent=fV(S.tU);$('#trO').textContent=fR(w.R);
   $('#wU').textContent=fV(w.U);$('#wI').textContent=fI(w.I);$('#wR').textContent=fR(w.R);$('#wP').textContent=fP(w.P);
-  $('#wF').innerHTML=`I = U / R = ${nf(w.U,1)} V / ${w.R} Ω = <b>${fI(w.I)}</b>`+(ui.includes('tnP')?`<br>P = U × I = ${nf(w.U,1)} V × ${nf(w.I,4)} A = <b>${fP(w.P)}</b>`+(w.P>P_RATED?' , over 0.25 W, overheating':''):'');
-  LwU.el.textContent='U = '+fV(w.U);LwN.el.textContent='Narrow section · '+fR(w.R);LwC1.el.textContent=LwC2.el.textContent=fI(w.I);LwGa.el.textContent='Gauge: '+fV(w.U)+' above ground';LwTh.el.textContent='Heat: '+(w.P*1000<1000?Math.round(w.P*1000)+' mW':w.P.toFixed(2)+' W')+' · limit 0.25';
+  $('#wF').innerHTML=_t('I = U / R = {0} / {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),w.R+' '+_u('Ω'),fI(w.I))+(ui.includes('tnP')?_t('<br>P = U × I = {0} × {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),nf(w.I,4)+' '+_u('A'),fP(w.P))+(w.P>P_RATED?_t(', over 0.25 W, overheating'):''):'');
+  LwU.el.textContent='U = '+fV(w.U);LwN.el.textContent=_t('Narrow section · {0}',fR(w.R));LwC1.el.textContent=LwC2.el.textContent=fI(w.I);LwGa.el.textContent=_t('Gauge: {0} above ground',fV(w.U));LwTh.el.textContent=_t('Heat: {0} · limit 0.25',w.P<1?Math.round(w.P*1000)+' '+_u('mW'):fP(w.P));
   /* board 3D */
   jSw.visible=!S.hasSw;gSw.visible=S.hasSw;jR.visible=!S.hasR;gR.visible=S.hasR;gTP.visible=S.tpOn;
   lever.rotation.z=S.closed?0:0.6;
@@ -660,33 +663,33 @@ function update(){
   const pr=(m,id)=>{const p=TPS[id][0];m.position.set(p.x,0.5,p.z)};pr(prRed,S.red);pr(prBlk,S.black);if(S.red===S.black)prBlk.position.x+=0.3;
   if(showM&&S.red!==S.black)S.meas.add([S.red,S.black].sort().join('-'));
   elec.visible=S.el;
-  Lsrc.el.textContent='Source · '+fV(C.V);Lsw.el.textContent='Switch · '+(S.closed?'closed':'open');
-  Lres.el.textContent='Resistor · '+fR(R)+(S.resDead?' · burnt':'');Lled.el.textContent='LED'+(S.ledDead?' · burnt':'');
+  Lsrc.el.textContent=_t('Source · {0}',fV(C.V));Lsw.el.textContent=_t(S.closed?'Switch · closed':'Switch · open');
+  Lres.el.textContent=_t('Resistor · {0}',fR(R))+(S.resDead?_t(' · burnt'):'');Lled.el.textContent=_t('LED')+(S.ledDead?_t(' · burnt'):'');
   Object.keys(TPS).forEach(id=>Ltp[id].el.textContent=id+' · '+fV(C.tp[id]));
-  const m=C.tp[S.red]-C.tp[S.black];$('#lcd').innerHTML=(Math.abs(m)<0.005?'0.00':m.toFixed(2))+'<small>V</small>';
-  $('#pRed').textContent=S.red;$('#pBlk').textContent=S.black;$('#pNext').textContent='Click a TP to place the '+(S.next==='red'?'red':'black')+' probe';
+  const m=C.tp[S.red]-C.tp[S.black];$('#lcd').innerHTML=nf(Math.abs(m)<0.005?0:m,2)+'<small>'+_u('V')+'</small>';
+  $('#pRed').textContent=S.red;$('#pBlk').textContent=S.black;$('#pNext').textContent=_t(S.next==='red'?'Click a TP to place the red probe':'Click a TP to place the black probe');
   /* board panel */
-  $('#v').value=S.V;$('#r').value=S.ri;$('#vO').textContent=fV(S.V);$('#rO').textContent=fR(R)+(R===0?' (jumper)':'');
-  $('#sw').setAttribute('aria-pressed',S.closed);$('#sw').textContent=S.closed?'Switch closed':'Switch open';
+  $('#v').value=S.V;$('#r').value=S.ri;$('#vO').textContent=fV(S.V);$('#rO').textContent=fR(R)+(R===0?_t(' (jumper)'):'');
+  $('#sw').setAttribute('aria-pressed',S.closed);$('#sw').textContent=_t(S.closed?'Switch closed':'Switch open');
   $('#el').setAttribute('aria-pressed',S.el);$('#map').setAttribute('aria-pressed',S.map);$('#swap').setAttribute('aria-pressed',S.swap);
-  $('#power').disabled=S.powered;$('#power').textContent=S.powered?'Power on':'Power on';
+  $('#power').disabled=S.powered;$('#power').textContent=_t('Power on');
   $('#fix').hidden=!((S.ledDead||S.resDead)&&(ui.includes('bR')||ui.includes('bV')));
   $('#nI').textContent=fI(C.I);$('#nUR').textContent=S.hasR?fV(C.UR):'—';$('#nUL').textContent=fV(C.UL);$('#nP').textContent=S.hasR?fP(C.P):'—';
   const led=S.ledDead?['r','LED burnt']:C.I===0?['m','LED off']:C.I<LED_WARN?['g','LED lit']:['y','Too bright, won’t last long'];
   const res=!S.hasR?['m','No resistor']:S.resDead?['r','Resistor burnt']:C.P>P_RATED?['r','Resistor smoking: overheating']:C.P>0.05?['y','Resistor warm']:['g','Resistor cold'];
-  $('#sLed').className='pill '+led[0];$('#sLed').textContent=led[1];$('#sRes').className='pill '+res[0];$('#sRes').textContent=res[1];
+  $('#sLed').className='pill '+led[0];$('#sLed').textContent=_t(led[1]);$('#sRes').className='pill '+res[0];$('#sRes').textContent=_t(res[1]);
   let f;
-  if(!S.powered)f='Power is off.';
-  else if(C.gap==='sw')f=`Switch open: current is 0, the full voltage (${fV(C.V)}) sits across the gap.`;
-  else if(C.gap==='res')f='The resistor burnt out and became a gap: current is 0, all the voltage is across it.';
-  else if(C.gap==='led')f=S.ledDead?`The LED burnt out and became a gap: current is 0, all the voltage (${fV(C.V)}) is across it.`+(ui.includes('bR')?' Fit a bigger resistor and press “Replace”.':''):'Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.';
-  else if(C.R===0)f='No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.';
-  else{f=`Across the resistor: U = ${fV(C.V)} − ${fV(C.UL)} = <b>${fV(C.UR)}</b><br>Ohm’s law: I = U / R = ${nf(C.UR,1)} V / ${C.R} Ω = <b>${fI(C.I)}</b><br>Heat: P = U × I = <b>${fP(C.P)}</b> (the resistor handles 250 mW)`;
-    if(S.step>=11)f+=`<br>LED: ${nf(C.UL,1)} V × I = ${fP(C.PL)}; the source delivers ${nf(C.V,1)} V × I = <b>${fP(C.V*C.I)}</b> = ${fP(C.P)} + ${fP(C.PL)}`}
+  if(!S.powered)f=_t('Power is off.');
+  else if(C.gap==='sw')f=_t('Switch open: current is 0, the full voltage ({0}) sits across the gap.',fV(C.V));
+  else if(C.gap==='res')f=_t('The resistor burnt out and became a gap: current is 0, all the voltage is across it.');
+  else if(C.gap==='led')f=S.ledDead?_t('The LED burnt out and became a gap: current is 0, all the voltage ({0}) is across it.',fV(C.V))+(ui.includes('bR')?_t(' Fit a bigger resistor and press “Replace”.'):''):_t('Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.');
+  else if(C.R===0)f=_t('No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.');
+  else{f=_t('Across the resistor: U = {0} − {1} = <b>{2}</b><br>Ohm’s law: I = U / R = {3} / {4} = <b>{5}</b><br>Heat: P = U × I = <b>{6}</b> (the resistor handles 250 mW)',fV(C.V),fV(C.UL),fV(C.UR),nf(C.UR,1)+' '+_u('V'),C.R+' '+_u('Ω'),fI(C.I),fP(C.P));
+    if(S.step>=11)f+=_t('<br>LED: {0} × I = {1}; the source delivers {2} × I = <b>{3}</b> = {4} + {5}',nf(C.UL,1)+' '+_u('V'),fP(C.PL),nf(C.V,1)+' '+_u('V'),fP(C.V*C.I),fP(C.P),fP(C.PL))}
   $('#formula').innerHTML=f;
   /* task */
   if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();
-  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');PED.after(S.done.has(S.step));$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');PED.after(S.done.has(S.step));$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+_t(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
   $('#after').hidden=!(ok&&st.after);if(ok&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
   [...$('#dots').children].forEach((b,i)=>b.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
 }

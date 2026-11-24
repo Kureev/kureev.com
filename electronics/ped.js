@@ -5,6 +5,7 @@
    Data comes from PED.init(lessonKey, {brief, pr, recall, end}). State lives in localStorage. */
 (function(){
 const KEY='ped_v1';let L='',D={},st={};
+const T=function(s){if(window.I18N)return I18N.t.apply(null,arguments);const a=arguments;return String(s).replace(/\{(\d+)\}/g,(m,i)=>a[+i+1])};
 const load=()=>{try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(_){st={}}};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(_){}};
 const g=k=>st[L+':'+k],s=(k,v)=>{if(v==null)delete st[L+':'+k];else st[L+':'+k]=v;save()};
@@ -39,7 +40,7 @@ function render(step){
   if(!box)return;cur=step;box.innerHTML='';layout();if(briefBox)briefBox.innerHTML='';
   const pr=D.pr&&D.pr[step],rc=D.recall&&D.recall[step],br=step===0&&D.brief,end=D.end&&D.end.step===step;
   if(br){const c=document.createElement('details');c.className='ped brief';
-    c.innerHTML=`<summary><span class="brief-s">${D.brief.short}</span><span class="brief-t">Goals</span></summary><p class="brief-p">${D.brief.problem}</p><ul>${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>`;(briefBox||box).appendChild(c)}
+    c.innerHTML=`<summary><span class="brief-s">${D.brief.short}</span><span class="brief-t">${T('Goals')}</span></summary><p class="brief-p">${D.brief.problem}</p><ul>${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>`;(briefBox||box).appendChild(c)}
   const quiz=(items,key,title,note)=>{const c=document.createElement('section');c.className='ped recall';
     const n=items.filter((_,i)=>g(key+i)!=null).length,ok=items.filter((q,i)=>g(key+i)===q.a).length;
     c.innerHTML=`<p class="ped-k">${title}<span>${n===items.length?ok+' / '+items.length:note}</span></p>`;
@@ -47,33 +48,33 @@ function render(step){
     const u=items.findIndex((_,i)=>g(key+i)==null);
     items.forEach((q,i)=>{const p=g(key+i);
       if(p!=null){const d=document.createElement('p');d.className='pq-done'+(p===q.a?' ok':'');
-        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?q.o[q.a]:'Not '+q.o[p]}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
-        if(p!==q.a)d.appendChild(again('Try again',()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
+        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?q.o[q.a]:T('Not {0}',q.o[p])}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
+        if(p!==q.a)d.appendChild(again(T('Try again'),()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
       if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);render(cur)}))});
-    c.querySelector('.ped-k span').textContent=u<0?ok+' / '+items.length+' right':(u+1)+' of '+items.length;
-    if(u<0){const r=again('Start over',()=>{items.forEach((_,i)=>s(key+i,null));render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
+    c.querySelector('.ped-k span').textContent=u<0?T('{0} / {1} right',ok,items.length):T('{0} of {1}',u+1,items.length);
+    if(u<0){const r=again(T('Start over'),()=>{items.forEach((_,i)=>s(key+i,null));render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
     box.appendChild(c)};
   const warm=rc&&rc.some((_,i)=>g('r'+step+'_'+i)==null);
-  if(rc)quiz(rc,'r'+step+'_','Warm-up from memory','No peeking');
+  if(rc)quiz(rc,'r'+step+'_',T('Warm-up from memory'),T('No peeking'));
   if(pr&&!warm){const c=document.createElement('section');c.className='ped predict';const p=g('p'+step);
-    c.innerHTML=`<p class="ped-k">${p==null?'Predict first':'Your prediction'}</p>`;
+    c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):T('Your prediction')}</p>`;
     c.appendChild(chips('p'+step,pr.q,pr.o,null,p,v=>{s('p'+step,v);render(cur)}));
-    if(p!=null){const f=document.createElement('p');f.className='pq-f';f.id='pedEx';f.textContent='Now try it and see.';c.appendChild(f);
-      const r=again('Change',()=>{s('p'+step,null);doneShown[step]=false;render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
+    if(p!=null){const f=document.createElement('p');f.className='pq-f';f.id='pedEx';f.textContent=T('Now try it and see.');c.appendChild(f);
+      const r=again(T('Change'),()=>{s('p'+step,null);doneShown[step]=false;render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
     box.appendChild(c)}
-  if(end){const t=document.getElementById('stepX')||document.getElementById('task');t.insertAdjacentElement('afterend',box);quiz(D.end.items,'e_','Check yourself','Mixed, from the whole level');
+  if(end){const t=document.getElementById('stepX')||document.getElementById('task');t.insertAdjacentElement('afterend',box);quiz(D.end.items,'e_',T('Check yourself'),T('Mixed, from the whole level'));
     const c=document.createElement('section');c.className='ped cando';
-    c.innerHTML=`<p class="ped-k">I can</p>`+D.brief.goals.map((x,i)=>`<label><input type="checkbox" data-i="${i}" ${g('c'+i)?'checked':''}> ${x}</label>`).join('');
+    c.innerHTML=`<p class="ped-k">${T('I can')}</p>`+D.brief.goals.map((x,i)=>`<label><input type="checkbox" data-i="${i}" ${g('c'+i)?'checked':''}> ${x}</label>`).join('');
     c.querySelectorAll('input').forEach(b=>b.onchange=()=>s('c'+b.dataset.i,b.checked));box.appendChild(c)}
   if(!end){if(seg&&box.parentNode!==seg.think)seg.think.appendChild(box);else if(!seg){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}}
   if(seg)queue();setTimeout(syncNext,0);
-  const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent='Warm up, then make a prediction';else note.textContent='Pick a prediction first'}
+  const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
   doneShown[step]=false;
 }
 function ready(step){const pr=D.pr&&D.pr[step];return!pr||g('p'+step)!=null}
 function after(ok){const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;const p=g('p'+cur);if(p==null)return;
   const f=document.getElementById('pedEx');if(!f)return;doneShown[cur]=true;
-  f.className='pq-f'+(p===pr.a?' ok':'');f.innerHTML='<b class="wh">'+(p===pr.a?'Your prediction held.':'What happened: '+pr.o[pr.a]+'.')+'</b> '+pr.ex}
+  f.className='pq-f'+(p===pr.a?' ok':'');f.innerHTML='<b class="wh">'+(p===pr.a?T('Your prediction held.'):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex}
 function wrap(fn,step){return function(){fn.apply(this,arguments);render(step())}}
 
 /* finishing a level: confetti in the course palette and a dialog that says what you can do now */
@@ -95,21 +96,21 @@ function celebrate(){const W=D.win;if(!W)return;let d=document.getElementById('p
   if(!d){d=document.createElement('dialog');d.id='pedWin';d.className='ped-win';d.setAttribute('aria-labelledby','pedWinT');document.body.appendChild(d);
     d.addEventListener('click',e=>{if(e.target===d)d.close()})}
   const ei=D.end?D.end.items:[],ea=ei.filter((_,i)=>g('e_'+i)!=null).length,eo=ei.filter((q,i)=>g('e_'+i)===q.a).length;
-  const nx=W.next?(W.next.soon?`<p class="pw-next">Next up: <b>${W.next.t}</b>, in the works.</p>`:`<a class="pw-btn ghost" href="${W.next.href}">Next: ${W.next.t}</a>`):'';
-  d.innerHTML=`<button class="pw-x" type="button" aria-label="Close"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  const nx=W.next?(W.next.soon?`<p class="pw-next">${T('Next up: <b>{0}</b>, in the works.',W.next.t)}</p>`:`<a class="pw-btn ghost" href="${W.next.href}">${T('Next: {0}',W.next.t)}</a>`):'';
+  d.innerHTML=`<button class="pw-x" type="button" aria-label="${T('Close')}"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     <div class="pw-art"><img src="/electronics/levels/lv${W.lv}.webp" alt="" width="320" height="320"></div>
-    <p class="pw-k">Level ${W.lv} complete</p><h2 id="pedWinT">${W.title}</h2><p class="pw-l">${W.line}</p>
+    <p class="pw-k">${T('Level {0} complete',W.lv)}</p><h2 id="pedWinT">${W.title}</h2><p class="pw-l">${W.line}</p>
     <ul class="pw-g">${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>
-    ${ea?`<p class="pw-s">Check yourself: <b>${eo} of ${ei.length}</b> right${eo<ei.length?' · worth another look':''}</p>`:''}
-    <div class="pw-a"><a class="pw-btn" href="/electronics">Back to the map</a>${nx}</div>`;
+    ${ea?`<p class="pw-s">${T('Check yourself: <b>{0} of {1}</b> right',eo,ei.length)}${eo<ei.length?T(' · worth another look'):''}</p>`:''}
+    <div class="pw-a"><a class="pw-btn" href="/electronics">${T('Back to the map')}</a>${nx}</div>`;
   d.querySelector('.pw-x').onclick=()=>d.close();
   if(!d.open)d.showModal();d.tabIndex=-1;d.focus();confetti()}
 function complete(ok,was){fin=ok;if(ok&&!was)setTimeout(celebrate,350)}
 document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('#next');if(n&&n.dataset.fin==='1'){e.preventDefault();e.stopImmediatePropagation();celebrate()}},true);
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
-  if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent='Finish'}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent='Next'}}
+  if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent=T('Finish')}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent=T('Next')}}
 window.PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
-window.PED={init(k,data){L=k;D=data;load();try{fin=!!(D.win&&(JSON.parse(localStorage.getItem('quest_v1')||'{}').done||{})[D.win.lv])}catch(_){}
+window.PED={init(k,data){L=k;D=window.I18N?I18N.deep(data):data;load();try{fin=!!(D.win&&(JSON.parse(localStorage.getItem('quest_v1')||'{}').done||{})[D.win.lv])}catch(_){}
   const mount=()=>{const lead=document.getElementById('stepS');ctl=document.querySelector('.card.ctl');
     box=document.createElement('div');box.id='ped';lead.insertAdjacentElement('afterend',box);note=document.createElement('p');note.className='ped-note';note.hidden=true;ctl.insertAdjacentElement('afterend',note);
     const pn=document.querySelector('.panel');if(pn&&window.MutationObserver)new MutationObserver(queue).observe(pn,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','style','class']});queue()};

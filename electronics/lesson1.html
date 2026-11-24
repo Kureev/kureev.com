@@ -10,6 +10,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>Level 1: Power input</title>
+<script src="/electronics/i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -295,12 +296,13 @@ input[type=range]{accent-color:#7d8cff}
 <script>
 {
 const $=s=>document.querySelector(s);
-const nf=(x,d)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fV=v=>nf(v,Math.abs(v)<10?2:1)+' V';
-const fI=i=>Math.abs(i)>=1?nf(i,Math.abs(i)>=100?0:1)+' A':nf(i*1000,1)+' mA';
-const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' kΩ':r+' Ω';
-const fP=p=>p<1?nf(p*1000,0)+' mW':nf(p,p>=100?0:1)+' W';
-const fA=a=>nf(a,a%1?1:0)+' A';
+I18N.apply(document.body);$('.ph').appendChild(I18N.switcher());const _t=I18N.t,_u=I18N.u;
+const nf=(x,d)=>I18N.nf(x,d);
+const fV=v=>nf(v,Math.abs(v)<10?2:1)+' '+_u('V');
+const fI=i=>Math.abs(i)>=1?nf(i,Math.abs(i)>=100?0:1)+' '+_u('A'):nf(i*1000,1)+' '+_u('mA');
+const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' '+_u('kΩ'):r+' '+_u('Ω');
+const fP=p=>p<1?nf(p*1000,0)+' '+_u('mW'):nf(p,p>=100?0:1)+' '+_u('W');
+const fA=a=>nf(a,a%1?1:0)+' '+_u('A');
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 
 /* ---------- state & physics ---------- */
@@ -334,7 +336,7 @@ function solve(){
   return{Vs,I,Vr,Pp,open,led,tap};
 }
 
-if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. Check your connection and reload the page.</div>')}
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">'+_t('3D failed to load. Check your connection and reload the page.')+'</div>')}
 else{
 const stage=$('#stage'),cv=$('#gl');
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
@@ -359,7 +361,7 @@ function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);c
 
 /* labels */
 const labels=[],TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
-const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=txt;$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=_t(txt);$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
 
 /* ---------- theory scenes in 3D: valve (diode) and staircase (divider) ---------- */
 const scV=mkScene(true),scD=mkScene(true);
@@ -409,7 +411,7 @@ let flapA=0,vflow=0;
 const K2=0.3,RUN0=-3.4,RUN1=3.4,LX=-4.6;
 {const fl=new THREE.Mesh(new THREE.BoxGeometry(11,0.1,3.2),M(0x030718));fl.position.set(-0.4,-0.05,0);scD.add(fl)}
 scD.add(tube(V3(LX,0,0),V3(LX,4.0,0),0.38,mGlass));
-for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x8f9bc4));t.position.set(-5.35,v*K2,0);scD.add(t);if(v%3===0)lab('d',v+' V',V3(-5.5,v*K2,0),'lvl',null,'left')}
+for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x8f9bc4));t.position.set(-5.35,v*K2,0);scD.add(t);if(v%3===0)lab('d',v+' '+_u('V'),V3(-5.5,v*K2,0),'lvl',null,'left')}
 scD.add(tube(V3(-5.35,0,0),V3(-5.35,12*K2,0),0.02,M(0x5a6699)));
 scD.add(tube(V3(RUN1+1.0,0.12,-1.15),V3(LX,0.12,-1.15),0.16,mGlass));
 const dDyn=new THREE.Group();scD.add(dDyn);
@@ -434,16 +436,16 @@ function buildD(){
   const face=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.3,0.02),M(0xb8c9a2,{emissive:0x4a5a30,emissiveIntensity:.3}));face.position.set(xL,0.36,mz+0.26);dDyn.add(face);
   dDyn.add(tube(V3(xL,hL+0.05,0.62),V3(xL,0.62,mz-0.1),0.025,M(0xe8332a)));
   mMeter.emissiveIntensity=w.out>ESP_MAX?0.8:0;
-  LdLift.el.textContent='The source lifts to '+fV(w.U);LdLift.p.set(LX,H+0.45,0);
-  LdR1.el.textContent=`R1 · ${fR(w.R1)} · takes ${fV(S.dOn?w.U-w.out:0)}`;LdR1.p.set((RUN0+xL)/2,(H+hL)/2+0.5,0);
-  LdR2.el.textContent=`R2 · ${fR(w.R2)} · takes ${fV(w.out)}`;LdR2.p.set((xL+RUN1)/2,hL/2+0.5,0);
-  LdM.el.textContent='Meter: '+fV(w.out)+(w.out>ESP_MAX?' , would burn':w.out>3?' , off the scale':'');LdM.el.className='lb '+(w.out>3?'bad':'good');LdM.p.set(xL,0,mz+0.3);
+  LdLift.el.textContent=_t('The source lifts to {0}',fV(w.U));LdLift.p.set(LX,H+0.45,0);
+  LdR1.el.textContent=_t('R1 · {0} · takes {1}',fR(w.R1),fV(S.dOn?w.U-w.out:0));LdR1.p.set((RUN0+xL)/2,(H+hL)/2+0.5,0);
+  LdR2.el.textContent=_t('R2 · {0} · takes {1}',fR(w.R2),fV(w.out));LdR2.p.set((xL+RUN1)/2,hL/2+0.5,0);
+  LdM.el.textContent=_t('Meter: {0}',fV(w.out))+(w.out>ESP_MAX?_t(', would burn'):w.out>3?_t(', off the scale'):'');LdM.el.className='lb '+(w.out>3?'bad':'good');LdM.p.set(xL,0,mz+0.3);
 }
 function buildV(){const w=valveW();
   springS.visible=!S.vSi;springH.visible=S.vSi;mFlap.color.setHex(w.I>0?0x5fd38d:0xe8332a);
   mHouse.emissiveIntensity=Math.min(1.2,w.vf*w.I/0.004);
-  LvValve.el.textContent=S.wRev?'Flap pressed against the seat: no backflow':w.I>0?`Valve open · loses ${fV(w.vf)}`:`The spring holds: needs more than ${fV(w.vf)}`;LvValve.el.className='lb '+(w.I>0?'good':'bad');
-  LvIn.el.textContent='Before the valve: '+fV(w.before);LvOut.el.textContent='After: '+fV(w.after);
+  LvValve.el.textContent=S.wRev?_t('Flap pressed against the seat: no backflow'):w.I>0?_t('Valve open · loses {0}',fV(w.vf)):_t('The spring holds: needs more than {0}',fV(w.vf));LvValve.el.className='lb '+(w.I>0?'good':'bad');
+  LvIn.el.textContent=_t('Before the valve: {0}',fV(w.before));LvOut.el.textContent=_t('After: {0}',fV(w.after));
   arrowD.material.color.setHex(S.wRev?0x777777:0x5fd38d);
 }
 /* ---------- board scene ---------- */
@@ -538,7 +540,7 @@ led:['Power indicator','A green LED with a resistor: lit means the rail has volt
 res:['Resistor','Resists current. The stripes are the value: two digits, then the number of zeros, gold is the tolerance.'],
 meter:['0–3 V meter','A teaching part: like a multimeter, but with a 3 V limit and no protection. Two legs: “+” to the measuring point, and ground. Inside it has a huge resistance, so it draws almost no current and doesn’t disturb what it measures. Above ~3.6 V it burns. Later an ESP32 input takes its place; it works the same way.'],
 cu:['Copper trace','A wire on the board. The narrower it is, the worse it handles high current.']};
-const showInfo=k=>{$('#infoT').textContent=INFO[k][0];$('#infoP').textContent=INFO[k][1];$('#info').hidden=false};
+const showInfo=k=>{$('#infoT').textContent=_t(INFO[k][0]);$('#infoP').textContent=_t(INFO[k][1]);$('#info').hidden=false};
 $('#infoX').onclick=()=>$('#info').hidden=true;
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
 const shown=o=>{while(o){if(!o.visible)return false;o=o.parent}return true};
@@ -588,8 +590,9 @@ STEPS=[
  b:'<p>We want to know how many volts the supply gives, for example to notice a battery running low. Let’s take a <b>0–3 V meter</b>: it’s like your multimeter, but with a 3 V limit and no protection. It has two legs: “+” and ground. Inside it has a huge resistance, so it draws almost no current and just looks at the voltage. Put 12 V on it and it burns.</p><p>The solution is a divider: R1 from the rail, R2 to ground, the meter at the point between them. Without R2 no current would flow through R1 (the meter draws almost none), nothing would drop across R1, and the meter would see the full 12 V.</p><ul><li>at the maximum voltage (12.6 V for a charged 3S battery) the meter sees <b>no more than 3 V</b>;</li><li>but not too little either, ideally above 2 V, or you lose precision;</li><li>resistors in the tens of kilohms: the divider constantly eats U / (R1 + R2), no point wasting it.</li></ul><p>You then convert back to the supply voltage: reading × (R1 + R2) / R2.</p><p class="note">When we build the board’s brain, an ESP32 input takes this meter’s place; it works exactly the same way.</p>',
  task:'At 12.6 V, get 2 to 3 V at the meter',ok:c=>S.vin>=12.55&&c.tap>=2&&c.tap<=3&&!S.espDead},
 {sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"The input stage is done: connector → fuse → MOSFET → 12 V rail → servos, indicator and meter.",bt:["-", "Next"],ui:[],build:B(true,'fet',true,true),enter:()=>{repair();S.rev=false;S.k=0},
- b:'<p>The board’s input stage is done: <b>connector → fuse → reverse-polarity MOSFET → 12 V rail</b>, and on the rail: servos, an indicator, and a divider with a meter. Every part is here because something burnt without it.</p><ul class="hw">'+['Look at the label on your power supply: how many volts and how many amps? Is it enough for six servos if two stall?','Find the STS3215 stall current at 12 V in its datasheet and recalculate the worst case.','Find which side is plus on your supply: a barrel plug has a polarity symbol printed next to it.','Think about which fuse you would fit for your supply.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${t}</label></li>`).join('')+'</ul><p class="note">Next up, lesson 2: the capacitor, a tank of spare water. Why boards carry those little “barrels”, and what happens when servos suddenly yank current.</p>',
+ b:_t('<p>The board’s input stage is done: <b>connector → fuse → reverse-polarity MOSFET → 12 V rail</b>, and on the rail: servos, an indicator, and a divider with a meter. Every part is here because something burnt without it.</p>')+'<ul class="hw">'+['Look at the label on your power supply: how many volts and how many amps? Is it enough for six servos if two stall?','Find the STS3215 stall current at 12 V in its datasheet and recalculate the worst case.','Find which side is plus on your supply: a barrel plug has a polarity symbol printed next to it.','Think about which fuse you would fit for your supply.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="note">Next up, lesson 2: the capacitor, a tank of spare water. Why boards carry those little “barrels”, and what happens when servos suddenly yank current.</p>'),
  task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
 
 function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
   document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}
@@ -620,7 +623,7 @@ function renderStep(){
   buildV();buildD();update();
 }
 $('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
-$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="Step ${i+1}: ${st.t}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="${_t('Step {0}: {1}',i+1,st.t)}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
 [...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
 const bind=(id,key,rebuild)=>$(id).oninput=e=>{S[key]=+e.target.value;if(rebuild){buildV();buildD()}update()};
 bind('#wu','wU',1);bind('#w1','w1',1);bind('#w2','w2',1);bind('#vin','vin');bind('#k','k');$('#fu').oninput=e=>{S.fi=+e.target.value;S.fuseBlown=false;update()};bind('#lr','lri');bind('#d1','b1');bind('#d2','b2');
@@ -652,11 +655,11 @@ function update(){
   /* water panel */
   const w=water();
   if(st.sc==='v'&&!S.wRev&&w.I===0&&S.wU>0)S.fl.below=true;if(st.sc==='d'&&!S.dOn)S.fl.off=true;
-  $('#wtype').textContent=S.vSi?'0.45 V Schottky':'0.7 V diode';$('#don').textContent=S.dOn?'Disconnect R2':'Connect R2';$('#don').setAttribute('aria-pressed',S.dOn);
+  $('#wtype').textContent=_t(S.vSi?'0.45 V Schottky':'0.7 V diode');$('#don').textContent=_t(S.dOn?'Disconnect R2':'Connect R2');$('#don').setAttribute('aria-pressed',S.dOn);
   $('#wu').value=S.wU;$('#w1').value=S.w1;$('#w2').value=S.w2;$('#wuO').textContent=fV(S.wU);$('#w1O').textContent=fR(DR[S.w1]);$('#w2O').textContent=fR(DR[S.w2]);
-  $('#wrev').setAttribute('aria-pressed',S.wRev);$('#wrev').textContent=S.wRev?'Restore the pump':'Reverse the pump';
+  $('#wrev').setAttribute('aria-pressed',S.wRev);$('#wrev').textContent=_t(S.wRev?'Restore the pump':'Reverse the pump');
   $('#wnU').textContent=fV(w.U);$('#wnI').textContent=fI(w.I);$('#wnD').textContent=fV(w.d||0);$('#wnOut').textContent=w.out!==undefined?fV(w.out):'—';
-  $('#wF').innerHTML=w.mode==='div'?(S.dOn?`Uout = U × R2 / (R1 + R2) = ${nf(w.U,1)} × ${fR(w.R2)} / (${fR(w.R1)} + ${fR(w.R2)}) = <b>${fV(w.out)}</b><br>Current through both: I = U / (R1 + R2) = <b>${fI(w.I)}</b>`:'R2 disconnected: no path to ground, current is 0, nothing drops across R1, so the output equals the full voltage.'):S.wRev?'The pump pushes backwards: the flap is pressed against the seat, current is 0.':w.I>0?`After the valve: ${fV(w.U)} − ${fV(w.vf)} = <b>${fV(w.after)}</b><br>Heat in the valve: ${fV(w.vf)} × ${fI(w.I)} = <b>${fP(w.vf*w.I)}</b>`:`Pump ${fV(w.U)} , below the threshold ${fV(w.vf)}: the spring holds, no current.`;
+  $('#wF').innerHTML=w.mode==='div'?(S.dOn?_t('Uout = U × R2 / (R1 + R2) = {0} × {1} / ({2} + {3}) = <b>{4}</b><br>Current through both: I = U / (R1 + R2) = <b>{5}</b>',nf(w.U,1),fR(w.R2),fR(w.R1),fR(w.R2),fV(w.out),fI(w.I)):_t('R2 disconnected: no path to ground, current is 0, nothing drops across R1, so the output equals the full voltage.')):S.wRev?_t('The pump pushes backwards: the flap is pressed against the seat, current is 0.'):w.I>0?_t('After the valve: {0} − {1} = <b>{2}</b><br>Heat in the valve: {1} × {3} = <b>{4}</b>',fV(w.U),fV(w.vf),fV(w.after),fI(w.I),fP(w.vf*w.I)):_t('Pump {0}, below the threshold {1}: the spring holds, no current.',fV(w.U),fV(w.vf));
   /* board 3D */
   jF.visible=!S.hasF;gF.visible=S.hasF;jP.visible=S.prot==='none';gD.visible=S.prot==='diode';gT.visible=S.prot==='fet';
   gLedB.visible=gLR.visible=gLD.visible=S.hasLed;gDivB.visible=gD1.visible=gD2.visible=S.hasDiv;gSD.visible=S.short;
@@ -669,44 +672,44 @@ function update(){
   mLed.color.setHex(S.ledDead?0x2a3a2e:0x3fdc6a);mLed.emissiveIntensity=C.led>0?Math.min(3,0.3+C.led/0.005):0;ledLight.intensity=C.led>0?Math.min(3,C.led/0.005):0;
   mEsp.emissiveIntensity=S.espDead?0.6:0;
   setPath(S.short&&!C.open?PATH_S:PATH_N);
-  Lf.el.textContent='Fuse · '+fA(rating)+(S.fuseBlown?' · burnt':'');Lp.el.textContent=S.prot==='diode'?'Schottky diode':'MOSFET';
-  Lled.el.textContent='Indicator · '+fR(LR[S.lri]);Ld1.el.textContent='R1 · '+fR(DR[S.b1]);Ld2.el.textContent='R2 · '+fR(DR[S.b2]);
-  Lesp.el.textContent=S.espDead?'Meter burnt':stage.clientWidth<600?`${fV(Math.max(0,C.tap))}`:`Meter: ${fV(Math.max(0,C.tap))} → supply ${fV(Math.max(0,C.tap)*(DR[S.b1]+DR[S.b2])/DR[S.b2])}`;Lesp.el.className='lb '+(S.espDead?'bad':'good');
-  Lservo.el.textContent=S.servosDead?'Servos burnt':`6 servos · stalled: ${S.k}`;
+  Lf.el.textContent=_t('Fuse · {0}',fA(rating))+(S.fuseBlown?_t(' · burnt'):'');Lp.el.textContent=_t(S.prot==='diode'?'Schottky diode':'MOSFET');
+  Lled.el.textContent=_t('Indicator · {0}',fR(LR[S.lri]));Ld1.el.textContent='R1 · '+fR(DR[S.b1]);Ld2.el.textContent='R2 · '+fR(DR[S.b2]);
+  Lesp.el.textContent=S.espDead?_t('Meter burnt'):stage.clientWidth<600?`${fV(Math.max(0,C.tap))}`:_t('Meter: {0} → supply {1}',fV(Math.max(0,C.tap)),fV(Math.max(0,C.tap)*(DR[S.b1]+DR[S.b2])/DR[S.b2]));Lesp.el.className='lb '+(S.espDead?'bad':'good');
+  Lservo.el.textContent=S.servosDead?_t('Servos burnt'):_t('6 servos · stalled: {0}',S.k);
   /* board panel */
   $('#vin').value=S.vin;$('#k').value=S.k;$('#fu').value=S.fi;$('#lr').value=S.lri;$('#d1').value=S.b1;$('#d2').value=S.b2;
-  $('#vinO').textContent=fV(S.vin);$('#kO').textContent=S.k+' of 6';$('#fuO').textContent=fA(rating);$('#lrO').textContent=fR(LR[S.lri]);$('#d1O').textContent=fR(DR[S.b1]);$('#d2O').textContent=fR(DR[S.b2]);
+  $('#vinO').textContent=fV(S.vin);$('#kO').textContent=_t('{0} of 6',S.k);$('#fuO').textContent=fA(rating);$('#lrO').textContent=fR(LR[S.lri]);$('#d1O').textContent=fR(DR[S.b1]);$('#d2O').textContent=fR(DR[S.b2]);
   $('#pD').setAttribute('aria-pressed',S.prot==='diode');$('#pF').setAttribute('aria-pressed',S.prot==='fet');
-  $('#rev').textContent=S.rev?'Restore the wires':'Swap the wires';$('#short').disabled=S.short;
+  $('#rev').textContent=_t(S.rev?'Restore the wires':'Swap the wires');$('#short').disabled=S.short;
   const dead=S.fuseBlown||S.traceBurnt||S.servosDead||S.ledDead||S.espDead;$('#fix').hidden=!(dead&&ui.length);
   const Itot=C.I+C.led+(S.hasDiv?Math.abs(C.Vr)/(DR[S.b1]+DR[S.b2]):0);
-  $('#nI').textContent=fI(Itot);$('#nV').textContent=fV(C.Vr);$('#nP').textContent=fP(C.Pp);$('#nTap').textContent=S.espDead?'burnt':fV(Math.max(0,C.tap));
+  $('#nI').textContent=fI(Itot);$('#nV').textContent=fV(C.Vr);$('#nP').textContent=fP(C.Pp);$('#nTap').textContent=S.espDead?_t('burnt'):fV(Math.max(0,C.tap));
   const pills=[];
   pills.push(C.open==='psu'?['r','Supply in protection mode']:load()>8&&!C.open?['y','Supply at its limit']:['g','Supply OK']);
   if(S.hasF)pills.push(S.fuseBlown?['r','Fuse blown']:['g','Fuse intact']);
   if(S.traceBurnt)pills.push(['r','Trace burnt']);
   pills.push(S.servosDead?['r','Servos burnt']:['g','Servos alive']);
-  if(S.prot!=='none')pills.push(C.Pp>1.5?['r',(S.prot==='diode'?'Diode':'MOSFET')+' scorching']:C.Pp>0.5?['y',(S.prot==='diode'?'Diode':'MOSFET')+' warm']:['g',(S.prot==='diode'?'Diode':'MOSFET')+' cold']);
+  if(S.prot!=='none'){const pn=S.prot==='diode'?'Diode':'MOSFET';pills.push(C.Pp>1.5?['r',pn+' scorching']:C.Pp>0.5?['y',pn+' warm']:['g',pn+' cold'])}
   if(S.hasLed)pills.push(S.ledDead?['r','Indicator burnt']:C.led>0.01?['y','Indicator blinding']:C.led>0?['g','Indicator lit']:['m','Indicator off']);
   if(S.hasDiv)pills.push(S.espDead?['r','Meter burnt']:C.tap>3?['r','Off the scale: above 3 V']:C.tap>=2?['g','Meter OK']:['y','Too low for an accurate reading']);
-  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join('');
+  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${_t(t)}</span>`).join('');
   let f='';
-  if(C.open==='trace')f='Trace burnt: the circuit is broken, the rail is at 0 V. Press “Repair”.';
-  else if(C.open==='fuse')f='Fuse blown: the circuit is broken, the board is fine. Replace the fuse.';
-  else if(C.open==='psu')f=`The arm asks for ${fI(load())}, but the supply can only do 10 A, so it shut off.`;
-  else if(C.open==='diode'||C.open==='fet')f='Wires swapped, but the protection is shut: current is 0, the rail is at 0 V. Everything survives.';
-  else if(S.short)f=`Short: I = U / R = 12 V / 0.05 Ω ≈ <b>${fI(C.I)}</b>`;
-  else if(S.rev)f=`Rail at ${fV(C.Vr)}: the electronics got reversed polarity.`;
-  else{f=`Load current: 0.3 A × ${6-S.k} + 2 A × ${S.k} = <b>${fI(C.I)}</b>`;
-    if(S.hasF)f+=`<br>Fuse ${fA(rating)}: `+(C.I<rating*0.8?'has headroom':'on the edge');
-    if(S.prot==='diode')f+=`<br>Diode: P = 0.45 V × ${nf(C.I,1)} A = <b>${fP(C.Pp)}</b>`;
-    if(S.prot==='fet')f+=`<br>MOSFET: P = I × I × R = ${nf(C.I,1)} × ${nf(C.I,1)} × 0.008 = <b>${fP(C.Pp)}</b>`;
-    if(S.hasLed)f+=`<br>Indicator: I = (${nf(C.Vr,1)} − 1.9) / ${LR[S.lri]} Ω = <b>${fI(C.led)}</b>`;
-    if(S.hasDiv)f+=`<br>Divider: ${nf(C.Vr,1)} × ${fR(DR[S.b2])} / (${fR(DR[S.b1])} + ${fR(DR[S.b2])}) = <b>${fV(C.tap)}</b> at the meter`}
+  if(C.open==='trace')f=_t('Trace burnt: the circuit is broken, the rail is at 0 V. Press “Repair”.');
+  else if(C.open==='fuse')f=_t('Fuse blown: the circuit is broken, the board is fine. Replace the fuse.');
+  else if(C.open==='psu')f=_t('The arm asks for {0}, but the supply can only do 10 A, so it shut off.',fI(load()));
+  else if(C.open==='diode'||C.open==='fet')f=_t('Wires swapped, but the protection is shut: current is 0, the rail is at 0 V. Everything survives.');
+  else if(S.short)f=_t('Short: I = U / R = 12 V / 0.05 Ω ≈ <b>{0}</b>',fI(C.I));
+  else if(S.rev)f=_t('Rail at {0}: the electronics got reversed polarity.',fV(C.Vr));
+  else{f=_t('Load current: 0.3 A × {0} + 2 A × {1} = <b>{2}</b>',6-S.k,S.k,fI(C.I));
+    if(S.hasF)f+=_t(C.I<rating*0.8?'<br>Fuse {0}: has headroom':'<br>Fuse {0}: on the edge',fA(rating));
+    if(S.prot==='diode')f+=_t('<br>Diode: P = 0.45 V × {0} = <b>{1}</b>',nf(C.I,1)+' '+_u('A'),fP(C.Pp));
+    if(S.prot==='fet')f+=_t('<br>MOSFET: P = I × I × R = {0} × {0} × 0.008 = <b>{1}</b>',nf(C.I,1),fP(C.Pp));
+    if(S.hasLed)f+=_t('<br>Indicator: I = ({0} − 1.9) / {1} = <b>{2}</b>',nf(C.Vr,1),LR[S.lri]+' '+_u('Ω'),fI(C.led));
+    if(S.hasDiv)f+=_t('<br>Divider: {0} × {1} / ({2} + {1}) = <b>{3}</b> at the meter',nf(C.Vr,1),fR(DR[S.b2]),fR(DR[S.b1]),fV(C.tap))}
   $('#formula').innerHTML=f;
   /* task */
   if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();
-  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');PED.after(S.done.has(S.step));$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');PED.after(S.done.has(S.step));$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+_t(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
   $('#after').hidden=!(ok&&st.after);if(ok&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
   [...$('#dots').children].forEach((b,i)=>b.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
 }

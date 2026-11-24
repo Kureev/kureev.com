@@ -10,6 +10,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>Level 2: Capacitor</title>
+<script src="/electronics/i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -299,12 +300,14 @@ input[type=range]{accent-color:#7d8cff}
 <script>
 {
 const $=s=>document.querySelector(s);
-const nf=(x,d)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fV=v=>nf(v,Math.abs(v)<10?2:1)+' V';
-const fI=i=>Math.abs(i)>=1?nf(i,Math.abs(i)>=100?0:1)+' A':nf(i*1000,1)+' mA';
-const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' kΩ':r+' Ω';
-const fC=c=>(c>=1000?c.toLocaleString('en-US'):c)+' µF';
-const fT=t=>t<1?nf(t*1000,t<0.01?2:0)+' ms':nf(t,t<10?2:1)+' s';
+I18N.apply(document.body);$('.ph').appendChild(I18N.switcher());const _t=I18N.t,_u=I18N.u;
+const nf=(x,d)=>I18N.nf(x,d);
+const fV=v=>nf(v,Math.abs(v)<10?2:1)+' '+_u('V');
+const fI=i=>Math.abs(i)>=1?nf(i,Math.abs(i)>=100?0:1)+' '+_u('A'):nf(i*1000,1)+' '+_u('mA');
+const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' '+_u('kΩ'):r+' '+_u('Ω');
+const fC=c=>nf(c,0)+' '+_u('µF');
+const fT=t=>t<1?nf(t*1000,t<0.01?2:0)+' '+_u('ms'):nf(t,t<10?2:1)+' '+_u('s');
+const fVr=v=>nf(v,v%1?1:0)+' '+_u('V');
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 
 /* ---------- state & physics ---------- */
@@ -339,7 +342,7 @@ function solve(){
   return{I,Vr,led};
 }
 
-if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. Check your connection and reload the page.</div>')}
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">'+_t('3D failed to load. Check your connection and reload the page.')+'</div>')}
 else{
 const stage=$('#stage'),cv=$('#gl');
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
@@ -366,7 +369,7 @@ function cyl(r,h,mat,x,y,z,rx,rz){const m=new THREE.Mesh(new THREE.CylinderGeome
 
 /* labels */
 const labels=[],TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
-const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=txt;$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=_t(txt);$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
 function polyPath(pts,closed){const L=[];for(let i=0;i<pts.length-(closed?0:1);i++)L.push(pts[i].distanceTo(pts[(i+1)%pts.length]));return{pts,L,T:L.reduce((a,b)=>a+b,0)||1,closed}}
 function pathAt(P,s,out){s=((s%P.T)+P.T)%P.T;for(let i=0;i<P.L.length;i++){if(s<=P.L[i])return out.copy(P.pts[i]).lerp(P.pts[(i+1)%P.pts.length],P.L[i]?s/P.L[i]:0);s-=P.L[i]}return out.copy(P.pts[0])}
 const dummy=new THREE.Object3D();
@@ -377,7 +380,7 @@ const mGlass=new THREE.MeshStandardMaterial({color:0x9fd0ff,transparent:true,opa
 const mWater=new THREE.MeshStandardMaterial({color:0x3f8cff,transparent:true,opacity:.7,roughness:.25,emissive:0x0b2a66,emissiveIntensity:.35});
 const SX=-2.6,SR=0.6,TL=1.6;
 {const fl=new THREE.Mesh(new THREE.BoxGeometry(9.6,0.08,2.6),M(0x030718));fl.position.set(0.3,-0.04,0);scW.add(fl)}
-for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x8f9bc4));t.position.set(SX-1.25,Y0+v*K,0);scW.add(t);if(v%3===0)lab('w',v+' V',V3(SX-1.4,Y0+v*K,0),'lvl',null,'left')}
+for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x8f9bc4));t.position.set(SX-1.25,Y0+v*K,0);scW.add(t);if(v%3===0)lab('w',v+' '+_u('V'),V3(SX-1.4,Y0+v*K,0),'lvl',null,'left')}
 scW.add(tube(V3(SX-1.25,Y0,0),V3(SX-1.25,Y0+12*K,0),0.02,M(0x5a6699)));
 /* glass column on a base ring, open at the top */
 function column(x,r,g){const o=g||scW;o.add(cyl(r,HT,mGlass,x,Y0+HT/2,0));const base=cyl(r+0.06,Y0,M(0x1d2752,{roughness:.5}),x,Y0/2,0);o.add(base);
@@ -391,7 +394,7 @@ function buildW(){[pipeG,tankG].forEach(g=>{while(g.children.length){const c=g.c
   pipeG.add(tube(V3(SX+SR-0.03,Y0+0.2,0),V3(TX-tankR+0.03,Y0+0.2,0),pipeR,new THREE.MeshStandardMaterial({color:0xbfe0ff,transparent:true,opacity:.35,roughness:.15,depthWrite:false})));
   column(TX,tankR,tankG);tankWater=cyl(tankR-0.03,1,mWater,TX,Y0,0);tankG.add(tankWater);
   WPATH=polyPath([V3(SX+SR-0.1,Y0+0.2,0),V3(TX-tankR+0.1,Y0+0.2,0)],false);
-  LwPipe.el.textContent='Narrow pipe = resistor R · '+fR(WR[S.wr]);LwTank.el.textContent='Tank = capacitor C · '+fC(WC[S.wc]);LwTank.p.set(TX,Y0+HT+0.15,0)}
+  LwPipe.el.textContent=_t('Narrow pipe = resistor R · {0}',fR(WR[S.wr]));LwTank.el.textContent=_t('Tank = capacitor C · {0}',fC(WC[S.wc]));LwTank.p.set(TX,Y0+HT+0.15,0)}
 const LwSrc=lab('w','',V3(SX,Y0+HT+0.15,0),'part',null,'up'),LwPipe=lab('w','',V3((SX+TL)/2,Y0+0.2,0.25),'part',null,'down'),
   LwTank=lab('w','',V3(),'part',null,'up'),LwLvl=lab('w','',V3(),'good',null,'right'),
   Lw63=lab('w','63% = 7.6 V',V3(),'flow',()=>S.step===2,'right');
@@ -487,7 +490,7 @@ res:['Resistor','The stripes are the value: two digits, then the number of zeros
 meter:['0–3 V meter','From level 1: reads the rail through a 10 kΩ / 2.2 kΩ divider. It is slow: like a multimeter, it averages and never sees a dip that lasts a millisecond.'],
 servo:['Servos','Six STS3215 on the 12 V rail. Moving gently: about 0.3 A each. When they all start at once they grab about 7 A more within microseconds.'],
 cu:['Copper trace','A wire on the board.']};
-const showInfo=k=>{$('#infoT').textContent=INFO[k][0];$('#infoP').textContent=INFO[k][1];$('#info').hidden=false};
+const showInfo=k=>{$('#infoT').textContent=_t(INFO[k][0]);$('#infoP').textContent=_t(INFO[k][1]);$('#info').hidden=false};
 $('#infoX').onclick=()=>$('#info').hidden=true;
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
 const shown=o=>{while(o){if(!o.visible)return false;o=o.parent}return true};
@@ -511,13 +514,13 @@ function drawScope(){const fig=$('#scope');if(fig.hidden)return;
   const hl=(v,c,dash)=>{x.strokeStyle=c;x.setLineDash(dash||[]);x.lineWidth=1.2;x.beginPath();x.moveTo(0,Y(v));x.lineTo(W,Y(v));x.stroke();x.setLineDash([])};
   const trace=(pts,c)=>{x.strokeStyle=c;x.lineWidth=2;x.lineJoin='round';x.beginPath();pts.forEach(([px,v],i)=>i?x.lineTo(px,Y(v)):x.moveTo(px,Y(v)));x.stroke()};
   let sub='',rd='',bad=false,xs='',ys='';
-  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub='rail · single shot';xs='0.5 ms / square';ys='4 V / square · red: 7 V line';
+  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub=_t('rail · single shot');xs=_t('{0} / square',nf(0.5,1)+' '+_u('ms'));ys=_t('{0} / square · red: 7 V line',4+' '+_u('V'));
     if(S.tr){const n=S.tr.V.length,m=Math.max(1,Math.floor(S.rp*(n-1))),pts=[];for(let i=0;i<=m;i++)pts.push([i/(n-1)*W,S.tr.V[i]]);trace(pts,'#8fd0ff');
-      if(S.rp>=1){rd='lowest '+fV(S.tr.min);bad=S.tr.min<LINE}else rd='capturing…'}
-    else{trace([[0,VS-BASE*RPATH],[W,VS-BASE*RPATH]],'#8fd0ff');rd='waiting for a lunge'}}
-  else if(mode==='slow'){hl(12,'rgba(201,210,245,.45)',[4,4]);sub='rail · rolling';xs='1 s / square';ys='2 V / square';
+      if(S.rp>=1){rd=_t('lowest {0}',fV(S.tr.min));bad=S.tr.min<LINE}else rd=_t('capturing…')}
+    else{trace([[0,VS-BASE*RPATH],[W,VS-BASE*RPATH]],'#8fd0ff');rd=_t('waiting for a lunge')}}
+  else if(mode==='slow'){hl(12,'rgba(201,210,245,.45)',[4,4]);sub=_t('rail · rolling');xs=_t('{0} / square',1+' '+_u('s'));ys=_t('{0} / square',2+' '+_u('V'));
     const L=S.ulog,t1=S.ut,t0=t1-10,pts=L.filter(p=>p[0]>=t0).map(([t,v])=>[(t-t0)/10*W,v]);if(pts.length>1)trace(pts,'#8fd0ff');rd=fV(solve().Vr)}
-  else{hl(12,'rgba(201,210,245,.45)',[4,4]);const tau=wTau(),span=S.step===2?Math.max(6*tau,1):6;sub='tank level';xs=(span>=10?nf(span/10,0):nf(span/10,span<1?2:1))+' s / square';ys='2 V / square';
+  else{hl(12,'rgba(201,210,245,.45)',[4,4]);const tau=wTau(),span=S.step===2?Math.max(6*tau,1):6;sub=_t('tank level');xs=_t('{0} / square',(span>=10?nf(span/10,0):nf(span/10,span<1?2:1))+' '+_u('s'));ys=_t('{0} / square',2+' '+_u('V'));
     if(S.step===2){const tx=Math.min(W,tau/span*W);x.strokeStyle='rgba(255,178,107,.8)';x.setLineDash([5,4]);x.beginPath();x.moveTo(tx,0);x.lineTo(tx,H);x.stroke();x.setLineDash([]);hl(12*0.632,'rgba(255,178,107,.8)',[5,4]);
       x.fillStyle='#ffb26b';x.font='600 13px Manrope,sans-serif';x.fillText('τ',Math.min(W-12,tx+4),14)}
     const L=S.wlog,t1=S.step===2?span:Math.max(S.wt,span),t0=Math.max(0,t1-span),pts=L.filter(p=>p[0]>=t0).map(([t,v])=>[(t-t0)/span*W,v]);if(pts.length>1)trace(pts,'#8fd0ff');rd=fV(S.lvl)}
@@ -560,8 +563,9 @@ STEPS=[
  after:'<p>With only the indicator drinking, the rail sank over several seconds and the LED faded out slowly. With the servos connected it’s gone in about 15 ms. A capacitor rides through milliseconds, not minutes.</p>',
  task:'Disconnect the servos, unplug the supply and watch the indicator fade',ok:()=>S.fl.fade},
 {sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"The rail now has a reserve: two 1000 µF / 25 V capacitors, stripe to ground, right after the protection.",bt:["-","Next"],ui:[],build:B(true,5,2),enter:()=>{fresh();S.plugged=S.servos=true;S.ri=3;S.tr=null;S.rp=1},
- b:'<p>Connector → fuse → MOSFET → 12 V rail → <b>two 1000 µF / 25 V capacitors</b>, then the indicator, the meter and six servos. The servos can lunge together and the rail stays above 11 V.</p><ul class="hw">'+['Find the big capacitors on your servo driver board. Read the µF and V on the can and find the stripe.','Check that their rating is at least 1.5× your supply voltage.','Redo C = I × Δt / ΔU for an allowed dip of 0.5 V. What would you fit?','Unplug your supply with nothing connected and watch its LED: does it fade? It has output capacitors too.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${t}</label></li>`).join('')+'</ul><p class="note">Next up, level 3: the inductor. Why current has inertia, and why the supply couldn’t keep up.</p>',
+ b:_t('<p>Connector → fuse → MOSFET → 12 V rail → <b>two 1000 µF / 25 V capacitors</b>, then the indicator, the meter and six servos. The servos can lunge together and the rail stays above 11 V.</p>')+'<ul class="hw">'+['Find the big capacitors on your servo driver board. Read the µF and V on the can and find the stripe.','Check that their rating is at least 1.5× your supply voltage.','Redo C = I × Δt / ΔU for an allowed dip of 0.5 V. What would you fit?','Unplug your supply with nothing connected and watch its LED: does it fade? It has output capacitors too.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="note">Next up, level 3: the inductor. Why current has inertia, and why the supply couldn’t keep up.</p>'),
  task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
 
 function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
   document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}
@@ -586,7 +590,7 @@ function quiz(){const go=()=>{const raw=($('#qa').value||'').replace(/[,\s]/g,''
     else if(v>=40&&v<=50||v>=4e4&&v<=5e4)m='Flipped: C = I × Δt / ΔU. Current times time on top, the allowed dip below.';
     else if(isNaN(v))m='Type a number of microfarads.';
     else m='Not quite. Multiply 7 A by 0.00015 s, divide by 1 V, and you get farads. Then convert to µF.';
-    $('#qf').textContent=m;update()};
+    $('#qf').textContent=_t(m);update()};
   $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
 function renderStep(){
   const st=STEPS[S.step];if(st.enter)st.enter();
@@ -601,7 +605,7 @@ function renderStep(){
   update();
 }
 $('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
-$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="Step ${i+1}: ${st.t}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="${_t('Step {0}: {1}',i+1,st.t)}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
 [...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
 const setMode=m=>{if(m===S.wm)return;S.wm=m;S.wlog=[[0,S.lvl]];S.wt=0;S.run=m==='charge'&&S.lvl<0.3?{tau:wTau()}:null;update()};
 $('#wmC').onclick=()=>setMode('charge');$('#wmD').onclick=()=>setMode('drain');
@@ -629,24 +633,24 @@ function update(){
     $('#wrO').textContent=fR(WR[S.wr]);$('#wcO').textContent=fC(WC[S.wc]);$('#wr').value=S.wr;$('#wc').value=S.wc;
     [['#wmC','charge'],['#wmD','drain']].forEach(([id,m])=>$(id).setAttribute('aria-pressed',S.wm===m));
     const Q=WC[S.wc]*1e-6*S.lvl,src=wSrc();
-    $('#wF').innerHTML=S.step===2?`τ = R × C = ${fR(WR[S.wr])} × ${fC(WC[S.wc])} = <b>${fT(tau)}</b> · full after about 5 τ = ${fT(5*tau)}`:
-      `Flow: I = (${src} − ${nf(S.lvl,1)}) / ${fR(WR[S.wr])} = <b>${fI(Math.abs(I))}</b>${I<-5e-5?' back to the source':''}<br>Charge: Q = C × U = ${fC(WC[S.wc])} × ${nf(S.lvl,1)} V = <b>${nf(Q*1000,1)} mC</b>`;
-    LwSrc.el.textContent=S.wm==='charge'?'Source: pump on, 12 V':'Source: pump off, 0 V';LwLvl.el.textContent='Level = '+fV(S.lvl)}
+    $('#wF').innerHTML=S.step===2?_t('τ = R × C = {0} × {1} = <b>{2}</b> · full after about 5 τ = {3}',fR(WR[S.wr]),fC(WC[S.wc]),fT(tau),fT(5*tau)):
+      _t('Flow: I = ({0} − {1}) / {2} = <b>{3}</b>',src,nf(S.lvl,1),fR(WR[S.wr]),fI(Math.abs(I)))+(I<-5e-5?_t(' back to the source'):'')+_t('<br>Charge: Q = C × U = {0} × {1} = <b>{2}</b>',fC(WC[S.wc]),nf(S.lvl,1)+' '+_u('V'),nf(Q*1000,1)+' '+_u('mC'));
+    LwSrc.el.textContent=_t(S.wm==='charge'?'Source: pump on, 12 V':'Source: pump off, 0 V');LwLvl.el.textContent=_t('Level = {0}',fV(S.lvl))}
   /* board */
   const n=S.cn,ok=S.hasCap&&CV[S.ci]>0;
   capG.forEach((c,k)=>{const vis=ok&&k<n;c.g.visible=vis;c.tg.visible=S.hasCap&&k<Math.max(1,n);c.g.rotation.y=k===0&&S.rev?Math.PI:0;
     const pp=S.pop[k];c.top.position.y=pp?1.05:0.985;c.top.rotation.x=pp?0.45:0;c.top.material.color.setHex(pp?0x5a3f28:0xb9c2d6);c.body.children[2].material.color.setHex(pp?0x120c0a:0x0b1236)});
   gCapT.visible=S.hasCap;capG[1].tg.visible=S.hasCap&&n===2;
-  Lcap.el.textContent=(S.pop[0]&&(n<2||S.pop[1])?'Capacitors burst':(n===2?'2 × ':'')+fC(CV[S.ci])+' · '+RAT[S.ri]+' V'+(S.rev?' · backwards!':''));Lcap.el.className='lb '+(S.pop[0]||S.pop[1]||S.rev?'bad':'part');
+  Lcap.el.textContent=(S.pop[0]&&(n<2||S.pop[1])?_t('Capacitors burst'):(n===2?'2 × ':'')+fC(CV[S.ci])+' · '+fVr(RAT[S.ri])+(S.rev?_t(' · backwards!'):''));Lcap.el.className='lb '+(S.pop[0]||S.pop[1]||S.rev?'bad':'part');
   plugG.position.x=S.plugged?0:-0.9;servoW.visible=S.servos;
-  Lservo.el.textContent=S.servos?'6 servos':'Servos disconnected';
-  Lmet.el.textContent='Meter: '+fV(Math.max(0,C.Vr)*2200/12200)+' → rail '+fV(Math.max(0,C.Vr));if(stage.clientWidth<600)Lmet.el.textContent=fV(Math.max(0,C.Vr)*2200/12200);
-  $('#cc').value=S.ci;$('#ccO').textContent=CV[S.ci]?fC(CV[S.ci]):'none (only the servos’ own 10 µF)';
-  $('#cap2').setAttribute('aria-pressed',S.cn===2);$('#cap2').textContent=S.cn===2?'Remove the second one':'Add a second one in parallel';
-  $('#flip').textContent=S.rev?'Turn it the right way round':'Fit one backwards';
-  $('#ra').value=S.ri;$('#raO').textContent=RAT[S.ri]+' V · '+nf(RAT[S.ri]/VPEAK,1)+'× headroom';
-  $('#srv').setAttribute('aria-pressed',S.servos);$('#srv').textContent=S.servos?'Disconnect the servos':'Connect the servos';
-  $('#plug').setAttribute('aria-pressed',S.plugged);$('#plug').textContent=S.plugged?'Unplug the supply':'Plug the supply back in';
+  Lservo.el.textContent=_t(S.servos?'6 servos':'Servos disconnected');
+  Lmet.el.textContent=_t('Meter: {0} → rail {1}',fV(Math.max(0,C.Vr)*2200/12200),fV(Math.max(0,C.Vr)));if(stage.clientWidth<600)Lmet.el.textContent=fV(Math.max(0,C.Vr)*2200/12200);
+  $('#cc').value=S.ci;$('#ccO').textContent=CV[S.ci]?fC(CV[S.ci]):_t('none (only the servos’ own 10 µF)');
+  $('#cap2').setAttribute('aria-pressed',S.cn===2);$('#cap2').textContent=_t(S.cn===2?'Remove the second one':'Add a second one in parallel');
+  $('#flip').textContent=_t(S.rev?'Turn it the right way round':'Fit one backwards');
+  $('#ra').value=S.ri;$('#raO').textContent=_t('{0} · {1}× headroom',fVr(RAT[S.ri]),nf(RAT[S.ri]/VPEAK,1));
+  $('#srv').setAttribute('aria-pressed',S.servos);$('#srv').textContent=_t(S.servos?'Disconnect the servos':'Connect the servos');
+  $('#plug').setAttribute('aria-pressed',S.plugged);$('#plug').textContent=_t(S.plugged?'Unplug the supply':'Plug the supply back in');
   $('#jerk').disabled=S.rp<1||!S.servos||!S.plugged;
   const dead=S.pop[0]||S.pop[1];$('#fix').hidden=!(dead&&ui.includes('flip'))&&!(dead&&ui.includes('rat'));
   $('#nI').textContent=fI(C.I);$('#nV').textContent=fV(Math.max(0,C.Vr));
@@ -656,17 +660,17 @@ function update(){
     if(S.hasCap)pills.push(dead?['r','Capacitor burst']:S.cook>0?['r','Capacitor hot, smoking']:RAT[S.ri]/VPEAK<1.5?['y','Thin voltage margin']:CV[S.ci]?['g','Capacitors OK']:['m','No capacitor']);
     if(S.last&&S.rp>=1&&(ui.includes('jerk')))pills.push(S.last.min<LINE?['r','Brain would reboot']:S.last.dip<1?['g','Dip under 1 V']:['y','Rail held, dip over 1 V']);
     pills.push(C.led>0.004?['g','Indicator lit']:C.led>0.0002?['y','Indicator fading']:['m','Indicator off'])}
-  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join('');
+  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${_t(t)}</span>`).join('');
   let f='';
-  if(!S.plugged){const E=0.5*b.C*C.Vr*C.Vr;f=`Left in the capacitors: E = ½ × C × U² = ½ × ${fC(Math.round(b.C*1e6))} × ${nf(C.Vr,1)}² = <b>${nf(E,3)} J</b>`+(S.servos?'<br>Servos drink 1.8 A: τ ≈ 7 Ω × C':'<br>Only the indicator and meter drink: τ ≈ 1.9 kΩ × C')}
-  else if(S.step===6)f=`Highest rail voltage ≈ 13 V. Headroom = ${RAT[S.ri]} / 13 = <b>${nf(RAT[S.ri]/VPEAK,1)}×</b>`+(RAT[S.ri]<12.6?'<br>Below the rail voltage: it won’t survive.':'');
-  else if(S.step===5)f=S.rev?'Backwards: the oxide layer breaks down, leakage current heats the electrolyte.':`Capacitance on the rail: ${b.n} × 1000 µF = <b>${fC(Math.round(b.C*1e6))}</b>`;
-  else if(st.sc==='b'&&ui.length){f=`Capacitance on the rail: 10 µF`+(b.C?` + ${b.n>1?b.n+' × ':''}${fC(CV[S.ci])} = <b>${fC(Math.round(b.C*1e6)+10)}</b>`:' (only the servos’ own)');
-    if(S.last&&S.rp>=1)f+=`<br>Lunge, +7 A: lowest <b>${fV(S.last.min)}</b> (dip ${fV(S.last.dip)}), highest ${fV(S.last.max)}`}
+  if(!S.plugged){const E=0.5*b.C*C.Vr*C.Vr;f=_t('Left in the capacitors: E = ½ × C × U² = ½ × {0} × {1}² = <b>{2}</b>',fC(Math.round(b.C*1e6)),nf(C.Vr,1),nf(E,3)+' '+_u('J'))+_t(S.servos?'<br>Servos drink 1.8 A: τ ≈ 7 Ω × C':'<br>Only the indicator and meter drink: τ ≈ 1.9 kΩ × C')}
+  else if(S.step===6)f=_t('Highest rail voltage ≈ 13 V. Headroom = {0} / 13 = <b>{1}×</b>',nf(RAT[S.ri],RAT[S.ri]%1?1:0),nf(RAT[S.ri]/VPEAK,1))+(RAT[S.ri]<12.6?_t('<br>Below the rail voltage: it won’t survive.'):'');
+  else if(S.step===5)f=S.rev?_t('Backwards: the oxide layer breaks down, leakage current heats the electrolyte.'):_t('Capacitance on the rail: {0} × {1} = <b>{2}</b>',b.n,fC(1000),fC(Math.round(b.C*1e6)));
+  else if(st.sc==='b'&&ui.length){f=_t('Capacitance on the rail: {0}',fC(10))+(b.C?` + ${b.n>1?b.n+' × ':''}${fC(CV[S.ci])} = <b>${fC(Math.round(b.C*1e6)+10)}</b>`:_t(' (only the servos’ own)'));
+    if(S.last&&S.rp>=1)f+=_t('<br>Lunge, +7 A: lowest <b>{0}</b> (dip {1}), highest {2}',fV(S.last.min),fV(S.last.dip),fV(S.last.max))}
   $('#formula').innerHTML=f;
   /* task */
   if(PED.ready(S.step)&&st.ok(C))S.done.add(S.step);saveQ();
-  const okd=S.done.has(S.step);$('#task').className='task'+(okd?' ok':'');PED.after(okd);$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(okd?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  const okd=S.done.has(S.step);$('#task').className='task'+(okd?' ok':'');PED.after(okd);$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+_t(okd?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
   $('#after').hidden=!(okd&&st.after);if(okd&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
   [...$('#dots').children].forEach((bt,i)=>bt.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
   drawScope();

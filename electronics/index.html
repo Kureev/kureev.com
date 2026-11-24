@@ -10,6 +10,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>Quest: electronics for a robot arm</title>
+<script src="/electronics/i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -141,6 +142,7 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 @media(max-width:900px){.panel{background:#050817!important;padding:12px!important}}
 </style>
 <link rel="stylesheet" href="/electronics/theme.css">
+<style>.intro{position:relative}.hubsw{position:absolute;top:14px;right:14px}</style>
 </head>
 <body>
 <div class="app">
@@ -173,6 +175,7 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 <script>
 {
 const $=s=>document.querySelector(s);
+I18N.apply(document.body);{const sw=I18N.switcher();sw.classList.add('hubsw');$('.intro').appendChild(sw)}const _t=I18N.t;
 const LEVELS=[
  {t:'The lab',g:'Current, voltage, resistance. Why the LED burnt.',href:'/electronics/lesson0',sec:null},
  {t:'Power input',g:'The board survives a dropped screwdriver and swapped wires.',href:'/electronics/lesson1',sec:0},
@@ -194,13 +197,13 @@ const isDone=i=>!!(Q.done&&Q.done[i]),built=i=>!!LEVELS[i].href,avail=i=>i===0||
 const nDone=LEVELS.filter((_,i)=>isDone(i)).length;
 $('#segs').innerHTML=LEVELS.map((_,i)=>`<i class="${isDone(i)?'d':avail(i)&&built(i)?'c':''}"></i>`).join('');$('#progT').textContent=`${nDone} / ${LEVELS.length}`;
 $('#levels').innerHTML=LEVELS.map((L,i)=>{const d=isDone(i),a=avail(i)&&built(i),st=Q.steps&&Q.steps[i]?Q.steps[i].length:0;
-  const cls=d?'done':a?'open':'locked',lock=!d&&!a,tag=d?'Cleared':a?(st?'Continue':'Start'):built(i)?'Unlocks after level '+(i-1):'Coming soon';
-  const inner=`<span class="art"><img src="/electronics/levels/lv${i}.webp" alt="" loading="lazy" width="320" height="320"></span><span class="meta"><span class="no">Level ${i}</span><span class="t">${L.t}</span><span class="g">${L.g}</span><span class="tag">${tag}</span></span>`;
+  const cls=d?'done':a?'open':'locked',lock=!d&&!a,tag=d?_t('Cleared'):a?_t(st?'Continue':'Start'):built(i)?_t('Unlocks after level {0}',i-1):_t('Coming soon');
+  const inner=`<span class="art"><img src="/electronics/levels/lv${i}.webp" alt="" loading="lazy" width="320" height="320"></span><span class="meta"><span class="no">${_t('Level {0}',i)}</span><span class="t">${_t(L.t)}</span><span class="g">${_t(L.g)}</span><span class="tag">${tag}</span></span>`;
   const fin=i===LEVELS.length-1?' final':'';return a||d&&built(i)?`<a class="lv ${cls}${a&&!d?' now':''}${fin}" href="${L.href}">${inner}</a>`:`<div class="lv ${cls}${fin}" aria-disabled="true">${inner}</div>`}).join('');
-$('#invN').textContent=`${INV.filter(([l])=>isDone(l)).length} / ${INV.length}`;$('#inv').innerHTML=INV.map(([l,n,d])=>isDone(l)?`<div class="card"><b>${n}</b><span>${d}</span></div>`:`<div class="card lock"><b>${n}</b><span>level ${l}</span></div>`).join('');
-let armed=false;$('#reset').onclick=e=>{if(!armed){armed=true;e.target.textContent='Reset for sure? Click again';return}try{localStorage.removeItem('quest_v1')}catch(_){}location.reload()};
+$('#invN').textContent=`${INV.filter(([l])=>isDone(l)).length} / ${INV.length}`;$('#inv').innerHTML=INV.map(([l,n,d])=>isDone(l)?`<div class="card"><b>${_t(n)}</b><span>${_t(d)}</span></div>`:`<div class="card lock"><b>${_t(n)}</b><span>${_t('level {0}',l)}</span></div>`).join('');
+let armed=false;$('#reset').onclick=e=>{if(!armed){armed=true;e.target.textContent=_t('Reset for sure? Click again');return}try{localStorage.removeItem('quest_v1')}catch(_){}location.reload()};
 
-if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. The levels are on the right.</div>')}
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">'+_t('3D failed to load. The levels are on the right.')+'</div>')}
 else{
 const stage=$('#stage'),cv=$('#gl'),V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=.85;gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap;gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
@@ -217,7 +220,7 @@ const cyl=(r,h,mat,x,y,z,par,rz)=>{const m=new THREE.Mesh(new THREE.CylinderGeom
 const B0X=-0.8+2*1.8,DW=25,DZ0=-5.45,DZ1=4.05;{const dk=box(DW,0.35,DZ1-DZ0,studio?studio.desk:M(0x0b0d14),0,-0.175,(DZ0+DZ1)/2);dk.receiveShadow=true;dk.castShadow=true;if(studio)['map','bumpMap','roughnessMap'].forEach(k=>{const t=dk.material[k];if(t)t.repeat.set(2.2,.85)})}
 
 
-const narrow=document.getElementById('stage').clientWidth<600,labels=[],lab=(t,p,cls)=>{const el=document.createElement('div');el.className='lb '+(cls||'');el.textContent=t;$('#labels').appendChild(el);labels.push({el,p});return el};
+const narrow=document.getElementById('stage').clientWidth<600,labels=[],lab=(t,p,cls)=>{const el=document.createElement('div');el.className='lb '+(cls||'');el.textContent=_t(t);$('#labels').appendChild(el);labels.push({el,p});return el};
 
 /* board with 8 sections on a cutting mat that matches it exactly */
 const B0=V3(-0.8,0,-1.9),CW=1.8,CD=2.3,hits=[];
@@ -269,7 +272,7 @@ for(let s=0;s<8;s++){const c=s%4,rw=Math.floor(s/4),cx=B0.x+0.2+c*CW+CW/2,cz=B0.
   if(a){m.position.y=0.25;floaters.push({m,y:0.25,ph:s})}
   m.traverse(o=>{if(o.isMesh)o.castShadow=true});g.add(m);
   const hit=box(CW-0.1,1.2,CD-0.1,new THREE.MeshBasicMaterial({visible:false}),0,0.6,0,g);hit.userData.lv=lv;hits.push(hit);
-  lab(narrow?String(lv):`${lv} · ${SECN[s]}`,V3(cx,0.06,cz+CD/2-0.18),d?'done':a?'open':'')}
+  lab(narrow?String(lv):`${lv} · ${_t(SECN[s])}`,V3(cx,0.06,cz+CD/2-0.18),d?'done':a?'open':'')}
 /* a bench power supply: amber digits are a practical light on the desk */
 {const c=document.createElement('canvas');c.width=256;c.height=96;const x=c.getContext('2d');x.fillStyle='#0b0d12';x.fillRect(0,0,256,96);x.font='bold 52px ui-monospace,Menlo,monospace';x.fillStyle='#ffb26b';x.fillText('12.00',18,62);x.font='bold 22px ui-monospace,Menlo,monospace';x.fillStyle='#ff7a4d';x.fillText('V   0.18A',30,88);
  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;const PX=-6.8,PZ=-4.3;const body=box(2.2,1.2,1.5,ML(0x060709),PX,0.6,PZ);body.castShadow=true;
@@ -356,9 +359,9 @@ const corner=(arr)=>{const out=[];for(let i=0;i<arr.length;i++){const p=arr[i];i
  const X1=B0.x+0.2+CW/2,Z1=B0.z+0.2+CD/2;
  [[0xb3261e,-7.4,0],[0x111216,-7.05,.09]].forEach(([c,tx,o])=>cable(corner([V3(tx,.35,-3.45),V3(tx,.12,-3.15),V3(tx+.2,y,-3.0+o),V3(-3.4,y,-3.0+o),V3(-1.6,y,-1.5+o),V3(X1-0.75,y,Z1-0.12+o),V3(X1-0.5,.12,Z1-0.12+o)]),0.03,c))}
 /* picking */
-const showInfo=lv=>{const L=LEVELS[lv];$('#infoT').textContent=`Level ${lv} · ${L.t}`;$('#infoP').textContent=L.g;const ok=avail(lv)&&built(lv);
-  $('#infoGo').hidden=!ok;if(ok){$('#infoGo').href=L.href;$('#infoGo').textContent=isDone(lv)?'Replay':'Open level'}
-  else $('#infoP').textContent+=built(lv)?` Unlocks after level ${lv-1}.`:' This level is still in the works.';$('#info').hidden=false};
+const showInfo=lv=>{const L=LEVELS[lv];$('#infoT').textContent=_t('Level {0} · {1}',lv,_t(L.t));$('#infoP').textContent=_t(L.g);const ok=avail(lv)&&built(lv);
+  $('#infoGo').hidden=!ok;if(ok){$('#infoGo').href=L.href;$('#infoGo').textContent=_t(isDone(lv)?'Replay':'Open level')}
+  else $('#infoP').textContent+=built(lv)?_t(' Unlocks after level {0}.',lv-1):_t(' This level is still in the works.');$('#info').hidden=false};
 $('#infoX').onclick=()=>$('#info').hidden=true;
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
 cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
