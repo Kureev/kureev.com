@@ -1,91 +1,162 @@
 (async()=>{
+/* "The bench": an SO-101 on a cutting mat moving an LED between two breadboard sockets.
+   The cursor is a marker on the mat; click to grab. Scroll lays the kit out flat (knolling).
+   Easter eggs: press R twice (Fast Refresh), click the lit LED (Blink). */
 if(!window.THREE||!window.SO101)return;
 const T=THREE,cv=document.getElementById('gl'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let gl;try{gl=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){return}
 const DPR=Math.min(devicePixelRatio,2);gl.setPixelRatio(DPR);gl.outputEncoding=T.sRGBEncoding;gl.toneMapping=T.ACESFilmicToneMapping;gl.toneMappingExposure=1.05;
-const scene=new T.Scene(),cam=new T.PerspectiveCamera(28,1,0.1,100);
+const scene=new T.Scene(),cam=new T.PerspectiveCamera(32,1,0.1,200),V=(x,y,z)=>new T.Vector3(x,y,z);
 
-/* studio light: soft key, cool sky, and two contour lights from behind that draw the silhouette */
-scene.add(new T.HemisphereLight(0x8fa6ff,0x050817,.55));
-const key=new T.DirectionalLight(0xffffff,.85);key.position.set(-3,5,6);scene.add(key);
-const rimA=new T.DirectionalLight(0x5b9cff,2.4);rimA.position.set(4,3,-5);scene.add(rimA);
-const rimB=new T.DirectionalLight(0x9a7bff,1.6);rimB.position.set(-5,2,-4);scene.add(rimB);
-const bounce=new T.PointLight(0xffb26b,.6,6);bounce.position.set(.6,.2,1.2);scene.add(bounce);
-
+scene.add(new T.HemisphereLight(0x8fa6ff,0x050817,.5));
+const key=new T.DirectionalLight(0xffffff,.85);key.position.set(-3,6,6);scene.add(key);
+const rimA=new T.DirectionalLight(0x5b9cff,2.2);rimA.position.set(4,3,-5);scene.add(rimA);
+const rimB=new T.DirectionalLight(0x9a7bff,1.4);rimB.position.set(-5,2,-4);scene.add(rimB);
 const group=new T.Group();scene.add(group);
-/* soft contact shadow under the base */
-{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);
- g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
- const m=new T.Mesh(new T.PlaneGeometry(3.4,2.4),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(1.1,.002,0);m.scale.setScalar(1.5);group.add(m)}
 
+/* cutting mat: canvas grid, radial alpha fade so it has no edges */
+const MW=9,MD=5.4,MC=V(1.6,0,.3);
+{const c=document.createElement('canvas');c.width=1024;c.height=Math.round(1024*MD/MW);const x=c.getContext('2d');x.fillStyle='#0a1230';x.fillRect(0,0,c.width,c.height);
+ const u=c.width/MW;for(let i=0;i<=MW*2;i++){x.strokeStyle=i%10?'rgba(91,156,255,.07)':'rgba(91,156,255,.14)';x.lineWidth=1.5;x.beginPath();x.moveTo(i*u/2,0);x.lineTo(i*u/2,c.height);x.stroke()}
+ for(let j=0;j<=MD*2;j++){x.strokeStyle=j%10?'rgba(91,156,255,.07)':'rgba(91,156,255,.14)';x.beginPath();x.moveTo(0,j*u/2);x.lineTo(c.width,j*u/2);x.stroke()}
+ const a=document.createElement('canvas');a.width=a.height=256;const y=a.getContext('2d'),g=y.createRadialGradient(128,128,10,128,128,128);g.addColorStop(0,'#fff');g.addColorStop(.55,'#ddd');g.addColorStop(1,'#000');y.fillStyle=g;y.fillRect(0,0,256,256);
+ const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;tex.anisotropy=4;
+ const mat=new T.Mesh(new T.PlaneGeometry(MW,MD),new T.MeshStandardMaterial({map:tex,alphaMap:new T.CanvasTexture(a),transparent:true,depthWrite:false,roughness:.9}));mat.rotation.x=-Math.PI/2;mat.position.copy(MC);group.add(mat)}
+/* soft contact shadows */
+const shadowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(0,0,0,.6)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)})();
+const shadow=(w,d,x,z)=>{const m=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(x,.004,z);group.add(m);return m};
+shadow(2.4,2.0,.2,0);
 
-const printed=new T.MeshStandardMaterial({color:0xbfc8ee,roughness:.6,metalness:0}),servo=new T.MeshStandardMaterial({color:0x12182f,roughness:.38,metalness:.25});
+/* breadboard with two sockets */
+const BB=V(2.55,0,.75),SOCK=[V(2.05,.12,.75),V(3.05,.12,.75)];
+{const c=document.createElement('canvas');c.width=512;c.height=320;const x=c.getContext('2d');x.fillStyle='#cfd5ea';x.fillRect(0,0,512,320);
+ x.fillStyle='#9aa3c4';for(let i=0;i<30;i++)for(let j=0;j<10;j++){if(j===4||j===5)continue;x.fillRect(14+i*16.5,40+j*24+(j>5?12:0),6,6)}
+ x.fillStyle='rgba(91,156,255,.5)';x.fillRect(10,14,492,3);x.fillStyle='rgba(255,120,90,.5)';x.fillRect(10,303,492,3);
+ const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;
+ const b=new T.Mesh(new T.BoxGeometry(1.6,.12,1.0),[new T.MeshStandardMaterial({color:0xcfd5ea,roughness:.7}),new T.MeshStandardMaterial({color:0xcfd5ea,roughness:.7}),new T.MeshStandardMaterial({map:t,roughness:.7}),new T.MeshStandardMaterial({color:0xcfd5ea}),new T.MeshStandardMaterial({color:0xcfd5ea,roughness:.7}),new T.MeshStandardMaterial({color:0xcfd5ea,roughness:.7})]);
+ b.position.set(BB.x,.06,BB.z);group.add(b);shadow(2.2,1.6,BB.x,BB.z);
+ SOCK.forEach(p=>{const r=new T.Mesh(new T.RingGeometry(.09,.12,24),new T.MeshBasicMaterial({color:0x5b9cff,transparent:true,opacity:.5}));r.rotation.x=-Math.PI/2;r.position.set(p.x,.122,p.z);group.add(r)})}
+/* the LED: dome + body + legs, glows copper when seated */
+const led=new T.Group(),ledMat=new T.MeshStandardMaterial({color:0xff9a6b,roughness:.2,transparent:true,opacity:.85,emissive:0xffb26b,emissiveIntensity:0});
+{const dome=new T.Mesh(new T.SphereGeometry(.12,20,12,0,Math.PI*2,0,Math.PI/2),ledMat);dome.position.y=.3;led.add(dome);
+ const body=new T.Mesh(new T.CylinderGeometry(.12,.12,.2,20),ledMat);body.position.y=.2;led.add(body);
+ const rim=new T.Mesh(new T.CylinderGeometry(.14,.14,.03,20),ledMat);rim.position.y=.105;led.add(rim);
+ const legM=new T.MeshStandardMaterial({color:0xc8cfd8,metalness:.8,roughness:.3});[-.05,.05].forEach((x,i)=>{const l=new T.Mesh(new T.CylinderGeometry(.012,.012,i?.26:.22,6),legM);l.position.set(x,i?-.04:-.02,0);led.add(l)})}
+led.scale.setScalar(1.15);group.add(led);
+const ledLight=new T.PointLight(0xffb26b,0,2.4,1.6);group.add(ledLight);
+const ledShadow=shadow(.5,.5,0,0);
+
+/* the arm */
+const printed=new T.MeshStandardMaterial({color:0xc3cbee,roughness:.58,metalness:0}),servo=new T.MeshStandardMaterial({color:0x12182f,roughness:.38,metalness:.25});
 let arm;try{arm=await SO101.load('/so101/',{printed,servo})}catch(e){return}
 const holder=new T.Object3D();holder.rotation.x=-Math.PI/2;holder.scale.setScalar(10);holder.add(arm.root);group.add(holder);
-const J=['shoulder_pan','shoulder_lift','elbow_flex','wrist_flex','wrist_roll','gripper'];
-J.forEach(n=>arm.set(n,0));holder.updateMatrixWorld(true);
-/* geometry at zero pose: gripper length from the wrist joint to the fingertips */
-const wj=arm.joint.wrist_flex.parent,_a=new T.Vector3(),_b=new T.Vector3();wj.getWorldPosition(_a);arm.tip.getWorldPosition(_b);const LG=_a.distanceTo(_b)/group.scale.x;
-const q={shoulder_pan:-.3,shoulder_lift:-.4,elbow_flex:.6,wrist_flex:.9,wrist_roll:0,gripper:.5};J.forEach(n=>arm.set(n,q[n]));
-
-/* exploded view: each part has a direction out from the arm's centre (computed in its own link frame) */
+['shoulder_pan','shoulder_lift','elbow_flex','wrist_flex','wrist_roll','gripper'].forEach(n=>arm.set(n,0));holder.updateMatrixWorld(true);
+const wj=arm.joint.wrist_flex.parent,_a=V(0,0,0),_b=V(0,0,0);wj.getWorldPosition(_a);arm.tip.getWorldPosition(_b);const LG=_a.distanceTo(_b);
+[['shoulder_pan',-.3],['shoulder_lift',-.4],['elbow_flex',.6],['wrist_flex',.9],['gripper',.5]].forEach(([n,v])=>arm.set(n,v));
 holder.updateMatrixWorld(true);
-const ctr=new T.Vector3(1.4,2.2,0),wp=new T.Vector3(),inv=new T.Matrix4(),rnd=(()=>{let s=3;return()=>((s=s*16807%2147483647)-1)/2147483646})();
-arm.parts.forEach((m,i)=>{m.getWorldPosition(wp);const d=wp.clone().sub(ctr);d.y=Math.max(d.y,-.2);d.normalize().multiplyScalar(.7+rnd()*.6);d.y+=.25+rnd()*.35;
-  inv.copy(m.parent.matrixWorld).invert();const p0=new T.Vector3().applyMatrix4(inv),p1=d.clone().applyMatrix4(inv);m.userData.ex=p1.sub(p0);
-  let depth=0,o=m.parent;while(o&&o!==arm.root){if(o.userData.axis)depth++;o=o.parent}m.userData.t0=.35+depth*.28+rnd()*.25});
+arm.parts.forEach(m=>{m.userData.q0=m.quaternion.clone()});
 
-/* inverse kinematics: pan/lift/elbow bring the wrist above the target (CCD), the wrist keeps the gripper pointing down */
-const chain=['elbow_flex','shoulder_lift','shoulder_pan'],P=new T.Vector3(),A=new T.Vector3(),E=new T.Vector3(),G=new T.Vector3(),W=new T.Vector3(),tmpQ=new T.Quaternion();
-const LIM={shoulder_lift:[-1.1,1.0],elbow_flex:[-.2,1.65],shoulder_pan:[-1.3,1.3]};
-function ccd(target,iters,gain){W.copy(target);W.y+=LG*group.scale.x;
-  for(let it=0;it<iters;it++)for(const n of chain){const r=arm.joint[n];r.updateMatrixWorld(true);
-  r.getWorldPosition(P);A.copy(r.userData.axis).applyQuaternion(r.getWorldQuaternion(tmpQ)).normalize();wj.getWorldPosition(E);
-  E.sub(P);G.copy(W).sub(P);E.addScaledVector(A,-E.dot(A));G.addScaledVector(A,-G.dot(A));if(E.lengthSq()<1e-8||G.lengthSq()<1e-8)continue;
-  const ang=Math.atan2(A.dot(E.clone().cross(G)),E.dot(G)),[lo,hi]=LIM[n];arm.set(n,Math.min(hi,Math.max(lo,arm.joint[n].userData.q+ang*gain)))}
-  const want=Math.PI/2-arm.joint.shoulder_lift.userData.q-arm.joint.elbow_flex.userData.q;arm.set('wrist_flex',arm.joint.wrist_flex.userData.q+(want-arm.joint.wrist_flex.userData.q)*.25)}
+/* IK: pan/lift/elbow bring the wrist above the target, the wrist keeps the gripper pointing down */
+const chain=['elbow_flex','shoulder_lift','shoulder_pan'],LIM={shoulder_lift:[-1.1,1.1],elbow_flex:[-.2,1.7],shoulder_pan:[-1.4,1.4]};
+const P=V(0,0,0),A=V(0,0,0),E=V(0,0,0),G=V(0,0,0),W=V(0,0,0),tq=new T.Quaternion();
+function ik(tgtLocal,gain){W.copy(tgtLocal);group.localToWorld(W);W.y+=LG*group.scale.y;
+  for(let it=0;it<3;it++)for(const n of chain){const r=arm.joint[n];r.updateMatrixWorld(true);r.getWorldPosition(P);A.copy(r.userData.axis).applyQuaternion(r.getWorldQuaternion(tq)).normalize();wj.getWorldPosition(E);
+    E.sub(P);G.copy(W).sub(P);E.addScaledVector(A,-E.dot(A));G.addScaledVector(A,-G.dot(A));if(E.lengthSq()<1e-8||G.lengthSq()<1e-8)continue;
+    const ang=Math.atan2(A.dot(E.clone().cross(G)),E.dot(G)),[lo,hi]=LIM[n];arm.set(n,Math.min(hi,Math.max(lo,r.userData.q+ang*gain)))}
+  const want=Math.PI/2-arm.joint.shoulder_lift.userData.q-arm.joint.elbow_flex.userData.q;arm.set('wrist_flex',arm.joint.wrist_flex.userData.q+(want-arm.joint.wrist_flex.userData.q)*.3)}
+const tipLocal=()=>{arm.tip.getWorldPosition(E);return group.worldToLocal(E.clone())};
 
-const ray=new T.Raycaster(),ptr=new T.Vector2(),plane=new T.Plane(),hit=new T.Vector3(),tgt=new T.Vector3(1.2,1,0),want=new T.Vector3();
-let active=false,last=0,grip=0,mx=0,my=0;
+/* knolling layout: every part's place on the mat when the kit is laid out */
+const ctr=V(1.3,2.2,0),rnd=(()=>{let s=3;return()=>((s=s*16807%2147483647)-1)/2147483646})();
+arm.parts.forEach((m,i)=>{const col=i%7,row=Math.floor(i/7);m.userData.knoll=V(-1.2+col*.85,.22,-1.5+row*.95);
+  m.getWorldPosition(_a);group.worldToLocal(_a);const d=_a.clone().sub(ctr);d.normalize().multiplyScalar(.8+rnd()*.6);d.y=Math.abs(d.y)+.3;m.userData.ex=d;
+  let depth=0,o=m.parent;while(o&&o!==arm.root){if(o.userData.axis)depth++;o=o.parent}m.userData.depth=depth});
+let assembleAt=0;const tParts=m=>.3+m.userData.depth*.22+(m.id%5)*.05;
+
+/* pointer: a ring on the mat */
+const ring=new T.Mesh(new T.RingGeometry(.16,.19,40),new T.MeshBasicMaterial({color:0x5b9cff,transparent:true,opacity:0,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.01;group.add(ring);
+const ray=new T.Raycaster(),ptr=new T.Vector2(),plane=new T.Plane(),hit=V(0,0,0);let active=false,last=0,mx=0,my=0,clickAt=-1;
 addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();if(e.clientY>r.bottom||e.clientY<r.top)return;ptr.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);mx=ptr.x;my=ptr.y;active=true;last=performance.now()},{passive:true});
-cv.parentElement.addEventListener('pointerdown',e=>{if(!e.target.closest('a'))grip=1});addEventListener('pointerup',()=>grip=0);
+cv.parentElement.addEventListener('pointerdown',e=>{if(e.target.closest('a,button'))return;clickAt=performance.now();last=clickAt;active=true});
 
-/* caption */
-const hero=cv.parentElement,cap=document.createElement('div');cap.className='tel';hero.appendChild(cap);let capT=0,capOn=false;
-const deg=n=>Math.round(arm.joint[n].userData.q*57.3);
+/* caption + eggs */
+const hero=cv.parentElement,cap=document.createElement('div');cap.className='tel';hero.appendChild(cap);
+let capMsg='',capUntil=0,blinkUntil=0,egg='';
+const say=(html,ms)=>{capMsg=html;capUntil=performance.now()+ms;cap.innerHTML=html};
+let rCount=0,rT=0;addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;if(e.key==='r'||e.key==='R'){const n=performance.now();rCount=n-rT<600?rCount+1:1;rT=n;if(rCount>=2){rCount=0;assembleAt=clk+0.001;fast=true;say('Fast Refresh ✓ 0.6s',5000)}}});
+let fast=false;
 
-let wide=true,baseRY=-.5;
-function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;wide=w/h>1.1;
-  cam.position.set(0,1.8,14);cam.lookAt(0,.4,0);cam.updateProjectionMatrix();
-  const half=Math.tan(cam.fov*Math.PI/360)*14,tx=Math.min(w*.7,w/2+430),wx=(tx/w-.5)*2*half*cam.aspect,sc=Math.min(.76*2*half/4.2,.62*half*cam.aspect/2.6);
-  group.position.set(wx-1.6*sc,.45-2.15*sc,0);group.scale.setScalar(sc)}
-new ResizeObserver(size).observe(cv);size();group.rotation.y=baseRY;
+/* state */
+const st={mode:'idle',phase:0,from:0,carry:false,seat:0,ledPos:SOCK[0].clone(),drop:null,timer:0};
+led.position.copy(SOCK[0]);
+const tgt=V(1.8,.9,.4),want=V(0,0,0);let grip=.5,clk=window.__tt||0;
 
-const clock=new T.Clock();let t=0,vis=1;
-function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);t+=dt;
-  /* fade with the hero; stop drawing once it's gone */
-  const sy=Math.max(0,scrollY),fade=Math.max(0,1-sy/(innerHeight*.8));if(Math.abs(fade-vis)>.001){vis=fade;cv.style.opacity=fade;cap.style.opacity=capOn?fade:0}
+let half=1,vw=1,vh=1;
+function size(){vw=cv.clientWidth;vh=cv.clientHeight;if(!vw||!vh)return;gl.setSize(vw,vh,false);cam.aspect=vw/vh;
+  const tx=Math.min(vw*.66,vw/2+440);cam.setViewOffset(vw,vh,-(tx-vw/2),-vh*.02,vw,vh);cam.updateProjectionMatrix()}
+new ResizeObserver(size).observe(cv);size();group.rotation.y=-.55;
+
+const clock=new T.Clock();let vis=1,pitch=22,qd=new T.Quaternion(),pd=V(0,0,0),pw=V(0,0,0),pinv=new T.Matrix4(),mw=new T.Matrix4(),sc=V(1,1,1),qw=new T.Quaternion(),qBase=new T.Quaternion().setFromEuler(new T.Euler(-Math.PI/2,0,0));
+function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);clk+=dt;const now=performance.now();
+  const sy=Math.max(0,scrollY),fade=Math.max(0,1-sy/(innerHeight*.9));if(Math.abs(fade-vis)>.001){vis=fade;cv.style.opacity=fade;cap.style.opacity=fade}
   if(fade<=0)return;
-  const live=active&&performance.now()-last<3000&&!reduce;
-  group.rotation.y+=((live?baseRY+mx*.18:baseRY+Math.sin(t*.13)*.1)-group.rotation.y)*Math.min(1,dt*2);
-  group.updateMatrixWorld();
-  /* target */
-  if(live){ray.setFromCamera(ptr,cam);group.getWorldPosition(P);plane.setFromNormalAndCoplanarPoint(cam.getWorldDirection(A).negate(),group.localToWorld(P.set(2.4,1.2,0)));
-    if(ray.ray.intersectPlane(plane,hit)){group.worldToLocal(hit);hit.x=Math.min(3.0,Math.max(1.3,hit.x));hit.y=Math.min(2.2,Math.max(.25,hit.y));hit.z=Math.min(1.4,Math.max(-1.4,hit.z));want.copy(hit);group.localToWorld(want)}}
-  else{const e=.5+.5*Math.sin(t*.5);want.set(2.0+.35*Math.sin(t*.21),.3+.9*e,.8*Math.sin(t*.17));group.localToWorld(want)}
-  tgt.lerp(want,1-Math.pow(.02,dt));
-  if(!reduce)ccd(tgt,3,.3);
-  arm.set('wrist_roll',reduce?0:.5*Math.sin(t*.23));
-  const gq=live?(grip?0:1.0):(.15+.85*(.5+.5*Math.sin(t*.5)));arm.set('gripper',arm.joint.gripper.userData.q+(gq-arm.joint.gripper.userData.q)*Math.min(1,dt*6));
-  /* assemble on load, come apart as the page scrolls away */
-  const sk=Math.min(1,sy/(innerHeight*.75));let kMax=0;
-  arm.parts.forEach(m=>{const u=reduce?1:Math.min(1,Math.max(0,(t-m.userData.t0)/1.1)),e=u*u*(3-2*u),k=Math.max(1-e,sk*.8);if(k>kMax)kMax=k;
-    m.position.copy(m.userData.home).addScaledVector(m.userData.ex,k)});
-  const on=kMax<.02;if(on!==capOn){capOn=on;cap.classList.toggle('on',on);cap.style.opacity=on?vis:0}
-  if((capT-=dt)<0&&capOn){capT=.2;cap.textContent=`Pan ${deg('shoulder_pan')}° · Lift ${deg('shoulder_lift')}° · Elbow ${deg('elbow_flex')}° · Gripper ${Math.round(arm.joint.gripper.userData.q/1.1*100)}%`;
-    group.localToWorld(wp.set(1.4,0,1.9));wp.project(cam);cap.style.transform=`translate(${(wp.x*.5+.5)*cv.clientWidth}px,${Math.min((-wp.y*.5+.5)*cv.clientHeight+14,cv.clientHeight-40)}px) translateX(-50%)`}
+  const knoll=reduce?0:Math.min(1,sy/(innerHeight*.6)),kk=knoll*knoll*(3-2*knoll);
+  /* camera: 22° down, easing toward 65° as the kit is laid out */
+  pitch=22+43*kk;const pr=pitch*Math.PI/180,d=12.3,aim=V(1.55,1.35-1.0*kk,.35);
+  cam.position.set(aim.x,aim.y+Math.sin(pr)*d,aim.z+Math.cos(pr)*d);cam.lookAt(aim);
+  const live=active&&now-last<4000&&!reduce&&kk<.05;
+  group.rotation.y+=((-.55+(live?mx*.08:Math.sin(clk*.13)*.06))-group.rotation.y)*Math.min(1,dt*2);group.updateMatrixWorld();
+  /* cursor on the mat */
+  let onMat=false;if(live){ray.setFromCamera(ptr,cam);group.getWorldPosition(P);plane.setFromNormalAndCoplanarPoint(V(0,1,0),P);
+    if(ray.ray.intersectPlane(plane,hit)){group.worldToLocal(hit);const r=Math.hypot(hit.x,hit.z);if(r<3.7&&r>.9&&hit.x>-1){onMat=true;ring.position.set(hit.x,.01,hit.z)}}}
+  ring.material.opacity+=((onMat?.8:0)-ring.material.opacity)*Math.min(1,dt*6);
+  /* click: the lit LED blinks (egg); otherwise dip and grab or release */
+  if(clickAt>0&&now-clickAt<50){ray.setFromCamera(ptr,cam);
+    if(st.seat&&!st.carry&&ray.intersectObject(led,true).length){clickAt=-1;blinkUntil=now+5000;say('digitalWrite(13, HIGH) · <a href="/electronics">learn why →</a>',5000)}
+    else if(onMat){clickAt=-1;if(!st.carry){if(hit.distanceTo(led.position.clone().setY(0))<.45){st.mode='grab';st.timer=0}else{st.mode='dip';st.timer=0}}else{st.mode='release';st.timer=0;st.drop=hit.clone()}}}
+  if(clickAt>0&&now-clickAt>60)clickAt=-1;
+  /* behaviour */
+  let gq=.9,dip=false;
+  if(st.mode==='grab'||st.mode==='dip'||st.mode==='release'){st.timer+=dt;const p=st.mode==='release'?st.drop:(st.mode==='grab'?led.position:hit);
+    want.set(p.x,st.timer<.35?.15+(.35-st.timer)*1.2:.15,p.z);dip=true;
+    if(st.timer>.35){if(st.mode==='grab'){st.carry=true;st.seat=0}if(st.mode==='release'){st.carry=false;const s=SOCK.findIndex(q=>q.distanceTo(V(st.drop.x,.12,st.drop.z))<.35);st.seat=s>=0?1:0;st.ledPos=s>=0?SOCK[s].clone():V(st.drop.x,.02,st.drop.z)}}
+    gq=st.mode==='release'?(st.timer>.35?1:0):(st.timer>.3?0:1);if(st.timer>.7)st.mode=live?'user':'idle',st.phase=0}
+  else if(live){st.mode='user';want.set(ring.position.x,st.carry?.75:.6,ring.position.z);gq=st.carry?0:.9}
+  else{/* idle pick-and-place between the two sockets */
+    if(st.mode!=='idle'){st.mode='idle';st.phase=0;st.timer=0;if(st.carry){st.from=SOCK[0].distanceTo(led.position)<SOCK[1].distanceTo(led.position)?1:0;st.phase=3}else st.from=SOCK[0].distanceTo(led.position)<SOCK[1].distanceTo(led.position)?0:1}
+    st.timer+=dt;const A0=SOCK[st.from],B0=SOCK[1-st.from],ph=st.phase,tt=st.timer;
+    const lp=(p,h)=>want.set(p.x,h,p.z);
+    if(ph===0){lp(A0,.9);if(tt>1.4)st.phase=1,st.timer=0}
+    else if(ph===1){lp(A0,.9-.75*Math.min(1,tt/.6));gq=1;if(tt>.7)st.phase=2,st.timer=0}
+    else if(ph===2){lp(A0,.15);gq=0;if(tt>.35){st.carry=true;st.seat=0;st.phase=3;st.timer=0}}
+    else if(ph===3){const u=Math.min(1,tt/1.6),e=u*u*(3-2*u);want.lerpVectors(A0,B0,e);want.y=.15+.8*Math.sin(Math.PI*e)+.1*e;gq=0;if(tt>1.7)st.phase=4,st.timer=0}
+    else if(ph===4){lp(B0,.25-.1*Math.min(1,tt/.3));gq=0;if(tt>.35){st.carry=false;st.seat=1;st.ledPos=B0.clone();st.phase=5;st.timer=0}}
+    else if(ph===5){lp(B0,.15+.75*Math.min(1,tt/.6));gq=1;if(tt>2.6){st.from=1-st.from;st.phase=0;st.timer=0}}}
+  if(fast)fast=false;
+  tgt.lerp(want,1-Math.pow(dip?.0005:.02,dt));
+  if(!reduce)ik(tgt,.35);
+  arm.set('wrist_roll',reduce?0:.25*Math.sin(clk*.23));
+  grip+=(gq-grip)*Math.min(1,dt*8);arm.set('gripper',grip);
+  /* the LED follows the gripper when carried */
+  if(st.carry){const p=tipLocal();led.position.set(p.x,p.y-.22,p.z)}else led.position.lerp(st.ledPos,1-Math.pow(.001,dt));
+  ledShadow.position.set(led.position.x,.005,led.position.z);
+  const on=st.seat&&!st.carry?(now<blinkUntil?(Math.floor(now/500)%2):1):0;
+  ledMat.emissiveIntensity+=((on?1.6:0)-ledMat.emissiveIntensity)*Math.min(1,dt*(on?6:10));ledLight.intensity=ledMat.emissiveIntensity*.9;ledLight.position.set(led.position.x,.5,led.position.z);
+  /* assemble on load (and on R R), lay out flat on scroll */
+  const tA=clk-assembleAt,spd=assembleAt?2.2:1;
+  arm.parts.forEach(m=>{const u=reduce?1:Math.min(1,Math.max(0,(tA*spd-tParts(m))/1.0)),e=u*u*(3-2*u),k=1-e;
+    m.position.copy(m.userData.home).addScaledVector(m.userData.exL||(m.userData.exL=(()=>{m.parent.updateMatrixWorld(true);pinv.copy(m.parent.matrixWorld).invert();const a=V(0,0,0).applyMatrix4(group.matrixWorld).applyMatrix4(pinv),b=m.userData.ex.clone().applyMatrix4(group.matrixWorld).applyMatrix4(pinv);return b.sub(a)})()),k);
+    m.quaternion.copy(m.userData.q0);
+    if(kk>0){/* knolling: lerp the part's world transform toward its slot on the mat */
+      m.parent.updateMatrixWorld(true);m.updateMatrixWorld(true);m.matrixWorld.decompose(pw,qw,sc);
+      const g=m.geometry.boundingSphere.center.clone().multiply(sc);
+      pd.copy(m.userData.knoll);group.localToWorld(pd);qd.copy(group.quaternion).multiply(qBase);pd.sub(g.applyQuaternion(qd));
+      pw.lerp(pd,kk);qw.slerp(qd,kk);mw.compose(pw,qw,sc);pinv.copy(m.parent.matrixWorld).invert();mw.premultiply(pinv);mw.decompose(m.position,m.quaternion,_b)}});
+  /* caption */
+  if(now>capUntil){const msg=clk<5?'move to aim · click to grab':`Pan ${Math.round(arm.joint.shoulder_pan.userData.q*57.3)}° · Lift ${Math.round(arm.joint.shoulder_lift.userData.q*57.3)}° · Elbow ${Math.round(arm.joint.elbow_flex.userData.q*57.3)}° · Gripper ${Math.round(grip*100)}%`;if(msg!==capMsg){capMsg=msg;cap.textContent=msg}}
+  _a.copy(MC).setZ(MC.z+MD*.38);group.localToWorld(_a);_a.project(cam);cap.style.transform=`translate(${(_a.x*.5+.5)*vw}px,${Math.min((-_a.y*.5+.5)*vh,vh-44)}px) translateX(-50%)`;
+  if(!cap.classList.contains('on')&&clk>1.2)cap.classList.add('on');
   gl.render(scene,cam)}
 frame();
-addEventListener('pageshow',()=>{vis=-1});
 setTimeout(()=>hero.classList.add('ready'),2600);
 })();
