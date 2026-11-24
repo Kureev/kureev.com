@@ -86,6 +86,10 @@ const css=`#ped{display:flex;flex-direction:column;gap:8px;margin:2px 0 12px}
 .card.ctl{transition:opacity .3s}
 .card.ctl.ped-lock{opacity:.4;pointer-events:none}
 .ped-note{margin:-4px 0 10px;font-size:12px;color:#8f9bc4}
-@media(prefers-reduced-motion:reduce){.card.ctl{transition:none}}`;
+@media(prefers-reduced-motion:reduce){.card.ctl{transition:none}}
+.dots button,.dots button:hover{background:linear-gradient(#1d2752,#1d2752) center/100% 4px no-repeat!important;border-radius:0!important}
+.dots button.done{background-image:linear-gradient(#4b5fc8,#4b5fc8)!important}
+.dots button.on,.dots button.on.done{background-image:linear-gradient(90deg,#5b9cff,#8a6bff)!important;background-size:100% 4px!important;filter:drop-shadow(0 0 4px rgba(91,156,255,.6))}
+.dots button:hover:not(.on){background-image:linear-gradient(#33407a,#33407a)!important}`;
 const el=document.createElement('style');el.textContent=css;document.head.appendChild(el);
 })();

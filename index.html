@@ -80,7 +80,7 @@ h2{font:700 clamp(26px,3vw,38px)/1.05 Unbounded,sans-serif;letter-spacing:-.03em
 .note{color:var(--mute);margin:22px 0 0;max-width:52ch}
 .note a{color:var(--ink);text-decoration-color:var(--blue);text-underline-offset:3px}
 footer{padding:40px clamp(20px,4vw,48px) 56px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:15px}
-footer a{color:var(--ink)}footer .links{display:flex;gap:20px;flex-wrap:wrap}
+footer a{color:var(--ink)}footer a.cr{color:var(--mute)}footer .links{display:flex;gap:20px;flex-wrap:wrap}
 @media(prefers-reduced-motion:reduce){.places a{transition:none}}
 @media(max-width:860px){
 .top{top:10px;padding:6px 6px 6px 12px}.top nav a:not(.cta-s){display:none}
@@ -126,7 +126,7 @@ h1.glitch .g::before,h1.glitch .g::after{opacity:.75;mix-blend-mode:screen}
 h1.glitch .g{transform:translateX(var(--s,0))}
 /* sections build themselves as they scroll in */
 @media(prefers-reduced-motion:no-preference){@supports(animation-timeline:view()){
- .hero .copy,#gl{animation:recede linear both;animation-timeline:scroll(root);animation-range:0 80vh}
+ .hero .copy{animation:recede linear both;animation-timeline:scroll(root);animation-range:0 80vh}
  @keyframes recede{to{opacity:.0;transform:translateY(-6vh)}}
 }}
 @media(prefers-reduced-motion:reduce){.hero::before{animation:none}}
@@ -155,7 +155,7 @@ html.js .course.in .levels i{transform:none}
 
 <main>
 <div class="hero">
-  <canvas id="gl" aria-label="A robot arm and its control board, drawn in glowing points"></canvas>
+  <canvas id="gl" aria-label="An SO-101 robot arm that follows your cursor"></canvas>
   <div class="copy">
     
     <h1 id="name"><span class="g" data-text="Alexey">Alexey</span><span class="g" data-text="Kureev">Kureev</span></h1>
@@ -228,228 +228,14 @@ html.js .course.in .levels i{transform:none}
 </section>
 </main>
 
-<footer><span>Alexey Kureev, Barcelona</span><span class="links"><a href="https://github.com/Kureev">GitHub</a><a href="https://x.com/kureevalexey">X</a><a href="https://www.linkedin.com/in/kureev/">LinkedIn</a><a href="https://medium.com/@kureevalexey">Medium</a><a href="https://habr.com/en/users/xamd/posts">Habr</a></span></footer>
+<footer><span>Alexey Kureev, Barcelona · <a class="cr" href="https://github.com/TheRobotStudio/SO-ARM100">SO-101 model</a> by TheRobotStudio, Apache-2.0</span><span class="links"><a href="https://github.com/Kureev">GitHub</a><a href="https://x.com/kureevalexey">X</a><a href="https://www.linkedin.com/in/kureev/">LinkedIn</a><a href="https://medium.com/@kureevalexey">Medium</a><a href="https://habr.com/en/users/xamd/posts">Habr</a></span></footer>
 
 <script>
 (()=>{
 /* the 3D arm is a desktop treat: phones and data-saver never download three.js */
 const big=matchMedia('(min-width:861px) and (hover:hover)').matches,save=navigator.connection&&navigator.connection.saveData;
 if(!big||save){document.documentElement.classList.add('no3d');return}
-const go=()=>{
-if(!window.THREE)return;
-const cv=document.getElementById('gl'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let gl;try{gl=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){return}
-const DPR=Math.min(devicePixelRatio,2);gl.setPixelRatio(DPR);
-const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,0.1,100);
-const V=(x,y,z)=>new THREE.Vector3(x,y,z);
-/* soft round points with the sci-fi pass: scan band, click ripple, rare glitch, cursor light */
-const FX=`uniform float uLeft;uniform float uSize,uScale,uTime,uScan,uGlitch,uSeed,uRipAge,uDim,uLit;uniform vec2 uHov;uniform vec2 uRip;attribute float aSize;varying vec3 vC;
-float h(float n){return fract(sin(n)*43758.5453);}
-void main(){vec3 p=position;vec3 c=color;float s=aSize;
-#ifdef FXON
- float band=floor((p.y+3.)*10.);float g=step(0.6,h(band+uSeed))*uGlitch;p.x+=(h(band*1.7+uSeed)-.5)*.6*g;
- c=mix(c,h(band+3.1+uSeed)>.5?vec3(.2,1.,1.)*1.3:vec3(1.,.25,.9)*1.3,g*.7);
- float sc=exp(-pow((p.y-uScan)*9.,2.));c+=vec3(.35,.55,1.)*sc*.7;s*=1.+sc*.6;
- float d=length(p.xy-uRip),w=d-uRipAge*3.;float r=exp(-w*w*30.)*exp(-uRipAge*1.4);p.z+=r*.4;c+=vec3(.6,.7,1.)*r*1.3;s*=1.+r;
- float hv=exp(-dot(p.xy-uHov,p.xy-uHov)*1.2)*uLit;
- c*=uDim+hv*.6+sc*.3+g*.35+r*.5;
-#endif
- vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
-#ifndef FXON
- c*=mix(1.,smoothstep(.02,.16,gl_Position.x/gl_Position.w),uLeft);
-#endif
- vC=min(c,vec3(.6,.68,.9));gl_PointSize=uSize*s*uScale/-mv.z;}`;
-const mat=(size,fx)=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.OneFactor,blendDst:THREE.OneFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor,vertexColors:true,defines:fx?{FXON:1}:{},
-  uniforms:{uGain:{value:fx?.55:1},uLeft:{value:1},uSize:{value:size},uScale:{value:1},uTime:{value:0},uScan:{value:-9},uGlitch:{value:0},uSeed:{value:0},uRip:{value:new THREE.Vector2(99,99)},uRipAge:{value:9},uDim:{value:0.5},uLit:{value:0},uHov:{value:new THREE.Vector2(99,99)}},
-  vertexShader:FX,
-  fragmentShader:`uniform float uGain;varying vec3 vC;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.0,d);gl_FragColor=vec4(vC*a*uGain,1.);}`});
-
-/* ---------- the course's robot arm, sampled as points ----------
-   STS3215 bus servos on printed brackets, a gripper, the daisy-chained servo bus,
-   and the board the course builds: power input, bulk caps, buck regulator, ESP32-S3, bus header. */
-let seed=7;const DEN=.5;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
-const Lx=[],Ly=[],Lz=[],Fr=[],Cr=[],Cg=[],Cb=[],Sz=[],Path=[],Par=[];
-const C={servo:[.36,.55,1],horn:[.75,.82,1],plate:[.55,.45,1],board:[.16,.42,.62],edge:[.3,.62,.85],cu:[.62,.38,.18],chip:[.55,.62,.8],cap:[.35,.5,.9],red:[1,.25,.2],grn:[.3,1,.5]};
-let F=0;const T=new THREE.Matrix4(),tv=new THREE.Vector3();
-function pt(x,y,z,c,k,sz,path,par){tv.set(x,y,z).applyMatrix4(T);Lx.push(tv.x);Ly.push(tv.y);Lz.push(tv.z);Fr.push(F);Pt.push(path!=null?0:PART);Cr.push(c[0]*k);Cg.push(c[1]*k);Cb.push(c[2]*k);Sz.push(sz||1);Path.push(path==null?-1:path);Par.push(par||0)}
-let PART=0;const Pt=[];
-function at(x,y,z,rx,ry,rz){PART++;T.compose(V(x,y,z),new THREE.Quaternion().setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0)),V(1,1,1))}
-/* box: sparse faces + dense bright edges */
-function box(sx,sy,sz,c,dens,holes){dens*=DEN;const A=[[sy,sz],[sx,sz],[sx,sy]],n=Math.round(dens*2*(sx*sy+sy*sz+sx*sz));
-  for(let i=0;i<n;i++){const f=Math.floor(rnd()*6),ax=f>>1,sg=f&1?1:-1;let p=[0,0,0];p[ax]=sg*[sx,sy,sz][ax]/2;const o=[0,1,2].filter(a=>a!==ax);
-    p[o[0]]=(rnd()-.5)*[sx,sy,sz][o[0]];p[o[1]]=(rnd()-.5)*[sx,sy,sz][o[1]];
-    if(holes&&holes.some(([hx,hy,hr])=>(p[0]-hx)**2+(p[1]-hy)**2<hr*hr))continue;pt(p[0],p[1],p[2],c,.32,.8)}
-  const E=Math.round(dens*1.1*(sx+sy+sz)*4/ (sx+sy+sz))*(sx+sy+sz);
-  for(let i=0;i<E*1.6;i++){const ax=Math.floor(rnd()*3),u=rnd()-.5,s1=rnd()<.5?-.5:.5,s2=rnd()<.5?-.5:.5,d=[sx,sy,sz];let p=[0,0,0];p[ax]=u*d[ax];const o=[0,1,2].filter(a=>a!==ax);p[o[0]]=s1*d[o[0]];p[o[1]]=s2*d[o[1]];pt(p[0],p[1],p[2],c,.8,1)}
-  if(holes)holes.forEach(([hx,hy,hr])=>{for(let i=0;i<hr*90;i++){const a=rnd()*6.283;[-.5,.5].forEach(s=>pt(hx+Math.cos(a)*hr,hy+Math.sin(a)*hr,s*sz,c,1.1,.85))}})}
-/* cylinder along local y */
-function cyl(r,h,c,dens,cap){dens*=DEN;const n=Math.round(dens*6.283*r*h)+20;for(let i=0;i<n;i++){const a=rnd()*6.283;pt(Math.cos(a)*r,(rnd()-.5)*h,Math.sin(a)*r,c,.6,.8)}
-  for(let i=0;i<r*140+12;i++){const a=rnd()*6.283;[-.5,.5].forEach(s=>pt(Math.cos(a)*r,s*h,Math.sin(a)*r,c,1.25,1))}
-  if(cap)for(let i=0;i<dens*3.14*r*r;i++){const a=rnd()*6.283,q=Math.sqrt(rnd())*r;pt(Math.cos(a)*q,h/2,Math.sin(a)*q,c,.7,.8)}}
-function ring(r,c,k,n){for(let i=0;i<n;i++){const a=i/n*6.283;pt(Math.cos(a)*r,0,Math.sin(a)*r,c,k,.9)}}
-/* STS3215-style servo: body, mounting ears, horn on the output shaft (+z face), status LED */
-function servo(){box(.62,.86,.48,C.servo,260);
-  const M0=T.clone();T.multiply(new THREE.Matrix4().makeTranslation(0,-.47,0));box(.74,.06,.48,C.servo,200);T.copy(M0);
-  T.multiply(new THREE.Matrix4().makeTranslation(0,.22,.27).multiply(new THREE.Matrix4().makeRotationX(Math.PI/2)));
-  cyl(.2,.05,C.horn,500,true);[0,1,2,3].forEach(i=>{const a=i*Math.PI/2+.4;pt(Math.cos(a)*.13,.03,Math.sin(a)*.13,C.horn,2.2,1.3)});
-  T.copy(M0);pt(.2,-.33,.245,C.red,2.4,1.4);pt(-.2,-.38,.245,C.servo,1.6,1)}
-/* bracket plate pair (link) with lightening holes */
-function link(len,w){const holes=[];for(let y=.45;y<len-.35;y+=.42)holes.push([0,y-len/2,.1]);
-  const M0=T.clone();[-.31,.31].forEach(z=>{T.copy(M0).multiply(new THREE.Matrix4().makeTranslation(0,len/2,z));box(w,len,.05,C.plate,220,holes)});T.copy(M0)}
-
-const root=new THREE.Object3D(),nodes=[root];
-const node=(par,x,y,z)=>{const o=new THREE.Object3D();o.position.set(x,y,z);par.add(o);nodes.push(o);return o};
-const L1=2.05,L2=1.95,BX=-1.35;
-const nYaw=node(root,BX,.92,0),nSh=node(nYaw,0,.55,0),nEl=node(nSh,0,L1,0),nWr=node(nEl,0,L2,0),nRo=node(nWr,0,.62,0),nJaw=node(nRo,.17,.42,0);
-/* frame 0: board + base */
-F=0;
-at(.75,-.04,.35);box(3.5,.08,2.3,C.board,120);
-[[-0.95,-.8],[2.45,-.8],[-0.95,1.5],[2.45,1.5]].forEach(([x,z])=>{at(x,0,z);ring(.07,C.edge,1.3,22)});
-at(1.35,.06,.05);box(.95,.06,.66,C.chip,700);at(1.25,.1,.05);box(.62,.02,.52,C.chip,600);
-for(let i=0;i<24;i++){const u=i/23;at(1.72+(i%2)*.06,.1,-.22+u*.54);pt(0,0,0,C.chip,1.6,.9)}
-at(1.05,.1,-.08);pt(0,0,0,C.grn,3,1.6);
-at(-.2,.1,1.32);box(.42,.2,.26,C.chip,900);
-[[.35,.85],[.68,.85]].forEach(([x,z])=>{at(x,.2,z);cyl(.13,.36,C.cap,900,true)});
-at(.75,.1,.35);box(.3,.18,.3,C.chip,900);at(.38,.06,.4);box(.2,.06,.16,C.chip,900);
-[.0,.12,.24].forEach(dz=>{at(2.25,.12,.95+dz);box(.06,.22,.06,C.horn,1400)});
-at(2.4,.06,.05);box(.16,.1,.3,C.horn,1100);
-/* copper traces: power in -> caps -> buck -> ESP32 -> bus header; 12 V straight to the bus */
-const traces=[[[-0.2,1.18],[.35,1.0],[.35,.85]],[[.35,.85],[.68,.85],[.75,.5]],[[.75,.2],[.75,.05],[.88,.05]],[[1.82,.1],[2.05,.6],[2.25,.95]],[[-0.05,1.32],[1.6,1.42],[2.25,1.19]]];
-traces.forEach((pl,pi)=>{let acc=0;for(let k=0;k<pl.length-1;k++){const [ax,az]=pl[k],[bx,bz]=pl[k+1],len=Math.hypot(bx-ax,bz-az),n=Math.round(len*120);
-  for(let i=0;i<n;i++){const u=i/n;at(ax+(bx-ax)*u,.005,az+(bz-az)*u);pt(0,0,0,C.cu,1.1,.85,pi,acc+u*len)}acc+=len}});
-/* base: clamp plate + yaw servo standing up */
-at(BX,.06,0);box(1.1,.1,.9,C.plate,200,null);at(BX,.5,0);box(.86,.62,.5,C.servo,260);
-at(BX,.86,0,Math.PI/2,0,0);ring(.22,C.horn,1.6,70);
-/* frame 1: turntable + shoulder bracket + shoulder servo */
-F=1;at(0,0,0);cyl(.42,.06,C.plate,300,true);at(0,.28,0);box(.66,.5,.62,C.plate,140);at(0,.55,0,0,0,0);servo();
-/* frame 2: upper arm */
-F=2;at(0,.3,0);link(L1-.3,.42);at(0,L1,0);servo();
-/* frame 3: forearm */
-F=3;at(0,.3,0);link(L2-.3,.36);at(0,L2,0,0,0,0);servo();
-/* frame 4: wrist roll servo (shaft along y) */
-F=4;at(0,.28,0,Math.PI/2,0,0);box(.5,.48,.56,C.servo,260);at(0,.52,0);ring(.2,C.horn,1.8,60);pt(.18,.2,.29,C.red,2.4,1.4);
-/* frame 5: gripper servo + fixed jaw */
-F=5;at(-.05,.22,0);box(.62,.4,.44,C.servo,260);at(-.2,.82,0);box(.1,.9,.32,C.plate,260);at(-.13,1.28,0);box(.06,.12,.3,C.horn,800);
-/* frame 6: moving jaw */
-F=6;at(0,.42,0);box(.1,.86,.3,C.plate,260);at(-.05,.86,0);box(.06,.12,.28,C.horn,800);
-const NF=nodes.length;
-/* servo bus: one daisy-chained cable, header -> each servo in turn */
-const busAnch=[[0,V(2.25,.3,1.07)],[0,V(BX+.3,.25,.28)],[1,V(.2,.25,-.3)],[2,V(.2,0,-.3)],[3,V(.2,0,-.3)],[4,V(.2,.1,-.3)],[5,V(.2,.15,-.25)]];
-const CAB0=Lx.length,CABPER=150;
-for(let k=0;k<busAnch.length-1;k++)for(let i=0;i<CABPER;i++){F=0;T.identity();pt(0,0,0,C.cu,1.15,.8,9,k+i/CABPER)}
-const N=Lx.length;
-/* buffers */
-const loc=new Float32Array(N*3),home=new Float32Array(N*3),pos=new Float32Array(N*3),vel=new Float32Array(N*3),col=new Float32Array(N*3),base=new Float32Array(N*3),sz=new Float32Array(N),fr=new Uint8Array(N),path=new Int8Array(N),par=new Float32Array(N);
-const NP=PART+1,prt=new Uint16Array(N),EX=new Float32Array(NP*3),KP=new Float32Array(NP).fill(1),T0=new Float32Array(NP);
-for(let i=0;i<N;i++){prt[i]=Pt[i];loc.set([Lx[i],Ly[i],Lz[i]],i*3);base.set([Cr[i],Cg[i],Cb[i]],i*3);sz[i]=Sz[i];fr[i]=Fr[i];path[i]=Path[i];par[i]=Par[i]}
-col.set(base);
-const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
-const pm=mat(0.045,true),group=new THREE.Group();group.add(new THREE.Points(geo,pm));scene.add(group);
-
-/* pose: a slow pick-and-place loop above the board */
-const Q=[-.3,-.35,-1.95,-.78,0,-.2];let ctrl=0,tgtR=2,tgtH=1,grip=0;
-function ik(r,h){const sx=0,sy=1.47,wx=r,wy=h+1.92;let dx=wx-sx,dy=wy-sy,d=Math.hypot(dx,dy);const dm=L1+L2-.02,dn=Math.abs(L1-L2)+.3;if(d>dm){dx*=dm/d;dy*=dm/d;d=dm}if(d<dn){dx*=dn/d;dy*=dn/d;d=dn}
-  const ph=Math.atan2(dx,dy),al=Math.acos((L1*L1+d*d-L2*L2)/(2*L1*d)),be=Math.acos((L1*L1+L2*L2-d*d)/(2*L1*L2)),t1=ph-al,t2=t1+Math.PI-be;return[-t1,-(Math.PI-be),-(Math.PI-t2)]}
-function pose(t,dt){const s=reduce?0:1,e=s*(.5+.5*Math.sin(t*.55)),w=s*Math.sin(t*.19);
-  let q=[-.3+.38*w,-.35+.06*e,-1.95+.42*e,-.78-.42*e,.5*w,-.04-.32*e];
-  if(ctrl>0){const [a,b,c]=ik(tgtR,tgtH);const qc=[-.3,a,b,c,0,grip?-.02:-.34];q=q.map((v,i)=>v+(qc[i]-v)*ctrl)}
-  const k=Math.min(1,(dt||1)*5);for(let i=0;i<6;i++)Q[i]+=(q[i]-Q[i])*k;
-  nYaw.rotation.y=Q[0];nSh.rotation.z=Q[1];nEl.rotation.z=Q[2];nWr.rotation.z=Q[3];nRo.rotation.y=Q[4];nJaw.rotation.z=Q[5];
-  root.updateMatrixWorld(true)}
-const E=new Float32Array(NF*16),wp=new THREE.Vector3(),bA=V(0,0,0),bB=V(0,0,0),bM=V(0,0,0);
-function fk(t,dt){pose(t,dt);for(let f=0;f<NF;f++)E.set(nodes[f].matrixWorld.elements,f*16);
-  for(let i=0;i<CAB0;i++){const j=i*3,o=fr[i]*16,x=loc[j],y=loc[j+1],z=loc[j+2];
-    const p=prt[i]*3,kk=KP[prt[i]];home[j]=E[o]*x+E[o+4]*y+E[o+8]*z+E[o+12]+EX[p]*kk;home[j+1]=E[o+1]*x+E[o+5]*y+E[o+9]*z+E[o+13]+EX[p+1]*kk;home[j+2]=E[o+2]*x+E[o+6]*y+E[o+10]*z+E[o+14]+EX[p+2]*kk}
-  const W=busAnch.map(([f,p])=>p.clone().applyMatrix4(nodes[f].matrixWorld));
-  for(let i=CAB0;i<N;i++){const k=Math.floor(par[i]),u=par[i]-k,a=W[k],b=W[k+1];bM.addVectors(a,b).multiplyScalar(.5);bM.y-=.12+a.distanceTo(b)*.12;bM.z-=.12;
-    const m=1-u,j=i*3;home[j]=m*m*a.x+2*m*u*bM.x+u*u*b.x;home[j+1]=m*m*a.y+2*m*u*bM.y+u*u*b.y;home[j+2]=m*m*a.z+2*m*u*bM.z+u*u*b.z}}
-/* exploded view: every part has its own direction out from the arm's centre; the board and its copper stay put */
-KP.fill(0);fk(0,1);{const C=new Float32Array(NP*4);for(let i=0;i<CAB0;i++){const p=prt[i]*4,j=i*3;C[p]+=home[j];C[p+1]+=home[j+1];C[p+2]+=home[j+2];C[p+3]++}
-  let big=0;for(let p=1;p<NP;p++)if(C[p*4+3]>C[big*4+3]&&fr[0]===0)big=p;
-  for(let p=1;p<NP;p++){const n=C[p*4+3];if(!n)continue;const x=C[p*4]/n,y=C[p*4+1]/n,z=C[p*4+2]/n;let dx=x-.2,dy=y-1.5,dz=z-.2;const l=Math.hypot(dx,dy,dz)||1,m=.5+rnd()*.5;
-    EX[p*3]=dx/l*m;EX[p*3+1]=Math.min(dy/l*m+.2+rnd()*.3,.9,Math.max(0,(4.3-y)*.45));EX[p*3+2]=dz/l*m+(rnd()-.5)*.4;
-    let f=0;for(let i=0;i<CAB0;i++)if(prt[i]===p){f=fr[i];break}T0[p]=.5+f*.32+rnd()*.25}
-  EX[big*3]=EX[big*3+1]=EX[big*3+2]=0;T0[big]=0}
-KP.fill(reduce?0:1);fk(0,1);pos.set(home);
-const tip=new THREE.Vector3();
-
-/* charges: inverse-square pull toward the gripper (or your cursor), swirl, damping; clicks throw them out */
-const M=reduce?0:(innerWidth<860?50:85),ap=new Float32Array(M*3),av=new Float32Array(M*3),ac=new Float32Array(M*3),as=new Float32Array(M);
-for(let i=0;i<M;i++){const r=1.2+Math.random()*3.2,a=Math.random()*6.283;ap.set([2+Math.cos(a)*r,(Math.random()-0.5)*4,Math.sin(a)*r],i*3);
-  const w=Math.random()<0.07,t=Math.random();ac.set((w?[1,0.72,0.45]:[0.36+0.3*t,0.58-0.1*t,1]).map(v=>v*0.7),i*3);as[i]=0.5+Math.random()*0.7}
-const ag=new THREE.BufferGeometry();ag.setAttribute('position',new THREE.BufferAttribute(ap,3));ag.setAttribute('color',new THREE.BufferAttribute(ac,3));ag.setAttribute('aSize',new THREE.BufferAttribute(as,1));
-const am=mat(0.042,false);scene.add(new THREE.Points(ag,am));
-const attr=new THREE.Vector3(),tmp=new THREE.Vector3();
-/* pointer */
-const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(9,9),plane=new THREE.Plane(),hit=new THREE.Vector3(),gp=new THREE.Vector3(),nrm=new THREE.Vector3();
-let active=false,last=0,burst=0,mx=0,my=0;
-addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();if(e.clientY>r.bottom)return;ptr.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);mx=ptr.x;my=ptr.y;active=true;last=performance.now()},{passive:true});
-let ripAge=9,ripX=99,ripY=99,glitchT=3+Math.random()*3,glitchLeft=0,scanT=0;
-cv.parentElement.addEventListener('pointerdown',e=>{if(!e.target.closest('a')){burst=1;grip=1}});addEventListener('pointerup',()=>grip=0);
-let wide=true,baseRY=0;
-function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;wide=w/h>1.1;
-  cam.position.set(0,.4,wide?13:15);cam.lookAt(0,.2,0);
-  const half=Math.tan(cam.fov*Math.PI/360)*13;
-  if(wide){const tx=Math.min(w*.71,w/2+420),wx=(tx/w-.5)*2*half*cam.aspect,sc=1.12*Math.min(.72,.44*2*half/4.4,.7*half*cam.aspect/4.6);
-    group.position.set(wx-.4*sc,.2-1.95*sc,0);group.scale.setScalar(sc)}else{group.position.set(-.35,1.05,0);group.scale.setScalar(.42)}
-  baseRY=wide?(window.__ry??-.55):-.8;
-  cam.updateProjectionMatrix();const s=h*DPR/(2*Math.tan(cam.fov*Math.PI/360));pm.uniforms.uScale.value=s*group.scale.x;am.uniforms.uScale.value=s;pm.uniforms.uDim.value=wide?.55:.4}
-new ResizeObserver(size).observe(cv);size();
-group.rotation.set(.26,-.55,0);
-/* telemetry: one quiet live caption under the board */
-const hero=cv.parentElement,cap=document.createElement('div');cap.className='tel';hero.appendChild(cap);
-const tp=new THREE.Vector3();let capT=0;
-let kMaxG=1;const corners=[[-0.95,-.8],[2.45,-.8],[-0.95,1.5],[2.45,1.5]];let capOn=false;
-function telemetry(dt){let mx=0,my=-1e9;const W=cv.clientWidth,H=cv.clientHeight;
-  corners.forEach(([x,z])=>{tp.set(x,0,z).applyMatrix4(root.matrixWorld);group.localToWorld(tp);tp.project(cam);const sx=(tp.x*.5+.5)*W,sy=(-tp.y*.5+.5)*H;mx+=sx/4;if(sy>my)my=sy});
-  cap.style.transform=`translate(${mx}px,${my+28}px) translateX(-50%)`;
-  const on=kMaxG<.02&&scrollY<40;if(on!==capOn){capOn=on;cap.classList.toggle('on',on)}
-  if((capT-=dt)<0){capT=.2;cap.textContent=`Shoulder ${Math.round(-Q[1]*57.3)}° · Gripper ${Math.max(0,Math.round(-Q[5]/.36*100))}% · 12 V`}}
-const clock=new THREE.Clock();let tt=window.__tt||0;
-function frame(){const dt=Math.min(clock.getDelta(),0.033);tt+=dt;const t=tt;
-  const live=active&&performance.now()-last<3000;
-  group.rotation.y+=((live?baseRY+mx*0.25:baseRY+Math.sin(t*0.15)*0.12)-group.rotation.y)*Math.min(1,dt*2);
-  group.rotation.x+=((live?.26-my*0.08:.26)-group.rotation.x)*Math.min(1,dt*2);
-  group.updateMatrixWorld();
-  let cx=99,cy=99;
-  if(live&&!reduce){ray.setFromCamera(ptr,cam);group.getWorldPosition(gp);nrm.set(0,0,1).applyQuaternion(group.quaternion);plane.setFromNormalAndCoplanarPoint(nrm,gp);
-    if(ray.ray.intersectPlane(plane,hit)){group.worldToLocal(hit);cx=hit.x;cy=hit.y}}
-  /* the gripper follows your cursor; idle for 3 s and it goes back to its own loop */
-  ctrl+=((cx<90?1:0)-ctrl)*Math.min(1,dt*2.5);if(cx<90){tgtR+=(Math.min(3.5,Math.max(.9,cx-BX))-tgtR)*Math.min(1,dt*6);tgtH+=(Math.min(2.4,Math.max(.25,cy))-tgtH)*Math.min(1,dt*6)}
-  /* assemble on load, drift apart again as the page scrolls over the hero */
-  const sk=Math.min(1,Math.max(0,scrollY/(innerHeight*.75)));let kAvg=0,kMax=0;
-  for(let p=1;p<NP;p++){const u=Math.min(1,Math.max(0,(t-T0[p])/1.1)),e=u*u*(3-2*u);KP[p]=reduce?0:Math.max(1-e,sk*.85);kAvg+=KP[p];if(KP[p]>kMax)kMax=KP[p]}kAvg/=NP-1;kMaxG=kMax;
-  fk(t,dt);
-  const K=reduce?0:22,D=Math.pow(0.003,dt),R=0.8,R2=R*R,Fp=0,B=burst?6:0;
-  for(let i=0;i<N;i++){const j=i*3;let px=pos[j],py=pos[j+1],pz=pos[j+2];
-    if(reduce){pos[j]=home[j];pos[j+1]=home[j+1];pos[j+2]=home[j+2];continue}
-    let vx=vel[j]+(home[j]-px)*K*dt,vy=vel[j+1]+(home[j+1]-py)*K*dt,vz=vel[j+2]+(home[j+2]-pz)*K*dt;
-    const dx=px-cx,dy=py-cy,d2=dx*dx+dy*dy;
-    if(d2<R2*(B?9:1)){const d=Math.sqrt(d2)+1e-4,f=B?B/(0.3+d):Fp*(1-d/R)*(1-d/R);vx+=dx/d*f*(B?1:dt);vy+=dy/d*f*(B?1:dt);vz+=(B?2.5:8)*f*(B?0.3:dt)}
-    vx*=D;vy*=D;vz*=D;vel[j]=vx;vel[j+1]=vy;vel[j+2]=vz;pos[j]=px+vx*dt;pos[j+1]=py+vy*dt;pos[j+2]=pz+vz*dt}
-  geo.attributes.position.needsUpdate=true;
-  /* current: pulses run along the copper and up the servo bus */
-  if(!reduce){for(let i=0;i<N;i++){const p=path[i];if(p<0)continue;const j=i*3,f=p===9?(par[i]*.9-t*.55):(par[i]*1.3-t*.8+p*.37),q=Math.pow(f-Math.floor(f),14)*1.6;
-    const fade=p===9?Math.pow(Math.max(0,1-kMax*2.5),3):1;col[j]=(base[j]+q*1.)*fade;col[j+1]=(base[j+1]+q*.72)*fade;col[j+2]=(base[j+2]+q*.45)*fade}geo.attributes.color.needsUpdate=true}
-  if(burst&&cx<90){ripX=cx;ripY=cy;ripAge=0}
-  if(!reduce){const u=pm.uniforms;scanT+=dt;const per=6.5;u.uScan.value=scanT%per<2?6.5-(scanT%per)/2*7.5:-9;
-    ripAge+=dt;u.uRip.value.set(ripX,ripY);u.uRipAge.value=ripAge;u.uHov.value.set(cx,cy);u.uLit.value+=((cx<90?1:0)-u.uLit.value)*Math.min(1,dt*4);
-    glitchT-=dt;if(false&&glitchT<0){glitchLeft=0.14+Math.random()*0.1;glitchT=5+Math.random()*5;u.uSeed.value=Math.random()*100}
-    if(glitchLeft>0){glitchLeft-=dt;u.uGlitch.value=1;if(Math.random()<0.3)u.uSeed.value=Math.random()*100}else u.uGlitch.value=0}
-  /* charges orbit the gripper */
-  if(M){tip.set(.1,1.2,0).applyMatrix4(nRo.matrixWorld);
-    if(live&&!reduce&&cx<90){tmp.set(cx,cy,0);group.localToWorld(tmp)}else{tmp.copy(tip);group.localToWorld(tmp)}
-    attr.lerp(tmp,1-Math.pow(live?0.01:0.1,dt));
-    const G=live?7:4,sw=2.4,dmp=Math.pow(0.4,dt),kick=burst?8:0;
-    for(let i=0;i<M;i++){const j=i*3;const dx=attr.x-ap[j],dy=attr.y-ap[j+1],dz=attr.z-ap[j+2];const r2=dx*dx+dy*dy+dz*dz+1.6,r=Math.sqrt(r2),inv=G/(r2*r);
-      let vx=av[j]+(dx*inv-dz/r*sw/(1+r*0.3))*dt,vy=av[j+1]+dy*inv*dt,vz=av[j+2]+(dz*inv+dx/r*sw/(1+r*0.3))*dt;
-      if(kick){const f=kick*(0.5+Math.random())/(0.5+r);vx-=dx/r*f;vy-=dy/r*f;vz-=dz/r*f}
-      av[j]=vx*dmp;av[j+1]=vy*dmp;av[j+2]=vz*dmp;ap[j]+=av[j]*dt;ap[j+1]+=av[j+1]*dt;ap[j+2]+=av[j+2]*dt}
-    ag.attributes.position.needsUpdate=true}
-  burst=0;telemetry(dt);
-  gl.render(scene,cam);requestAnimationFrame(frame)}
-frame();
-};
+const go=()=>{const s2=document.createElement('script');s2.src='/so101/so101.js';s2.onload=()=>{const s3=document.createElement('script');s3.src='/scene.js';document.head.appendChild(s3)};document.head.appendChild(s2)};
 const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';s.async=true;s.onload=go;document.head.appendChild(s);
 })();
 </script>
