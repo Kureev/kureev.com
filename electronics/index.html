@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm. Learn by breaking things on a virtual bench.">
+<meta property="og:title" content="Electronics for a robot arm">
+<meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Quest: electronics for a robot arm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning quest: a workbench at night where your own arm comes alive level by level
+   IDEA the bench itself is the map: a ghost circuit board fills in section by section, the arm beside it wakes up
+   PICTURE live 3D bench: arm, board with 8 sections, multimeter, cable from servo bus to the arm
+   COLOUR night bench #0b110e, solder-mask green, copper, servo blue, power-LED green, locked parts as dashed ghosts
+   TYPE Manrope 800 + Manrope
+   LAYOUT laptop: 3D bench left, quest column 410px right (progress, levels, inventory); phone: bench on top */
+:root{color-scheme:dark;--bg:#0b110e;--panel:#111a16;--card:#16211c;--line:#25352d;--ink:#e8f1ec;--mute:#9db1a6;--cu:#e39a52;--ok:#5fd38d;--warn:#ffc14d}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;overflow:hidden}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(11,17,14,.82);border:1px dashed #3a4d43;white-space:nowrap;color:var(--mute)}
+.lb.done{border:1px solid #2c5a3d;color:#9ff0c0}
+.lb.open{border:1px solid #5a4a1f;color:var(--warn)}
+.tools{position:absolute;left:16px;top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--mute);background:rgba(11,17,14,.7);padding:4px 10px;border-radius:8px}
+.info{position:absolute;right:16px;bottom:16px;width:min(320px,calc(100% - 32px));background:rgba(22,33,28,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.info b{display:block;font-size:15px;margin:0 28px 4px 0}.info p{margin:0 0 8px;color:#cfdcd5}
+.x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer}
+.panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
+h1{font:800 32px/1.05 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
+h2{font:800 19px/1.2 Manrope,sans-serif;margin:22px 0 10px}
+.sub{margin:0 0 16px;color:var(--mute);font-size:15px}
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.bar{flex:1;height:10px;border-radius:99px;background:#1d2a24;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.prog b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.lv{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px}
+.lv .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;border:2px solid var(--line);color:var(--mute)}
+.lv.done .n{background:var(--ok);border-color:var(--ok);color:#0b110e}
+.lv.open .n{border-color:var(--warn);color:var(--warn)}
+.lv .t{font-weight:700;line-height:1.25}.lv .g{font-size:13px;color:var(--mute);line-height:1.35}
+.lv.locked{opacity:.55}
+a.go,button{font:600 14px Manrope,sans-serif;color:#0b110e;background:var(--ink);border:1px solid var(--ink);border-radius:10px;min-height:40px;padding:0 12px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;cursor:pointer}
+a.go.ghost,button.ghost{background:none;color:var(--ink);border-color:var(--line)}
+.st{font-size:12px;color:var(--mute);white-space:nowrap}
+a:focus-visible,button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+.inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}
+.card b{display:block;font-size:14px}.card span{display:block;font-size:13px;color:var(--mute);line-height:1.35;margin-top:2px}
+.card.lock{border-style:dashed;opacity:.5}
+.foot{margin-top:18px;font-size:13px;color:var(--mute)}
+.foot button{min-height:36px;font-size:13px}
+.err{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
+@media(max-width:900px){html,body{height:auto}.app{grid-template-columns:minmax(0,1fr);height:auto}.stage{height:58svh;min-height:340px}.panel{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}.hint{display:none}.lb{font-size:11px;padding:2px 5px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="stage" id="stage">
+    <canvas id="gl" aria-label="3D bench: the arm and the board"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="tools"><span class="hint">Drag to rotate · click a board section to open a level</span></div>
+    <aside class="info" id="info" hidden><button class="x" id="infoX" aria-label="Close">×</button><b id="infoT"></b><p id="infoP"></p><a class="go" id="infoGo" href="#">Open</a></aside>
+  </section>
+  <main class="panel">
+    <h1>Electronics for a robot arm</h1>
+    <p class="sub">A quest from zero: from Ohm’s law to a board that powers and drives a robot arm on STS3215 servos. Each level builds out the board on the bench, and the arm comes alive.</p>
+    <div class="prog"><div class="bar"><i id="barI"></i></div><b id="progT"></b></div>
+    <h2>Levels</h2>
+    <div id="levels"></div>
+    <h2>Inventory: what you understand so far</h2>
+    <div class="inv" id="inv"></div>
+    <p class="foot">Progress is saved in this browser. <button class="ghost" id="reset">Reset progress</button></p>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const LEVELS=[
+ {t:'The lab',g:'Current, voltage, resistance. Why the LED burnt.',href:'/electronics/lesson0',sec:null},
+ {t:'Power input',g:'The board survives a dropped screwdriver and swapped wires.',href:'/electronics/lesson1',sec:0},
+ {t:'Capacitor',g:'Servos yank current, but the supply doesn’t sag.',sec:1},
+ {t:'Inductor',g:'The inertia of current: you need it to understand a switching converter.',sec:2},
+ {t:'Regulator',g:'Making 5 and 3.3 V from 12 V. Why one heats up and the other doesn’t.',sec:3},
+ {t:'Transistor switch',g:'Turning a load on and off with a signal.',sec:4},
+ {t:'Digital signals',g:'Ones and zeros on a wire: how the servo bus talks.',sec:5},
+ {t:'Brain: ESP32',g:'Swapping understood pieces for a microcontroller.',sec:6},
+ {t:'Servo bus',g:'The arm gets commands and moves.',sec:7},
+ {t:'Your own board',g:'Layout in KiCad, ordering from JLCPCB, first power-up.',sec:'all'}];
+const INV=[
+ [0,'Voltage','Height: the difference between two points, V'],[0,'Current','Flow: charge per second, A'],[0,'Resistance','Pipe narrowness, Ω. I = U / R'],
+ [0,'Power','Heat and work, W. P = U × I'],[0,'Resistor','Sets the current and heats up'],[0,'LED','1.9 V step, doesn’t limit current by itself'],[0,'Multimeter','Measures the difference between probes'],
+ [1,'Parallel','One voltage, currents add up'],[1,'Fuse','A deliberately weak point'],[1,'Diode','A check valve with a threshold'],[1,'MOSFET','A valve opened by voltage'],[1,'Divider','A staircase of two resistors'],
+ [2,'Capacitor','?'],[3,'Inductor','?'],[4,'Regulator','?'],[5,'Transistor switch','?'],[6,'Digital signal','?'],[7,'ESP32','?'],[8,'Servo bus','?']];
+let Q={done:{},steps:{}};try{Q=Object.assign(Q,JSON.parse(localStorage.getItem('quest_v1')||'{}'))}catch(e){}
+const isDone=i=>!!(Q.done&&Q.done[i]),built=i=>!!LEVELS[i].href,avail=i=>i===0||isDone(i-1);
+const nDone=LEVELS.filter((_,i)=>isDone(i)).length;
+$('#barI').style.width=(nDone/LEVELS.length*100)+'%';$('#progT').textContent=`${nDone} of ${LEVELS.length}`;
+$('#levels').innerHTML=LEVELS.map((L,i)=>{const d=isDone(i),a=avail(i)&&built(i),st=Q.steps&&Q.steps[i]?Q.steps[i].length:0;
+  const cls=d?'done':a?'open':'locked',act=d&&built(i)?`<a class="go ghost" href="${L.href}">Replay</a>`:a?`<a class="go" href="${L.href}">${st?'Continue':'Start'}</a>`:`<span class="st">${built(i)?'after level '+(i-1):'soon'}</span>`;
+  return `<div class="lv ${cls}"><span class="n">${d?'✓':i}</span><div><div class="t">${L.t}</div><div class="g">${L.g}</div></div>${act}</div>`}).join('');
+$('#inv').innerHTML=INV.map(([l,n,d])=>isDone(l)?`<div class="card"><b>${n}</b><span>${d}</span></div>`:`<div class="card lock"><b>${n}</b><span>level ${l}</span></div>`).join('');
+let armed=false;$('#reset').onclick=e=>{if(!armed){armed=true;e.target.textContent='Reset for sure? Click again';return}try{localStorage.removeItem('quest_v1')}catch(_){}location.reload()};
+
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. The levels are on the right.</div>')}
+else{
+const stage=$('#stage'),cv=$('#gl'),V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b110e);scene.fog=new THREE.Fog(0x0b110e,22,50);
+scene.add(new THREE.HemisphereLight(0xdff5ea,0x0a120e,0.7));const sun=new THREE.DirectionalLight(0xffffff,0.85);sun.position.set(-5,10,7);scene.add(sun);
+const cam=new THREE.PerspectiveCamera(40,1,0.1,120),ctl=new THREE.OrbitControls(cam,cv);
+ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=6;ctl.maxDistance=30;ctl.minPolarAngle=0.5;ctl.maxPolarAngle=1.35;ctl.minAzimuthAngle=-0.9;ctl.maxAzimuthAngle=0.9;
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
+const box=(w,h,d,mat,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(par||scene).add(m);return m};
+const cyl=(r,h,mat,x,y,z,par,rz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat);m.position.set(x,y,z);if(rz)m.rotation.z=rz;(par||scene).add(m);return m};
+box(17,0.3,10,M(0x2a2119,{roughness:.9}),0,-0.15,0);
+const narrow=document.getElementById('stage').clientWidth<600,labels=[],lab=(t,p,cls)=>{const el=document.createElement('div');el.className='lb '+(cls||'');el.textContent=t;$('#labels').appendChild(el);labels.push({el,p});return el};
+
+/* board with 8 sections */
+const B0=V3(-0.8,0,-1.9),CW=1.8,CD=2.3,hits=[];
+const all=isDone(9);
+box(4*CW+0.4,0.1,2*CD+0.4,new THREE.MeshStandardMaterial({color:0x1d6b45,transparent:!all,opacity:all?1:.28,roughness:.85}),B0.x+2*CW,0.05,B0.z+CD);
+const mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3});
+function sectionParts(i,g){const r=n=>Math.sin(i*12.9898+n*78.233)*0.5+0.5;
+  for(let k=0;k<3;k++)box(CW*0.8,0.02,0.07,mCu,0,0.12,-0.7+k*0.6,g);
+  if(i===0){cyl(0.13,0.6,M(0xddeeff,{transparent:true,opacity:.5}),-0.3,0.25,-0.4,g,Math.PI/2);box(0.5,0.16,0.45,M(0x161616),0.35,0.18,-0.4,g);box(0.6,0.4,0.9,M(0xf2c230),-0.45,0.3,0.55,g)}
+  else for(let k=0;k<4;k++){const t=Math.floor(r(k)*3);if(t===0)cyl(0.18,0.35,M(0x2a4a8a),-0.5+k*0.33,0.28,0.3,g);else if(t===1)box(0.3,0.14,0.2,M(0x9a6a40),-0.5+k*0.33,0.17,0.35,g);else box(0.45,0.12,0.45,M(0x161616),-0.5+k*0.33,0.16,0.3,g)}
+  if(i===6){box(1.1,0.16,1.3,M(0x30353a),0,0.18,0,g);box(0.8,0.1,0.8,M(0xb8c0c4,{metalness:.7}),0,0.3,-0.1,g)}
+  if(i===7)box(0.5,0.35,1.0,M(0x222222),0.5,0.28,0,g)}
+const SECN=['Power input','Capacitors','Inductor','Regulator','Switches','Signals','ESP32 brain','Servo bus'];
+const secLevel=s=>LEVELS.findIndex(L=>L.sec===s);
+for(let s=0;s<8;s++){const c=s%4,rw=Math.floor(s/4),cx=B0.x+0.2+c*CW+CW/2,cz=B0.z+0.2+rw*CD+CD/2,lv=secLevel(s),d=isDone(lv),a=avail(lv)&&built(lv);
+  const g=new THREE.Group();g.position.set(cx,0,cz);scene.add(g);
+  if(d){box(CW-0.08,0.04,CD-0.08,M(0x1f7a4e,{roughness:.8}),0,0.1,0,g);sectionParts(s,g)}
+  else{const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW-0.12,0.02,CD-0.12)),new THREE.LineDashedMaterial({color:a?0xffc14d:0x55705f,dashSize:0.15,gapSize:0.1}));e.computeLineDistances();e.position.y=0.12;g.add(e)}
+  const hit=box(CW-0.1,0.3,CD-0.1,new THREE.MeshBasicMaterial({visible:false}),0,0.15,0,g);hit.userData.lv=lv;hits.push(hit);
+  lab(narrow?String(lv):`${lv} · ${SECN[s]}`,V3(cx,0.2,cz+CD/2-0.25),d?'done':a?'open':'')}
+/* power LED once the input works */
+let ledL=null;if(isDone(1)){const led=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,10),M(0x3fdc6a,{emissive:0x2aff66,emissiveIntensity:2}));led.position.set(B0.x+0.2+CW/2+0.55,0.25,B0.z+0.2+CD/2-0.7);scene.add(led);ledL=new THREE.PointLight(0x40ff70,1.4,4);ledL.position.copy(led.position).add(V3(0,0.4,0));scene.add(ledL)}
+/* multimeter: the lab level */
+const mm=box(1.1,0.25,1.6,M(0xf2c230),-6.2,0.12,3.0);mm.userData.lv=0;hits.push(mm);
+box(0.8,0.02,0.5,M(isDone(0)?0xb8c9a2:0x56604a,{emissive:isDone(0)?0x4a5a30:0,emissiveIntensity:.4}),-6.2,0.26,2.7);
+lab(narrow?'0':isDone(0)?'0 · The lab ✓':'0 · The lab',V3(-6.2,0.4,3.9),isDone(0)?'done':'open');
+/* the arm */
+const powered=isDone(1),alive=isDone(8);
+const mBody=M(0xd9dcd6,{roughness:.5}),mServo=M(powered?0x1f3a66:0x4a4f52),mLedS=M(0xff3030,{emissive:0xff2020,emissiveIntensity:powered?1.5:0});
+const base=new THREE.Group();base.position.set(-5.2,0,-1.0);scene.add(base);
+cyl(0.8,0.3,mBody,0,0.15,0,base);
+const turn=new THREE.Group();turn.position.y=0.3;base.add(turn);box(0.75,0.55,0.6,mServo,0,0.3,0,turn);box(0.08,0.08,0.02,mLedS,0.25,0.45,0.31,turn);
+const sh=new THREE.Group();sh.position.y=0.6;turn.add(sh);box(0.32,2.2,0.32,mBody,0,1.1,0,sh);
+const el=new THREE.Group();el.position.y=2.2;sh.add(el);box(0.6,0.55,0.6,mServo,0,0,0,el);box(0.08,0.08,0.02,mLedS,0.2,0.12,0.31,el);box(0.28,1.8,0.28,mBody,0,0.9,0,el);
+const wr=new THREE.Group();wr.position.y=1.8;el.add(wr);box(0.5,0.45,0.5,mServo,0,0,0,wr);box(0.08,0.08,0.02,mLedS,0.17,0.1,0.26,wr);
+const gr=new THREE.Group();gr.position.y=0.3;wr.add(gr);box(0.55,0.25,0.35,mServo,0,0.05,0,gr);
+const f1=box(0.08,0.55,0.25,mBody,-0.18,0.4,0,gr),f2=box(0.08,0.55,0.25,mBody,0.18,0.4,0,gr);
+lab(narrow?(alive?'Moving':powered?'Powered':'Unpowered'):alive?'The arm is moving':powered?'The arm is powered: waiting for the brain and the bus':'The arm is unpowered',V3(-5.2,0.1,0.2),alive?'done':powered?'open':'');
+/* cable from servo bus section to the arm */
+{const p=[V3(B0.x+0.2+3*CW+CW/2,0.15,B0.z+0.2+CD+CD/2),V3(1.5,0.12,3.6),V3(-3.5,0.12,3.2),V3(-5.2,0.12,0.0)];
+ scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p),60,0.05,6,false),M(powered?0x333333:0x3a3a3a)))}
+/* picking */
+const showInfo=lv=>{const L=LEVELS[lv];$('#infoT').textContent=`Level ${lv} · ${L.t}`;$('#infoP').textContent=L.g;const ok=avail(lv)&&built(lv);
+  $('#infoGo').hidden=!ok;if(ok){$('#infoGo').href=L.href;$('#infoGo').textContent=isDone(lv)?'Replay':'Open level'}
+  else $('#infoP').textContent+=built(lv)?` Unlocks after level ${lv-1}.`:' This level is still in the works.';$('#info').hidden=false};
+$('#infoX').onclick=()=>$('#info').hidden=true;
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
+cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+cv.addEventListener('pointerup',e=>{if(!down)return;const dx=e.clientX-down[0],dy=e.clientY-down[1];down=null;if(dx*dx+dy*dy>49)return;
+  const r=cv.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,cam);
+  const h=ray.intersectObjects(hits,false)[0];if(h)showInfo(h.object.userData.lv)});
+/* camera */
+const FC=V3(0.1,0.6,0.7),FD=V3(0.12,0.8,1);
+function fit(){const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect),d=Math.max(8.4/Math.tan(hf/2),3.6/Math.tan(vf/2))*1.0+1;cam.position.copy(FC).add(FD.clone().normalize().multiplyScalar(d));ctl.target.copy(FC);ctl.update()}
+let lastW=0;function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
+function frame(){const t=clock.getElapsedTime();ctl.update();
+  if(alive&&!reduce){turn.rotation.y=Math.sin(t*0.5)*0.8;sh.rotation.z=-0.35+Math.sin(t*0.7)*0.3;el.rotation.z=0.9+Math.sin(t*0.9)*0.35;wr.rotation.z=0.4+Math.sin(t*1.1)*0.3;const o=0.18+Math.max(0,Math.sin(t*1.3))*0.12;f1.position.x=-o;f2.position.x=o}
+  else{turn.rotation.y=0.3;sh.rotation.z=powered?-0.25:-1.2;el.rotation.z=powered?1.1:2.2;wr.rotation.z=powered?0.6:1.1}
+  if(ledL)ledL.intensity=1.2+Math.sin(t*3)*0.25;
+  gl.render(scene,cam);
+  const W=stage.clientWidth,H=stage.clientHeight;
+  labels.forEach(L=>{pv.copy(L.p).project(cam);const v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;L.el.style.display=v?'block':'none';if(v)L.el.style.transform=`translate(${(pv.x*.5+.5)*W}px,${(-pv.y*.5+.5)*H}px) translate(-50%,-100%)`});
+  requestAnimationFrame(frame)}
+frame();
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alexey Kureev</title>
+<meta name="description" content="Alexey Kureev: senior React Native engineer in Barcelona, former React Native core contributor, now building a robot arm and a free electronics course.">
+<meta property="og:title" content="Alexey Kureev">
+<meta property="og:description" content="React Native engineer, now teaching software to move.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* IDEA a software engineer whose code started to move: the hero is a servo arm that reaches for your cursor
+   COLOUR night bench #0b110e, solder mask #1d4a35, copper #e39a52, servo blue #4f7fb8, ink #edf3ef
+   TYPE Bricolage Grotesque 800 for display, Manrope for text */
+:root{color-scheme:dark;--bg:#0b110e;--ink:#edf3ef;--mute:#9db1a6;--cu:#e39a52;--line:#21302a;--mask:#1d4a35}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Manrope,system-ui,sans-serif}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--cu);outline-offset:4px;border-radius:4px}
+.top{position:absolute;inset:0 0 auto;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:20px clamp(20px,4vw,48px)}
+.mark{font:800 18px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.01em;text-decoration:none}
+.top nav{display:flex;gap:clamp(14px,2.4vw,28px);font-size:15px;font-weight:600}
+.top nav a{text-decoration:none;color:var(--mute)}.top nav a:hover{color:var(--ink)}
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:end;overflow:hidden}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+.copy{position:relative;z-index:2;padding:0 clamp(20px,4vw,48px) clamp(40px,9vh,96px);pointer-events:none}
+.copy a{pointer-events:auto}
+h1{font:800 clamp(52px,8.6vw,128px)/.88 'Bricolage Grotesque',sans-serif;letter-spacing:-.045em;margin:0 0 26px}
+h1 span{display:block;color:var(--cu)}
+.lede{max-width:34ch;margin:0 0 30px;font-size:clamp(17px,1.5vw,19px);color:#cddad3}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:999px;font-weight:700;text-decoration:none;background:var(--cu);color:#1a0f05}
+.btn.ghost{background:none;color:var(--ink);box-shadow:inset 0 0 0 1.5px #3b4d44}
+.btn:hover{filter:brightness(1.08)}.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.hint{position:absolute;right:clamp(20px,4vw,48px);bottom:28px;z-index:2;font-size:13px;color:var(--mute)}
+section{padding:clamp(72px,12vh,140px) clamp(20px,4vw,48px);border-top:1px solid var(--line)}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:32px clamp(24px,5vw,72px)}
+h2{font:800 clamp(30px,3.6vw,46px)/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;margin:0}
+.kick{color:var(--mute);margin:12px 0 0;max-width:28ch}
+.course{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;text-decoration:none;padding:28px;border-radius:22px;background:linear-gradient(160deg,#16261f,#0f1a15);box-shadow:inset 0 0 0 1px #2a3f35}
+.course:hover{box-shadow:inset 0 0 0 1px var(--cu)}
+.chip{width:64px;height:64px;border-radius:14px;background:var(--mask);position:relative;box-shadow:inset 0 0 0 1px #2f6a4c}
+.chip::before{content:'';position:absolute;left:-10px;right:-10px;top:30px;height:4px;border-radius:2px;background:var(--cu)}
+.chip::after{content:'';position:absolute;inset:17px;border-radius:7px;background:var(--ink)}
+.course h3{font:800 26px/1.1 'Bricolage Grotesque',sans-serif;margin:0 0 8px;letter-spacing:-.02em}
+.course p{margin:0 0 14px;color:#cddad3}
+.course .go{font-weight:700;color:var(--cu)}
+.levels{display:flex;gap:6px;margin-top:18px}.levels i{flex:1;height:5px;border-radius:3px;background:#263a31}.levels i.on{background:var(--cu)}
+.levels-l{font-size:13px;color:var(--mute);margin-top:8px}
+.oss{list-style:none;margin:0;padding:0}
+.oss li{display:grid;grid-template-columns:minmax(0,15em) 1fr;gap:6px 24px;padding:18px 0;border-bottom:1px solid var(--line)}
+.oss li:first-child{padding-top:0}
+.oss a{font-weight:700;text-decoration-color:#3b4d44;text-underline-offset:4px}.oss a:hover{text-decoration-color:var(--cu)}
+.oss span{color:var(--mute)}
+.places{display:flex;flex-wrap:wrap;gap:6px 26px;font:800 clamp(24px,3vw,38px)/1.25 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;margin:0;padding:0;list-style:none}
+.places li:nth-child(odd){color:#c9d6cf}
+.note{color:var(--mute);margin:22px 0 0;max-width:52ch}
+footer{padding:40px clamp(20px,4vw,48px) 56px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:15px}
+footer a{color:var(--ink)}
+@media(max-width:860px){
+.hero{grid-template-columns:1fr;min-height:auto;padding-top:56svh}
+#gl{height:62svh;bottom:auto}
+.hint{display:none}
+.copy{padding-top:12px}
+.wrap{grid-template-columns:1fr}
+.oss li{grid-template-columns:1fr}
+.course{grid-template-columns:1fr;padding:22px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="mark" href="/">Kureev</a>
+  <nav aria-label="Main"><a href="#now">Now</a><a href="#oss">Open source</a><a href="#work">Work</a></nav>
+</header>
+
+<main>
+<div class="hero">
+  <canvas id="gl" aria-label="A 3D servo arm that reaches toward your cursor"></canvas>
+  <div class="copy">
+    <h1>Alexey<span>Kureev</span></h1>
+    <p class="lede">Senior React Native engineer in Barcelona, consulting with Margelo. Former React Native core contributor. These days my code is learning to move: I’m building a robot arm and turning what I learn into a free course.</p>
+    <div class="cta"><a class="btn" href="/electronics">Take the electronics course</a><a class="btn ghost" href="https://github.com/Kureev">GitHub</a></div>
+  </div>
+  <p class="hint" id="hint">Move your cursor. The arm follows.</p>
+</div>
+
+<section id="now">
+  <div class="wrap">
+    <div><h2>Now</h2><p class="kick">Learning hardware in public, from zero.</p></div>
+    <a class="course" href="/electronics">
+      <i class="chip" aria-hidden="true"></i>
+      <div>
+        <h3>Electronics for a robot arm</h3>
+        <p>An interactive 3D course for people who write software but have never read a schematic. Start with Ohm’s law on a water model, burn a few LEDs, and work up to the power board of a six-servo arm.</p>
+        <span class="go">Start level 0</span>
+        <div class="levels" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="levels-l">2 of 10 levels out</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section id="oss">
+  <div class="wrap">
+    <div><h2>Open source</h2><p class="kick">Libraries I wrote in the early days of React Native.</p></div>
+    <ul class="oss">
+      <li><a href="https://github.com/Kureev/react-native-blur">react-native-blur</a><span>Native blur and vibrancy views for React Native.</span></li>
+      <li><a href="https://github.com/rnpm/rnpm">rnpm</a><span>Linking native dependencies in one command. It later became part of the React Native CLI.</span></li>
+      <li><a href="https://github.com/Kureev/react-native-side-menu">react-native-side-menu</a><span>A customizable side menu component.</span></li>
+      <li><a href="https://github.com/Kureev/react-native-navbar">react-native-navbar</a><span>A customizable navigation bar component.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div><h2>Work</h2><p class="kick">Teams I’ve shipped with.</p></div>
+    <div>
+      <ul class="places"><li>Facebook</li><li>Twilio</li><li>Margelo</li><li>Novoic</li><li>Werkspot</li><li>Publitas</li><li>Shuffle</li></ul>
+      <p class="note">Through Margelo I’ve worked on apps like MetaMask and Rainbow Wallet.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><span>Alexey Kureev, Barcelona</span><a href="https://github.com/Kureev">github.com/Kureev</a></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+if(!window.THREE)return;
+const cv=document.getElementById('gl'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let gl;try{gl=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){return}
+gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0b110e,12,24);
+const cam=new THREE.PerspectiveCamera(32,1,0.1,100);
+scene.add(new THREE.HemisphereLight(0xcfe8dc,0x0b110e,0.4));
+const key=new THREE.DirectionalLight(0xffffff,0.9);key.position.set(4,9,6);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-6,right:6,top:6,bottom:-6});scene.add(key);
+const rim=new THREE.PointLight(0xe39a52,1.4,14);rim.position.set(-3,4,-3);scene.add(rim);
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.55,metalness:.1},o||{}));
+const mMask=M(0x1d4a35,{roughness:.8}),mCu=M(0xe39a52,{metalness:.7,roughness:.35}),mBody=M(0xdfe5e2,{roughness:.45}),mServo=M(0x3f6fa8,{roughness:.5}),mLed=M(0xff4a3a,{emissive:0xff4a3a,emissiveIntensity:1.2}),mDark=M(0x1a2420);
+const add=(g,m,p,par)=>{const x=new THREE.Mesh(g,m);x.position.set(...p);x.castShadow=x.receiveShadow=true;(par||scene).add(x);return x};
+const box=(w,h,d,m,p,par)=>add(new THREE.BoxGeometry(w,h,d),m,p,par);
+const cyl=(r,h,m,p,par)=>add(new THREE.CylinderGeometry(r,r,h,32),m,p,par);
+/* bench: a big PCB with copper traces */
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),M(0x0a0f0c,{roughness:1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+box(7,0.12,5,mMask,[0,0.06,0]);
+const traces=[[[-3.2,-2],[-1.2,-2],[-0.6,-1.4],[-0.6,-0.9]],[[3.2,1.6],[1.6,1.6],[0.9,0.9]],[[3.2,-1.8],[2,-1.8],[1.4,-1.2],[1.4,-0.4]],[[-3.2,1.2],[-2,1.2],[-1.1,0.4]]];
+traces.forEach(t=>{for(let i=0;i<t.length-1;i++){const [a,b]=[t[i],t[i+1]],dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);const s=box(L,0.02,0.09,mCu,[(a[0]+b[0])/2,0.13,(a[1]+b[1])/2]);s.rotation.y=-Math.atan2(dz,dx)}
+  const e=t[t.length-1];cyl(0.13,0.03,mCu,[e[0],0.13,e[1]])});
+[[2.2,0.2,-0.6],[-2.3,0.2,-0.2]].forEach(([x,y,z],i)=>{box(i?0.9:1.1,0.14,i?0.9:0.7,mDark,[x,0.19,z])});
+/* arm */
+const base=new THREE.Group();scene.add(base);cyl(0.75,0.28,mBody,[0,0.26,0],base);
+const turn=new THREE.Group();turn.position.y=0.4;base.add(turn);box(0.75,0.55,0.62,mServo,[0,0.28,0],turn);box(0.08,0.08,0.02,mLed,[0.22,0.42,0.32],turn);
+const L1=2.1,L2=1.75;
+const sh=new THREE.Group();sh.position.y=0.62;turn.add(sh);box(0.34,L1,0.34,mBody,[0,L1/2,0],sh);
+const el=new THREE.Group();el.position.y=L1;sh.add(el);box(0.6,0.55,0.62,mServo,[0,0,0],el);box(0.08,0.08,0.02,mLed,[0.18,0.12,0.32],el);box(0.28,L2,0.28,mBody,[0,L2/2,0],el);
+const wr=new THREE.Group();wr.position.y=L2;el.add(wr);box(0.5,0.45,0.52,mServo,[0,0,0],wr);
+const gr=new THREE.Group();gr.position.y=0.3;wr.add(gr);box(0.55,0.22,0.36,mServo,[0,0.05,0],gr);
+const f1=box(0.08,0.5,0.24,mBody,[-0.2,0.38,0],gr),f2=box(0.08,0.5,0.24,mBody,[0.2,0.38,0],gr);
+/* pointer → target point on a plane in front of the arm */
+const ray=new THREE.Raycaster(),plane=new THREE.Plane(new THREE.Vector3(0,0,1),-1.4),ptr=new THREE.Vector2(.35,.2),tgt=new THREE.Vector3(2,2.4,1.4),hit=new THREE.Vector3();
+let active=false,grip=0,gripT=0,last=0;
+addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();if(e.clientY>r.bottom)return;ptr.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);active=true;last=performance.now()},{passive:true});
+addEventListener('pointerdown',()=>gripT=1);addEventListener('pointerup',()=>gripT=0);
+const ang={yaw:0.6,a1:0.4,e:1.2,w:0.5};
+function solve(p){const yaw=Math.atan2(p.z,-p.x);const r=Math.max(0.6,Math.hypot(p.x,p.z)),h=p.y-1.02;
+  let D=Math.hypot(r,h);const max=L1+L2+0.3-0.05;if(D>max){D=max}const k=D/Math.hypot(r,h)||1;const rr=r*k,hh=h*k;
+  const L2e=L2+0.3,c=(D*D-L1*L1-L2e*L2e)/(2*L1*L2e),e=Math.acos(Math.max(-1,Math.min(1,c)));
+  const a1=Math.atan2(rr,hh)-Math.atan2(L2e*Math.sin(e),L1+L2e*Math.cos(e));
+  return{yaw,a1,e,w:Math.max(-0.2,Math.min(1.4,Math.PI/2-a1-e+0.2))}}
+function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;
+  const wide=w/h>1.1;cam.position.set(wide?-3.2:0.6,wide?5.6:6.4,wide?12.5:14.5);cam.lookAt(wide?-2.6:0,wide?2:2.1,0);
+  base.position.x=wide?1.6:0;cam.updateProjectionMatrix()}
+new ResizeObserver(size).observe(cv);size();
+const clock=new THREE.Clock();
+function frame(){const dt=Math.min(clock.getDelta(),0.05),t=clock.elapsedTime;
+  if(active&&performance.now()-last<4000&&!reduce){ray.setFromCamera(ptr,cam);if(ray.ray.intersectPlane(plane,hit)){hit.sub(base.position);hit.y=Math.max(0.5,Math.min(4.4,hit.y));tgt.lerp(hit,1-Math.pow(0.002,dt))}}
+  else{const k=reduce?0:t;tgt.lerp(new THREE.Vector3(Math.sin(k*0.45)*2.4-0.4,2+Math.sin(k*0.8)*0.9,1.4+Math.cos(k*0.45)*0.6),1-Math.pow(0.2,dt))}
+  const s=solve(tgt),q=1-Math.pow(0.0005,dt);for(const k in s)ang[k]+=(s[k]-ang[k])*q;
+  turn.rotation.y=ang.yaw;sh.rotation.z=ang.a1;el.rotation.z=ang.e;wr.rotation.z=ang.w;
+  grip+=(gripT-grip)*Math.min(1,dt*10);const o=0.24-grip*0.14+(reduce?0:Math.sin(t*2)*0.02);f1.position.x=-o;f2.position.x=o;
+  gl.render(scene,cam);requestAnimationFrame(frame)}
+frame();
+if(matchMedia('(hover:none)').matches)document.getElementById('hint').textContent='Touch the scene. The arm follows.';
+})();
+</script>
+</body>
+</html>

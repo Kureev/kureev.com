@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm. Learn by breaking things on a virtual bench.">
+<meta property="og:title" content="Electronics for a robot arm">
+<meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Level 0: The lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning, a workbench lesson for a software engineer
+   IDEA first a glass water loop that shows volts, amps, ohms and watts; then the same loop built up in copper on a board
+   PICTURE live 3D: water climbing through a pump and falling through a narrow pipe; then a board where parts get added one by one
+   COLOUR night bench #0b110e, water blue, solder-mask green, copper, voltage red (+) to blue (0), LED red, meter yellow
+   TYPE Manrope 800 + Manrope, JetBrains Mono only on the meter LCD
+   LAYOUT laptop: 3D stage left, lesson column 410px right; phone: stage on top, lesson below; only the controls a step needs are shown */
+:root{color-scheme:dark;--bg:#0b110e;--panel:#111a16;--card:#16211c;--line:#25352d;--ink:#e8f1ec;--mute:#9db1a6;--cu:#e39a52;--hot:#ff5a3c;--cold:#4aa3ff;--ok:#5fd38d;--warn:#ffc14d}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;overflow:hidden;background:var(--bg)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(11,17,14,.82);border:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+.lb.tp{color:var(--warn);border-color:#4a3f1f}
+.lb.big{font-size:15px;color:#ffd1c4;border-color:#6b2a1c}
+.lb.flow{color:#bfe3ff;border-color:#24496b}
+.lb.lvl{background:none;border:0;color:var(--mute);font-size:12px;padding:0}
+.tools{position:absolute;left:16px;top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.reset{min-height:36px;font-size:14px;background:rgba(22,33,28,.9)}
+.hint{font-size:13px;color:var(--mute);background:rgba(11,17,14,.7);padding:4px 10px;border-radius:8px}
+.info{position:absolute;right:16px;top:14px;width:min(300px,calc(100% - 32px));background:rgba(22,33,28,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.info b{display:block;font-size:15px;margin:0 28px 4px 0}
+.info p{margin:0;color:#cfdcd5}
+.x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}
+.meter{position:absolute;left:16px;bottom:16px;width:236px;background:#f2c230;color:#1d1a10;border-radius:16px;padding:10px 12px 12px;box-shadow:0 6px 0 #a3801a,0 14px 30px rgba(0,0,0,.45)}
+.mtop{display:flex;justify-content:space-between;font:800 13px Manrope,sans-serif}
+.lcd{margin:6px 0 8px;background:#b8c9a2;color:#14200f;font:700 34px/1 'JetBrains Mono',monospace;text-align:right;padding:8px 10px;border-radius:7px;box-shadow:inset 0 2px 0 rgba(0,0,0,.18)}
+.lcd small{font-size:16px;margin-left:4px}
+.probes{display:flex;gap:12px;font-size:13px;font-weight:600}
+.pr i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.next{font-size:12px;margin-top:4px;color:#4b4120}
+.panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
+h1{font:800 31px/1.06 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+.sub{margin:0 0 16px;color:var(--mute);font-size:15px}
+.card,.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.stephead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--mute);font-size:13px;font-weight:600;flex-wrap:wrap}
+.part{color:var(--cu)}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots button{width:13px;height:13px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer}
+.dots button.on{background:var(--ink);border-color:var(--ink)}
+.dots button.done{border-color:var(--ok)}
+.dots button.on.done{background:var(--ok)}
+h2{font:800 22px/1.15 Manrope,sans-serif;margin:8px 0 8px;letter-spacing:-.01em}
+.stepb p,.stepb ol,.stepb ul{margin:0 0 10px}
+.stepb ol,.stepb ul{padding-left:20px}
+.stepb li{margin-bottom:4px}
+.stepb .note{font-size:14px;color:var(--mute)}
+.stepb b{color:#fff}
+.stepb table{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 10px}
+.stepb th{text-align:left;color:var(--mute);font-weight:600;font-size:13px;border-bottom:1px solid var(--line);padding:4px 6px 4px 0}
+.stepb td{border-bottom:1px solid var(--line);padding:5px 6px 5px 0;vertical-align:top}
+.after{border-left:3px solid var(--ok);padding:2px 0 2px 12px;margin:0 0 10px}
+.after p{margin:0 0 8px}
+.task{border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;background:#1f2a1f;border:1px solid #3a4a2a;color:var(--warn)}
+.task.ok{color:var(--ok);border-color:#2c5a3d;background:#15281d}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+button{font:600 15px Manrope,sans-serif;color:var(--ink);background:#1d2a24;border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer}
+button:hover{border-color:#3d5548}
+button:focus-visible,input:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+button.pri{background:var(--ink);color:#0b110e;border-color:var(--ink)}
+button:disabled{opacity:.35;cursor:default}
+.ctl label{display:flex;justify-content:space-between;font-weight:600;font-size:15px;margin-top:4px}
+output{color:var(--warn);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--cu);cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.row button{flex:1 1 140px}
+.row button[aria-pressed=true]{border-color:var(--ok);color:var(--ok)}
+.power{width:100%;background:#3a1b14;border-color:#a33d22;color:#ffd1c4;font-size:16px}
+.fix{width:100%;margin-top:4px;background:#3a1b14;border-color:#6b2a1c;color:#ffb39f}
+.nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.num span{display:block;font-size:13px;color:var(--mute)}
+.num b{font:800 22px/1.2 Manrope,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.num.u b{color:#ff8a70}.num.i b{color:#8fd0ff}.num.r b{color:#ffc14d}.num.p b{color:#ff6a4d}
+.st{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 0}
+.pill{font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid var(--line)}
+.pill.g{color:var(--ok);border-color:#2c5a3d}.pill.y{color:var(--warn);border-color:#5a4a1f}.pill.r{color:#ff8a70;border-color:#6b2a1c}.pill.m{color:var(--mute)}
+.formula{grid-column:1/-1;margin:0;padding-top:10px;border-top:1px solid var(--line);font-size:14px;line-height:1.6;color:#cfdcd5}
+.quiz{display:flex;gap:8px;margin:4px 0 8px}
+.quiz input{flex:1;font:600 16px Manrope,sans-serif;background:#0e1512;color:var(--ink);border:1px solid #3a4d43;border-radius:10px;padding:0 12px;min-height:44px}
+.fb{font-size:14px;margin:0 0 8px}
+.hw{list-style:none;padding:0!important;margin:0 0 10px}
+.hw li{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:14px}
+.hw input{width:20px;height:20px;margin-top:2px;accent-color:var(--ok);flex:none}
+.warnbox{font-size:14px;border-left:3px solid var(--hot);padding:4px 0 4px 10px;color:#ffc9bc;margin:0 0 10px}
+.err{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
+@media(max-width:900px){
+html,body{height:auto}
+.app{grid-template-columns:minmax(0,1fr);height:auto}
+.stage{height:62svh;min-height:360px}
+.panel{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}
+.meter{width:186px;padding:8px 10px 10px;left:10px;bottom:10px}
+.lcd{font-size:26px}
+.hint{display:none}
+.info{right:10px;top:10px}
+.lb{font-size:11px;padding:2px 5px}
+.lb.part{display:none!important}
+.meter{width:160px}
+.lcd{font-size:22px}
+}
+
+.lead{font-size:16px;line-height:1.5;margin:0 0 12px}.lead b{color:#fff}
+.step .card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 0 4px;margin:0 0 10px}
+.step .after{margin:10px 0 0}
+.stepx:empty{display:none}.stepx{margin-top:12px}.stepx p{margin:0 0 10px}
+.stepx table{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 10px}
+.more{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.more summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px;font-weight:700;font-size:15px;color:var(--mute)}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:'';width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.more[open] summary::before{transform:rotate(45deg)}
+.more summary:hover{color:var(--ink)}
+.blocks{display:grid;gap:8px;margin-top:4px}
+.blk{background:#1a2721;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px}
+.blk h3{margin:0 0 4px;font:800 12px/1.3 Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cu)}
+.blk p,.blk ul,.blk ol{margin:0 0 6px}.blk>:last-child{margin-bottom:0}
+.blk ul,.blk ol{padding-left:20px}
+.blk b{color:#fff}
+.blk.note{background:none;border-style:dashed;color:var(--mute);font-size:14px}
+.blk.note h3{color:var(--mute)}
+.blk table{width:100%;border-collapse:collapse;font-size:14px}
+.blk th{text-align:left;color:var(--mute);font-weight:600;font-size:13px;border-bottom:1px solid var(--line);padding:4px 6px 4px 0}
+.blk td{border-bottom:1px solid var(--line);padding:5px 6px 5px 0;vertical-align:top}
+.hud{position:absolute;right:12px;bottom:12px;display:flex;flex-flow:row wrap;justify-content:flex-end;align-content:flex-end;gap:6px;max-width:min(460px,calc(100% - 24px));pointer-events:none;background:none;border:0;padding:0;margin:0}
+.hud .num{display:flex;align-items:baseline;gap:10px;background:rgba(11,17,14,.86);border:1px solid var(--line);border-radius:10px;padding:4px 10px}
+.hud .num span{display:inline;font-size:12px}
+.hud .num b{font-size:18px}
+.hud .st{margin:0;justify-content:flex-end;flex:1 0 100%}.hud .pill{background:rgba(11,17,14,.86)}
+.hud .formula{border:1px solid var(--line);border-radius:10px;background:rgba(11,17,14,.86);padding:7px 10px;font-size:13px;line-height:1.5;text-align:right}
+.hud .formula:empty{display:none}
+@media(max-width:900px){.hud{right:8px;bottom:8px;gap:4px;max-width:calc(100% - 16px)}.hud .num{padding:2px 8px}.hud .num span{font-size:11px}.hud .num b{font-size:15px}.hud .formula{font-size:11px;padding:5px 8px;max-width:100%}}
+
+/* panel v2: one header line, segmented progress, goal row, sticky footer */
+.app{grid-template-columns:minmax(0,1fr) 384px}
+.panel{display:flex;flex-direction:column;padding:0}
+.ph{display:flex;align-items:baseline;gap:10px;padding:16px 20px 0;font-size:13px;color:var(--mute);flex-wrap:wrap}
+.ph .ltitle{color:var(--ink);font-weight:700;font-size:14px}
+.ph .back{margin:0;font-size:13px}
+.step{background:none;border:0;border-radius:0;padding:14px 20px 10px;margin:0;flex:1 0 auto}
+.prog{margin:0 0 2px}
+.ptop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:6px}
+.ptop .part{color:var(--cu)}
+#stepC{font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:3px;flex-wrap:nowrap}
+.dots button{flex:1 1 0;height:16px;min-height:0;padding:0;border:0;border-radius:0;cursor:pointer;background:linear-gradient(var(--line),var(--line)) center/100% 5px no-repeat}
+.dots button.pb{margin-left:7px}
+.dots button.done{background-image:linear-gradient(#2f7a4f,#2f7a4f)}
+.dots button.on{background-image:linear-gradient(var(--ink),var(--ink));background-size:100% 7px}
+.dots button.on.done{background-image:linear-gradient(var(--ok),var(--ok))}
+.dots button:hover{background-size:100% 7px}
+h2{font-size:23px;margin:10px 0 6px}
+.lead{margin:0 0 6px}
+.step .card{border-top:0;padding:6px 0 0;margin:0 0 6px}
+.task{display:flex;gap:10px;align-items:flex-start;background:#1c1f15;border:1px solid #3a3a22;border-radius:12px;padding:10px 12px;color:var(--ink);font-size:15px;font-weight:600;line-height:1.4}
+.task .tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--warn);margin-top:0;position:relative}
+.task.ok{background:#14241b;border-color:#2c5a3d;color:#cfe9da}
+.task.ok .tick{background:var(--ok);border-color:var(--ok)}
+.task.ok .tick::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #0b110e;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.more summary .cnt{font-weight:600;font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:0 7px;margin-left:2px}
+.nav{position:sticky;bottom:0;z-index:3;margin:0;padding:12px 20px;background:var(--panel);border-top:1px solid var(--line);display:flex;gap:10px}
+.nav #prev{flex:none;width:48px;padding:0;font-size:22px;line-height:1}
+.nav #next{flex:1}
+.lvl-done{margin:0 20px 12px!important}
+@media(max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.ph{padding:14px 16px 0}.step{padding:12px 16px 8px}.nav{padding:10px 16px calc(10px + env(safe-area-inset-bottom))}}
+.back{display:inline-block;color:var(--mute);text-decoration:none;font-size:14px;font-weight:600;margin:0 0 10px}.lvl-done{display:block;text-align:center;background:#15281d;border:1px solid #2c5a3d;color:#9ff0c0;border-radius:12px;padding:12px;font-weight:700;text-decoration:none;margin:0 0 14px}.lvl-done[hidden]{display:none}</style>
+</head>
+<body>
+<div class="app">
+  <section class="stage" id="stage">
+    <canvas id="gl" aria-label="3D model of the lesson"></canvas>
+    <div class="labels" id="labels"></div>
+    <section class="hud" id="hud" data-grp aria-live="polite">
+      <div class="num u" data-ui="tnU"><span>Voltage</span><b id="wU"></b></div>
+      <div class="num i" data-ui="tnI"><span>Current</span><b id="wI"></b></div>
+      <div class="num r" data-ui="tnR"><span>Resistance</span><b id="wR"></b></div>
+      <div class="num p" data-ui="tnP"><span>Power</span><b id="wP"></b></div>
+      <p class="formula" data-ui="tfI" id="wF"></p>
+      <div class="num i" data-ui="bNums"><span>Loop current</span><b id="nI"></b></div>
+      <div class="num u" data-ui="bNums"><span>Drop across resistor</span><b id="nUR"></b></div>
+      <div class="num u" data-ui="bNums"><span>Drop across LED</span><b id="nUL"></b></div>
+      <div class="num p" data-ui="bNums"><span>Resistor heat</span><b id="nP"></b></div>
+      <p class="st" data-ui="bNums"><span id="sLed" class="pill"></span><span id="sRes" class="pill"></span></p>
+      <p class="formula" data-ui="bF" id="formula"></p>
+    </section>
+    <div class="tools" id="tools"><button id="reset" class="reset">Reset view</button><span class="hint">Drag to rotate · scroll or pinch to zoom</span></div>
+    <aside class="info" id="info" hidden>
+      <button class="x" id="infoX" aria-label="Close">×</button>
+      <b id="infoT"></b><p id="infoP"></p>
+    </aside>
+    <div class="meter" id="meter" data-ui="meter" aria-live="polite">
+      <div class="mtop"><span>Multimeter</span><span>V⎓</span></div>
+      <div class="lcd" id="lcd">12.00<small>V</small></div>
+      <div class="probes">
+        <span class="pr"><i style="background:#e8332a"></i><b id="pRed">TP1</b></span>
+        <span class="pr"><i style="background:#1a1a1a"></i><b id="pBlk">TP4</b></span>
+      </div>
+      <div class="next" id="pNext"></div>
+    </div>
+  </section>
+  <main class="panel">
+    <header class="ph"><a class="back" href="/electronics">← Map</a><span class="lesson">Lesson 0</span><span class="ltitle">Voltage, current and resistance</span></header>
+    <article class="step">
+      <div class="prog"><div class="ptop"><span id="stepN"></span><span id="stepC"></span></div><div class="dots" id="dots" role="group" aria-label="Steps"></div></div>
+      <h2 id="stepT"></h2>
+      <div class="lead" id="stepS"></div>
+      <section class="card ctl" data-grp>
+        <div data-ui="tU"><label for="tu">Pump, voltage <output id="tuO"></output></label><input type="range" id="tu" min="0" max="12" step="0.5" value="12"></div>
+        <div data-ui="tR"><label for="tr">Narrow section, resistance <output id="trO"></output></label><input type="range" id="tr" min="0" max="6" step="1" value="3"></div>
+        <div data-ui="bPower"><button id="power" class="power">Power on</button></div>
+        <div data-ui="bV"><label for="v">Source <output id="vO"></output></label><input type="range" id="v" min="0" max="12" step="0.1" value="12">
+          <div class="row"><button data-v="3.3">3.3 V</button><button data-v="5">5 V</button><button data-v="12">12 V</button></div></div>
+        <div data-ui="bR"><label for="r">Resistor <output id="rO"></output></label><input type="range" id="r" min="0" max="12" step="1" value="9"></div>
+        <div class="row">
+          <button id="sw" data-ui="bSw" aria-pressed="true">Switch closed</button>
+          <button id="el" data-ui="bEl" aria-pressed="false">Show electrons</button>
+          <button id="map" data-ui="bMap" aria-pressed="true">Voltage map</button>
+          <button id="swap" data-ui="bSwap" aria-pressed="false">Swap places</button>
+        </div>
+        <button id="fix" class="fix" hidden>Replace burnt parts</button>
+      </section>
+      <div class="task" id="task"></div>
+      <div class="after" id="after" hidden></div>
+      <div class="stepx" id="stepX"></div>
+      <details class="more" id="more"><summary>Details <span class="cnt" id="moreN"></span></summary><div class="blocks stepb" id="stepB"></div></details>
+    </article><a class="lvl-done" id="lvlDone" href="/electronics" hidden>Level complete ✓ Back to the map</a>
+    <div class="nav"><button id="prev" aria-label="Back">‹</button><button id="next" class="pri">Next</button></div>
+
+
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const nf=(x,d)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fV=v=>nf(v,1)+' V';
+const fI=i=>i>=1?nf(i,2)+' A':nf(i*1000,i*1000<10?2:1)+' mA';
+const fR=r=>r===0?'0 Ω':r>=1000?nf(r/1000,r%1000?1:0)+' kΩ':r+' Ω';
+const fP=p=>p<1?nf(p*1000,0)+' mW':nf(p,2)+' W';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+/* ---------- state & physics ---------- */
+const WR=[100,220,470,1000,2200,4700,10000];
+const RS=[0,10,22,47,100,220,330,470,680,1000,2200,4700,10000];
+const VF=1.9,RD=1,LED_WARN=0.025,LED_MAX=0.05,P_RATED=0.25,P_BURN=1;
+let hw=[];try{hw=JSON.parse(localStorage.getItem('l0hw')||'[]')}catch(e){}
+const S={step:0,done:new Set(),
+  tU:12,tri:3,tMoved:false,valve:true,q1:false,
+  V:12,ri:9,closed:true,map:false,el:false,swap:false,powered:true,hasR:true,hasSw:true,tpOn:true,
+  ledDead:false,resDead:false,red:'TP1',black:'TP4',next:'red',seen:new Set(),meas:new Set(),swT:false,quiz:false};
+const water=()=>{const R=WR[S.tri],I=S.valve?S.tU/R:0;return{U:S.tU,R,I,P:S.tU*I}};
+function solve(){
+  const V=S.powered?S.V:0,R=S.hasR?RS[S.ri]:0,closed=S.hasSw?S.closed:true;
+  const els=S.swap?['led','res']:['res','led'],open={res:S.resDead,led:S.ledDead||V<=VF};
+  let I=0,Vb=V,Vm,gap=null;
+  if(!closed){Vb=0;Vm=0;gap='sw'}
+  else if(open[els[0]]){gap=els[0];Vm=0}
+  else if(open[els[1]]){gap=els[1];Vm=V}
+  else{I=(V-VF)/(R+RD);const dR=I*R;Vm=els[0]==='res'?V-dR:dR}
+  const d0=Vb-Vm,d1=Vm,UR=els[0]==='res'?d0:d1,UL=els[0]==='led'?d0:d1;
+  return{V,R,I,Vb,Vm,gap,UR,UL,P:I*I*R,PL:UL*I,tp:{TP1:V,TP2:Vb,TP3:Vm,TP4:0}};
+}
+
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. Check your connection and reload the page.</div>')}
+else{
+const stage=$('#stage'),cv=$('#gl');
+const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
+const cam=new THREE.PerspectiveCamera(42,1,0.1,100);
+const ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.enablePan=false;ctl.maxPolarAngle=1.5;ctl.minDistance=3;ctl.maxDistance=32;
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
+function mkScene(grid){const s=new THREE.Scene();s.background=new THREE.Color(0x0b110e);s.fog=new THREE.Fog(0x0b110e,20,44);
+  s.add(new THREE.HemisphereLight(0xdff5ea,0x0a120e,0.75));const d=new THREE.DirectionalLight(0xffffff,0.85);d.position.set(-4,10,6);s.add(d);
+  if(grid){const g=new THREE.GridHelper(44,44,0x24412f,0x14231b);g.position.y=-0.17;s.add(g)}return s}
+const scW=mkScene(true),scB=mkScene(true);
+/* camera always orbits the centre of what is on screen and is framed to fit the stage */
+const FRAME={w:{c:V3(-0.3,1.6,0.3),w:10.6,h:5.0,d:1.0,dir:V3(0.35,0.42,1)},b:{c:V3(-0.4,0.3,0),w:12.2,h:5.8,d:1.2,dir:V3(-0.08,1,1)}};
+let curSc=null;
+function fit(){const f=FRAME[curSc];if(!f)return;const th=curSc==='w';
+  ctl.minAzimuthAngle=th?-0.45:-Infinity;ctl.maxAzimuthAngle=th?1.05:Infinity;ctl.minPolarAngle=th?0.55:0;ctl.maxPolarAngle=th?1.45:1.5;
+  const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect);
+  const dist=Math.max((f.w/2)/Math.tan(hf/2),(f.h/2)/Math.tan(vf/2))*1.04+f.d;
+  cam.position.copy(f.c).add(f.dir.clone().normalize().multiplyScalar(dist));ctl.target.copy(f.c);ctl.update()}
+function useScene(k){if(k===curSc)return;curSc=k;fit()}
+function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,22,1,true),mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(V3(0,1,0),d.normalize());return m}
+
+/* labels */
+const labels=[];
+const TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=txt;$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+
+/* ---------- water scene ---------- */
+const Y0=0.3,K=0.25,RP=0.28;
+const mGlass=new THREE.MeshStandardMaterial({color:0x7fc4ff,transparent:true,opacity:.2,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
+const mNarrow=new THREE.MeshStandardMaterial({color:0xa8d6ff,transparent:true,opacity:.4,roughness:.2,side:THREE.DoubleSide,emissive:0xff4a10,emissiveIntensity:0,depthWrite:false});
+const wDyn=new THREE.Group();scW.add(wDyn);
+{const slab=new THREE.Mesh(new THREE.BoxGeometry(10,0.1,2.8),M(0x16211c));slab.position.set(-0.3,-0.1,0);scW.add(slab);
+ const wall=new THREE.Mesh(new THREE.BoxGeometry(9.2,3.9,0.05),M(0x121a16,{roughness:.9}));wall.position.set(-0.4,1.85,-0.86);scW.add(wall)}
+function gaugeW(par,x,y,val){const g=new THREE.Group();g.position.set(x,y,0);par.add(g);g.add(tube(V3(0,0.28,0),V3(0,0.85,0),0.045,M(0xc8cfd2,{metalness:.7,roughness:.3})));
+  const dial=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.36,0.07,30),M(0xf2f2ee));dial.rotation.x=Math.PI/2;dial.position.set(0,1.2,0);g.add(dial);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(0.36,0.035,8,30),M(0x30363a));rim.position.set(0,1.2,0.02);g.add(rim);
+  for(let i=0;i<=4;i++){const a=2.3-i/4*4.6,t=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.07,0.02),M(0x30363a));t.position.set(-Math.sin(a)*0.28,1.2+Math.cos(a)*0.28,0.05);t.rotation.z=a;g.add(t)}
+  const piv=new THREE.Group();piv.position.set(0,1.2,0.05);piv.rotation.z=2.3-val/12*4.6;g.add(piv);const nd=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.28,0.02),M(0xe8332a));nd.position.y=0.13;piv.add(nd);return g}
+let wTh=null,wCol=null;
+const pump=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.0,1.0),M(0x2a302d));pump.position.set(-3,Y0,0);scW.add(pump);
+const imp=new THREE.Group();imp.position.set(-3,Y0,0.52);scW.add(imp);
+for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.12,0.04),M(0xe8332a));b.rotation.z=i*Math.PI/4;imp.add(b)}
+for(let v=0;v<=12;v+=3){const l=new THREE.Mesh(new THREE.BoxGeometry(8.2,0.025,0.02),new THREE.MeshBasicMaterial({color:v?0x2a4035:0x4a6a58}));l.position.set(-0.4,Y0+v*K,-0.8);scW.add(l);lab('w',v+' V',V3(3.75,Y0+v*K,-0.8),'lvl',null,'right')}
+const mWater=new THREE.MeshBasicMaterial({color:0x6fc3ff}),NW=60;
+const drops=new THREE.InstancedMesh(new THREE.SphereGeometry(0.09,10,8),mWater,NW);scW.add(drops);
+let WP=[V3(-3,Y0,0),V3(-3,Y0+3,0),V3(0.6,Y0+3,0),V3(3,Y0,0)],WL=[],WLT=1;
+const LwU=lab('w','',V3(),'big',null,'left'),LwPump=lab('w','Pump = source',V3(-3,Y0-0.5,0),'',null,'down'),LwN=lab('w','',V3(),'',null,'left'),LwValve=lab('w','Valve closed',V3(),'',()=>!S.valve),
+  LwC1=lab('w','',V3(),'flow',()=>S.step>=1),LwC2=lab('w','',V3(),'flow',()=>S.step>=1,'down'),LwG=lab('w','Ground · 0 V',V3(1.7,Y0-0.3,0),'',null,'down'),
+  LwGa=lab('w','',V3(),'',()=>S.step===0||S.step===4),LwTh=lab('w','',V3(),'',()=>S.step>=3);
+const steam=[...Array(12)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,10,8),new THREE.MeshBasicMaterial({color:0xd0d8d4,transparent:true,opacity:0,depthWrite:false}));scW.add(m);return{m,life:0}});
+function buildWater(){
+  while(wDyn.children.length){const c=wDyn.children.pop();if(c.geometry)c.geometry.dispose()}
+  const w=water(),H=w.U*K,rN=Math.max(0.05,Math.min(0.22,0.22*Math.sqrt(220/w.R)));
+  WP=[V3(-3,Y0,0),V3(-3,Y0+H,0),V3(0.6,Y0+H,0),V3(3,Y0,0)];
+  if(H>0.01)wDyn.add(tube(WP[0],WP[1],RP,mGlass));
+  wDyn.add(tube(WP[1],WP[2],RP,mGlass),tube(WP[2],WP[3],rN,mNarrow),tube(WP[3],WP[0],RP,mGlass));
+  WP.forEach(p=>{const s=new THREE.Mesh(new THREE.SphereGeometry(RP,18,12),mGlass);s.position.copy(p);wDyn.add(s)});
+  const br=tube(V3(-3.75,Y0,0),V3(-3.75,Y0+H,0),0.045,M(0xff5a3c,{emissive:0xff5a3c,emissiveIntensity:.4}));wDyn.add(br);
+  [Y0,Y0+H].forEach(y=>{const c=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.03,0.03),M(0xff5a3c));c.position.set(-3.5,y,0);wDyn.add(c)});
+  const vx=-1.7,vy=Y0+H;
+  const wheel=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.04,8,20),M(S.valve?0x5fd38d:0xe8332a));wheel.position.set(vx,vy+0.62,0);wDyn.add(wheel);
+  wDyn.add(tube(V3(vx,vy+RP,0),V3(vx,vy+0.62,0),0.03,M(0x9aa4a0)));
+  if(!S.valve){const plug=new THREE.Mesh(new THREE.CylinderGeometry(RP*0.95,RP*0.95,0.08,22),M(0xe8332a));plug.position.set(vx,vy,0);plug.rotation.z=Math.PI/2;wDyn.add(plug)}
+  [[V3(-0.6,vy,0)],[V3(-1.5,Y0,0)]].forEach(([p])=>{const r=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.035,8,28),M(0x8fd0ff,{emissive:0x4aa3ff,emissiveIntensity:.5}));r.position.copy(p);r.rotation.y=1.15;wDyn.add(r)});
+  gaugeW(wDyn,-2.45,Y0+H,w.U);{const g=gaugeW(wDyn,0.2,Y0,0);g.children[0].visible=false;g.position.set(0.1,Y0-1.2*0.75,0.62);g.scale.setScalar(0.75)}
+  {const th=new THREE.Group(),mid=WP[2].clone().lerp(WP[3],0.5);th.position.set(WP[3].x+0.6,Y0,0);wDyn.add(th);wTh=th;
+   th.add(new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,1.9,18),mGlass).translateY(1.05));
+   const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.2,18,12),M(0xe8332a,{emissive:0xe8332a,emissiveIntensity:.3}));bulb.position.y=0.05;th.add(bulb);
+   const col=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1,12),M(0xe8332a,{emissive:0xe8332a,emissiveIntensity:.3}));th.add(col);wCol=col;
+   const mk=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.03,0.03),M(0xffcf3a));mk.position.y=0.15+1.6*0.5;th.add(mk);
+   th.visible=S.step>=3}
+  WL=[0,1,2,3].map(i=>WP[i].distanceTo(WP[(i+1)%4]));WLT=WL.reduce((a,b)=>a+b,0);
+  LwU.p.set(-3.85,Y0+H/2,0);LwN.p.set(1.8-0.3,Y0+H/2-0.1,0);LwValve.p.set(vx,vy+0.9,0);LwC1.p.set(-0.6,vy+0.45,0);LwC2.p.set(-1.5,Y0-0.45,0);
+  LwGa.p.set(-2.45,Y0+H+1.6,0);LwTh.p.set(WP[3].x+0.6,Y0+2.1,0);
+  mNarrow.emissiveIntensity=Math.min(1.4,w.P/P_RATED*1.1);
+}
+function wAt(s,out){s=((s%WLT)+WLT)%WLT;for(let i=0;i<4;i++){if(s<=WL[i])return out.copy(WP[i]).lerp(WP[(i+1)%4],WL[i]?s/WL[i]:0);s-=WL[i]}return out.copy(WP[0])}
+
+/* ---------- board scene ---------- */
+const mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3}),mDark=M(0x2a302d),mLead=M(0xc8cfd2,{metalness:.7,roughness:.3});
+const hits=[];
+const add=(par,m,part)=>{par.add(m);if(part){m.userData.part=part;hits.push(m)}return m};
+const P=(x,z)=>V3(x,0,z);
+function bar(a,b,w,h,y,mat,ext){const d=b.clone().sub(a);const m=new THREE.Mesh(new THREE.BoxGeometry(d.length()+(ext||0),h,w),mat);m.position.set((a.x+b.x)/2,y,(a.z+b.z)/2);m.rotation.y=-Math.atan2(d.z,d.x);return m}
+function cyl(r,h,mat,x,y,z,rx,rz){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),mat);m.position.set(x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m}
+{const brd=new THREE.Mesh(new THREE.BoxGeometry(11.8,0.16,6.8),M(0x1d6b45,{roughness:.85}));brd.position.set(-0.4,-0.08,0);scB.add(brd)}
+const N={Sp:P(-3.8,-1.8),A:P(-2.1,-1.8),B:P(-0.7,-1.8),C:P(1.2,-1.8),D:P(2.6,-1.8),E:P(4,-1.8),F:P(4,-0.7),G:P(4,0.7),H:P(4,1.8),Sm:P(-3.8,1.8),Q1:P(-4.8,1.8),Q2:P(-4.8,-1.8)};
+const SEG=[['Sp','A','w'],['A','B','sw'],['B','C','w'],['C','D','s1'],['D','E','w'],['E','F','w'],['F','G','s2'],['G','H','w'],['H','Sm','w'],['Sm','Q1','src'],['Q1','Q2','src'],['Q2','Sp','src']];
+const segL=SEG.map(([a,b])=>N[a].distanceTo(N[b])),LT=segL.reduce((a,b)=>a+b,0);
+function at(s){s=((s%LT)+LT)%LT;for(let i=0;i<SEG.length;i++){if(s<=segL[i])return{i,t:s/segL[i]};s-=segL[i]}return{i:0,t:0}}
+const ptAt=(o,out)=>out.copy(N[SEG[o.i][0]]).lerp(N[SEG[o.i][1]],o.t);
+SEG.forEach(([a,b,k])=>{if(k==='w')add(scB,bar(N[a],N[b],0.24,0.03,0.015,mCu,0.24),'cu')});
+['Sp','A','B','C','D','F','G','Sm'].forEach(k=>add(scB,cyl(0.17,0.05,mGold,N[k].x,0.025,N[k].z)));
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(1.4,1.1,4.4),mDark),'src').position.set(-4.85,0.55,0);
+add(scB,cyl(0.2,0.14,M(0xe8332a),-4.85,1.16,-1.4),'src');add(scB,cyl(0.2,0.14,M(0x1c1c1c),-4.85,1.16,1.4),'src');
+add(scB,bar(P(-4.15,-1.8),N.Sp,0.12,0.06,0.05,M(0xe8332a)));add(scB,bar(P(-4.15,1.8),N.Sm,0.12,0.06,0.05,M(0x1c1c1c)));
+const jSw=add(scB,bar(N.A,N.B,0.24,0.03,0.015,mCu,0.24),'cu'),jR=add(scB,bar(N.C,N.D,0.24,0.03,0.015,mCu,0.24),'cu');
+/* switch */
+const gSw=new THREE.Group();scB.add(gSw);
+add(gSw,bar(N.A,N.B,0.5,0.16,0.08,M(0x30363a)),'sw');
+const lever=new THREE.Group();lever.position.set(N.A.x+0.05,0.22,-1.8);gSw.add(lever);
+const lm=new THREE.Mesh(new THREE.BoxGeometry(1.35,0.07,0.18),mLead);lm.position.x=0.675;add(lever,lm,'sw');
+add(gSw,cyl(0.09,0.1,mGold,N.B.x-0.05,0.2,-1.8),'sw');
+/* resistor, built along local x, 1.4 long */
+const gR=new THREE.Group();scB.add(gR);
+const mRes=M(0xd9c39a,{emissive:0xff3a10,emissiveIntensity:0});
+add(gR,cyl(0.19,0.9,mRes,0,0.34,0,0,Math.PI/2),'res');
+[-0.45,0.45].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(0.21,20,14),mRes);e.scale.x=0.55;e.position.set(x,0.34,0);add(gR,e,'res')});
+[-0.62,0.62].forEach(x=>add(gR,cyl(0.025,0.34,mLead,x,0.17,0)));
+[-0.55,0.55].forEach(x=>add(gR,cyl(0.025,0.16,mLead,x,0.34,0,0,Math.PI/2)));
+const bands=[-0.27,-0.12,0.03,0.27].map(x=>add(gR,cyl(0.197,0.07,new THREE.MeshStandardMaterial({color:0x111111,roughness:.5}),x,0.34,0,0,Math.PI/2),'res'));
+const BC=[0x111111,0x7a4a21,0xd42222,0xff6a00,0xffd800,0x22a033,0x2255ff,0xa040d0,0x888888,0xeeeeee];
+/* LED, built along local x */
+const gL=new THREE.Group();scB.add(gL);
+const mLed=M(0xff3326,{transparent:true,opacity:.92,emissive:0xff2a15,emissiveIntensity:0,roughness:.25});
+add(gL,cyl(0.28,0.42,mLed,0,0.5,0),'led');
+const dome=new THREE.Mesh(new THREE.SphereGeometry(0.28,24,12,0,Math.PI*2,0,Math.PI/2),mLed);dome.position.set(0,0.71,0);add(gL,dome,'led');
+add(gL,cyl(0.33,0.06,mLed,0,0.3,0),'led');
+[-1,1].forEach(s=>{add(gL,cyl(0.025,0.3,mLead,s*0.62,0.15,0));add(gL,cyl(0.025,0.5,mLead,s*0.37,0.3,0,0,Math.PI/2))});
+const ledLight=new THREE.PointLight(0xff3a20,0,7);scB.add(ledLight);
+const SLOT=[{p:V3(1.9,0,-1.8),r:0},{p:V3(4,0,0),r:-Math.PI/2}];
+function place(){const a=S.swap?1:0;gR.position.copy(SLOT[a].p);gR.rotation.y=SLOT[a].r;gL.position.copy(SLOT[1-a].p);gL.rotation.y=SLOT[1-a].r;
+  ledLight.position.copy(gL.position).add(V3(0,1.3,0))}
+/* test points */
+const TPS={TP1:[P(-3,-2.6),P(-3,-1.8)],TP2:[P(0.2,-2.6),P(0.2,-1.8)],TP3:[P(4.8,-1.25),P(4,-1.25)],TP4:[P(0,2.6),P(0,1.8)]};
+const gTP=new THREE.Group();scB.add(gTP);
+Object.entries(TPS).forEach(([id,[p,q]])=>{
+  add(gTP,bar(p,q,0.12,0.03,0.015,mCu),'cu');add(gTP,cyl(0.22,0.08,mGold,p.x,0.04,p.z));add(gTP,cyl(0.08,0.09,M(0x0b110e),p.x,0.045,p.z));
+  const h=cyl(0.42,0.3,mGold,p.x,0.15,p.z);h.visible=false;h.userData.tp=id;gTP.add(h);hits.push(h)});
+const cone=c=>{const m=new THREE.Mesh(new THREE.ConeGeometry(0.13,0.5,18),M(c,{emissive:c,emissiveIntensity:.25}));m.rotation.x=Math.PI;scB.add(m);return m};
+const prRed=cone(0xe8332a),prBlk=cone(0x444444);
+/* voltage fence */
+const NS=Math.ceil(LT/0.06),fGeo=new THREE.BufferGeometry(),fPos=new Float32Array(NS*6),fCol=new Float32Array(NS*6),idx=[];
+for(let k=0;k<NS-1;k++){const a=k*2;idx.push(a,a+1,a+2,a+1,a+3,a+2)}
+fGeo.setAttribute('position',new THREE.BufferAttribute(fPos,3));fGeo.setAttribute('color',new THREE.BufferAttribute(fCol,3));fGeo.setIndex(idx);
+const fence=new THREE.Mesh(fGeo,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.38,side:THREE.DoubleSide,depthWrite:false}));scB.add(fence);
+const tGeo=new THREE.BufferGeometry(),tPos=new Float32Array(NS*3),tCol=new Float32Array(NS*3);
+tGeo.setAttribute('position',new THREE.BufferAttribute(tPos,3));tGeo.setAttribute('color',new THREE.BufferAttribute(tCol,3));
+const topLine=new THREE.Line(tGeo,new THREE.LineBasicMaterial({vertexColors:true}));scB.add(topLine);
+const cHot=new THREE.Color(0xff5a3c),cCold=new THREE.Color(0x4aa3ff),tmpC=new THREE.Color(),tmpV=V3();
+/* charges & electrons */
+const NP=72,parts=new THREE.InstancedMesh(new THREE.SphereGeometry(0.075,10,8),new THREE.MeshBasicMaterial({color:0xffe7a0}),NP);scB.add(parts);
+const elec=new THREE.InstancedMesh(new THREE.SphereGeometry(0.05,8,6),new THREE.MeshBasicMaterial({color:0x5aa8ff}),NP);scB.add(elec);
+const dummy=new THREE.Object3D();let flow=0,wflow=0;
+const smoke=[...Array(14)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,10,8),new THREE.MeshBasicMaterial({color:0x9aa39e,transparent:true,opacity:0,depthWrite:false}));scB.add(m);return{m,life:0}});
+let smokeT=0,flash=0;
+/* board labels */
+const Lsrc=lab('b','',V3(-4.85,1.2,0.4),'part'),Lsw=lab('b','',V3(-1.4,0.1,-1.45),'part',()=>S.hasSw,'down'),Lres=lab('b','',V3(),'part',()=>S.hasR,'down'),Lled=lab('b','',V3(),'part',null,'left');
+const Ltp={};const TPM={TP1:'up',TP2:'up',TP3:'right',TP4:'down'};Object.entries(TPS).forEach(([id,[p]])=>Ltp[id]=lab('b','',V3(p.x+(id==='TP3'?0.2:0),0.1,p.z+(id==='TP4'?0.25:id==='TP3'?0:-0.25)),'tp',()=>S.tpOn,TPM[id]));
+
+const INFO={
+src:['Power supply','The pump from the water model. It holds a constant voltage between plus and minus. How much current flows is decided not by the supply but by the parts in the circuit. Minus is zero, “ground” (GND).'],
+sw:['Switch','A valve on the pipe. Closed: resistance is almost zero. Open: current is zero, and the full source voltage sits across its contacts. Click it to toggle.'],
+res:['Resistor','A narrow section of pipe: it resists current, more ohms means less current. The stripes are the value: two digits, then how many zeros to add, gold means ±5% tolerance. Turns excess voltage into heat; a small one handles 0.25 W.'],
+led:['LED','A step about 1.9 V high (for red). Below the step it’s shut, above it opens wide and barely limits current by itself. That’s why it always needs a resistor. Passes current in one direction only.'],
+cu:['Copper trace','A wide pipe: resistance is almost zero, so no voltage is lost along it.'],
+tp:['Test point','A pad that’s easy to touch with a multimeter probe.']};
+const showInfo=k=>{$('#infoT').textContent=INFO[k][0];$('#infoP').textContent=INFO[k][1];$('#info').hidden=false};
+$('#infoX').onclick=()=>$('#info').hidden=true;
+
+/* picking */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
+const shown=o=>{if(o.userData.tp)return S.tpOn;while(o){if(!o.visible)return false;o=o.parent}return true};
+cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+cv.addEventListener('pointerup',e=>{if(!down||curSc!=='b')return;const dx=e.clientX-down[0],dy=e.clientY-down[1];down=null;if(dx*dx+dy*dy>49)return;
+  const r=cv.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,cam);
+  const h=ray.intersectObjects(hits.filter(shown),false)[0];if(!h)return;const u=h.object.userData;
+  if(u.tp){if(!STEPS[S.step].ui.includes('meter'))return;if(S.next==='red'){S.red=u.tp;S.next='black'}else{S.black=u.tp;S.next='red'}}
+  else{S.seen.add(u.part);showInfo(u.part);if(u.part==='sw'&&STEPS[S.step].ui.includes('bSw')){S.closed=!S.closed;S.swT=true}}
+  update()});
+
+/* ---------- lesson ---------- */
+const pair=(a,b)=>(S.red===a&&S.black===b)||(S.red===b&&S.black===a);
+const ALL={R:true,sw:true,tp:true};
+const STEPS=[
+{sc:'w',part:'Basics',t:'Voltage is height',s:"<b>Voltage</b> is how much “higher” one point is than another, in volts (V). A pump lifts water; a power supply lifts charges. The height is there even when the water stands still.",bt:["-", "Like plumbing", "Height above what?", "Voltage without current"],ui:['tU','tnU'],
+ b:'<p><b>Voltage</b> is the difference in “height” between two points. The unit is the <b>volt (V)</b>.</p><p>Picture a water loop: the pump lifts water from the lower pipe to the upper one. The higher it lifts, the harder the water pushes on the way down. A power supply does the same with electric charges: a 12 V supply lifts them to a “height” of 12 V. The red bracket on the left shows that height.</p><p>Height is always measured <b>from something</b>. “It’s 12 volts here” means “12 volts above ground”. Ground (GND) is the lower pipe, the source minus: 0 V.</p><p>The valve at the top is closed: the water stands still, but the height is still there. <b>Voltage can exist without current.</b></p>',
+ task:'Move the pump and watch the height change',ok:()=>S.tMoved},
+{sc:'w',part:'Basics',t:'Current is flow',s:"<b>Current</b> is how much water passes through a cross-section of pipe per second, in amps (A). In a closed loop it’s the same everywhere.",bt:["Units", "Same all around the loop", "Which way it flows"],ui:['tU','tnU','tnI'],
+ b:'<p><b>Current</b> is how much charge passes through a cross-section of pipe per second. The unit is the <b>amp (A)</b>. 1 A is roughly 6×10¹⁸ electrons per second, so electronics usually works in milliamps: 1 mA = 0.001 A.</p><p>The valve is open and water flows around the loop. Look at the two blue counter rings on different pipes: they show the same number. In one closed loop <b>the current is the same everywhere</b> : whatever flows in, flows out.</p><p class="note">Direction: by convention, current flows from plus to minus. Real electrons in copper crawl the other way; the convention was set before the electron was discovered. It doesn’t affect any calculation, and every schematic uses the conventional direction.</p>',
+ task:'Set the pump to 0 V and the flow stops',ok:()=>S.valve&&S.tU===0},
+{sc:'w',part:'Basics',t:'Resistance is a narrow pipe',s:"<b>Resistance</b> is how narrow the pipe is, in ohms (Ω). Ohm’s law ties it all together: <b>I = U / R</b>.",bt:["Narrow section", "Ohm’s law", "Rearranging the formula", "Where the height is lost"],ui:['tU','tR','tnU','tnI','tnR','tfI'],
+ b:'<p><b>Resistance</b> is how much a part resists current. The unit is the <b>ohm (Ω)</b>. In plumbing it’s a narrow section: the narrower it is, the less water gets through at the same height.</p><p>All three quantities are tied together by <b>Ohm’s law: I = U / R</b>. Current (A) = voltage (V) / resistance (Ω). Raise the pump and current goes up. Narrow the pipe and current drops.</p><p>From the same formula: <b>R = U / I</b> and <b>U = I × R</b>. Check yourself with units, like types in code: volts / ohms = amps, volts / amps = ohms.</p><p>And notice: all the height is lost in the narrow section. Wide pipes barely resist, so the height doesn’t drop along them.</p>',
+ task:'Get a current of 10 mA by adjusting the pump and the resistance',ok:()=>{const w=water();return Math.abs(w.I-0.01)<0.001}},
+{sc:'w',part:'Basics',t:'Power is work and heat',s:"<b>Power</b> is how much energy per second turns into heat or work, in watts (W): <b>P = U × I</b>. The narrow section heats up.",bt:["What it is", "Formula", "Why the resistor heats up"],ui:['tU','tR','tnU','tnI','tnR','tnP','tfI'],
+ b:'<p><b>Power</b> is how much energy per second turns into work, light or heat. The unit is the <b>watt (W)</b>. In plumbing, both the height the water falls from and how much of it flows matter: a tall waterfall with a thin stream and a low one with a wide flow can turn a mill equally well.</p><p><b>P = U × I</b> : power = voltage × current.</p><p>Plug Ohm’s law in and you get <b>P = I × I × R</b>. A narrow section carrying noticeable current heats up. A small resistor handles only 0.25 W.</p>',
+ task:'Find a setting where the narrow section overheats (more than 0.25 W)',ok:()=>water().P>P_RATED},
+{sc:'w',part:'Basics',t:'Units and prefixes',s:"Prefixes go in steps of 1000: <b>m</b> is a thousandth, <b>k</b> is a thousand. On schematics the letter replaces the decimal point: <b>4k7</b> = 4.7 kΩ.",bt:["Cheat sheet", "Prefixes", "How schematics write it", "In everyday life"],ui:['tU','tR','tnU','tnI','tnR','tnP','tfI'],
+ b:'<table><tr><th>Quantity</th><th>Symbol</th><th>Unit</th><th>Water</th></tr><tr><td>Voltage</td><td>U (or V)</td><td>volt, V</td><td>height</td></tr><tr><td>Current</td><td>I</td><td>amp, A</td><td>flow</td></tr><tr><td>Resistance</td><td>R</td><td>ohm, Ω</td><td>narrowness</td></tr><tr><td>Power</td><td>P</td><td>watt, W</td><td>strength of the flow</td></tr></table><p>Prefixes in steps of 1000: <b>m</b> (milli) is a thousandth, <b>µ</b> is a millionth, <b>k</b> is a thousand, <b>M</b> is a million. 10 mA = 0.01 A, 4.7 kΩ = 4700 Ω.</p><p>Schematics write values with a letter in place of the decimal point, so the dot can’t get lost in print: <b>4k7</b> = 4.7 kΩ, <b>2R2</b> = 2.2 Ω.</p><p class="note">In everyday life: a “5V ⎓ 3A” charger gives 5 V × 3 A = 15 W.</p><div class="quiz"><input id="q1a" inputmode="decimal" placeholder="How many ohms is 4k7?" aria-label="How many ohms is 4k7"><button id="q1b">Check</button></div><p class="fb" id="q1f"></p>',
+ task:'Answer how many ohms 4k7 is',ok:()=>S.q1},
+{sc:'b',part:'Building the board',t:'Connecting the LED directly',s:"Swapping water for copper: pump → 12 V supply, pipes → traces. We connect an LED straight to the supply.",bt:["Water → copper", "The LED as a step", "-"],ui:['bPower','bNums'],build:{R:false,sw:false,tp:false},map:false,
+ enter:()=>{S.powered=false;S.ledDead=false;S.resDead=false;S.V=12;S.closed=true;S.swap=false},
+ b:'<p>Moving from water to copper. The pump is the <b>power supply</b> (a 12 V supply), the wide pipes are <b>copper traces</b> on the board.</p><p>We connect an <b>LED</b>to the source. In plumbing it’s like a step: while the “height” is below ~1.9 V no current flows through it, and above that it opens wide.</p><p>Power it on and see what happens.</p>',
+ after:'<p><b>Why it burned.</b> Only the circuit’s resistance limits current, and copper plus an open LED have almost none. By Ohm’s law I = U / R: if R is close to zero, the current is huge, around an amp, while the LED’s limit is 0.05 A. The chip overheated in milliseconds.</p><p>We need a part that resists current: a narrow section of pipe.</p>',
+ task:'Press “Power on”',ok:()=>S.ledDead},
+{sc:'b',part:'Building the board',t:'Adding a resistor',s:"We add a 1 kΩ resistor, our narrow section. Current drops to ~10 mA and the LED survives.",bt:["-", "Calculating the current", "The price is heat", "-"],ui:['bNums','bF'],build:{R:true,sw:false,tp:false},map:false,
+ enter:()=>{S.powered=true;S.ledDead=false;S.resDead=false;S.ri=9;S.V=12},
+ b:'<p>We add a <b>resistor</b> of 1 kΩ, our narrow section. The LED is a fresh one in place of the burnt one.</p><p>The LED takes its ~1.9 V, and the remaining 10.1 V drops across the resistor. Current by Ohm’s law: 10.1 V / 1000 Ω ≈ <b>10 mA</b> , five times below the limit, so the LED glows happily.</p><p>The resistor pays for this with heat: P = 10.1 V × 0.01 A ≈ 0.1 W, with 0.25 W allowed.</p><p>Click the resistor and the LED to see what they are.</p>',
+ task:'Click the resistor and the LED',ok:()=>S.seen.has('res')&&S.seen.has('led')},
+{sc:'b',part:'Building the board',t:'Adding a switch',s:"A switch is a valve in the loop. Open it and current stops everywhere in the loop at once.",bt:["-", "The lights are current", "Real electrons", "Why the light comes on instantly"],ui:['bSw','bEl','bNums','bF'],build:{R:true,sw:true,tp:false},map:false,enter:()=>{S.powered=true},
+ b:'<p>To turn the light on without pulling wires, we put a <b>switch</b> in the loop: a valve on the pipe.</p><p>The lights on the traces are current. In one loop it’s the same everywhere, so the lights run at the same speed around the whole circuit. Open the switch and current stops everywhere at once.</p><p>The lights run from plus to minus: that’s the conventional current direction. The “Show electrons” button adds blue dots: the real electrons, crawling the other way.</p><p class="note">Real electrons actually crawl very slowly, fractions of a millimetre per second. The light comes on instantly because the “push” travels down the wire at nearly the speed of light and shifts all the charges at once, like in a pipe completely full of water.</p>',
+ task:'Flip the switch and turn on “Show electrons”',ok:()=>S.swT&&S.el},
+{sc:'b',part:'Building the board',t:'Test points and the multimeter',s:"A multimeter measures the <b>difference</b> between the red and black probes. Click a TP: first click places the red probe, second the black.",bt:["Test points", "At a point vs across a part", "How to measure", "Kirchhoff’s law"],ui:['meter','bMap','bSw','bNums'],build:ALL,map:true,enter:()=>{S.closed=true;S.red='TP1';S.black='TP4';S.next='red'},
+ b:'<p>We added yellow <b>test points</b> TP1–TP4, where you touch the multimeter probes. The red-blue fence above the traces is a height map, like in the water model.</p><ul><li><b>Voltage at a point</b> is its height relative to ground. It’s labelled at each TP.</li><li><b>Drop across a part</b> is the difference between its two legs: how much the height fell as current passed through it. The numbers in the corner of the scene show it.</li></ul><p>A multimeter measures the difference between the red and black probes. The first click on a TP places the red probe, the second the black.</p><p><b>Kirchhoff’s law:</b> the drops around a loop add up to the source voltage. The source lifted by 12 V, so together the parts must bring it down by 12.</p>',
+ after:'<p>10.1 + 1.9 = 12. It adds up. Open the switch and measure TP1–TP2: current disappears and all 12 V end up across the gap.</p>',
+ task:'Measure the drop across the resistor (TP2–TP3) and across the LED (TP3–TP4)',ok:()=>S.meas.has('TP2-TP3')&&S.meas.has('TP3-TP4')},
+{sc:'b',part:'Building the board',t:'The LED holds its own voltage',s:"The LED always takes ~1.9 V and the resistor gets the rest. The order of parts in the loop doesn’t matter.",bt:["Trap", "Why 1.9 V", "The box picture", "“Before” and “after”"],ui:['meter','bMap','bSwap','bNums'],build:ALL,map:true,enter:()=>{S.closed=true},
+ b:'<p>A common trap: thinking the resistor comes “first”, spends its share, and the LED gets what’s left. Voltage isn’t used up along the way like fuel. All the heights settle at once, across the whole circuit.</p><p>When current flows through an LED, its legs always differ by about 1.9 V. The lower leg is at ground (0 V), so the upper one is at 1.9 V. The resistor gets the rest: 12 − 1.9 = 10.1 V. This doesn’t depend on resistance; only the current does.</p><p>A box 1.9 m tall stands on the floor (the LED), and a rubber band stretches 12 m from the ceiling to its lid (the resistor). The lid is at 1.9 m because of the box, not the band.</p><p class="note">And “before” and “after” is just a convention: for electrons running from minus, the LED actually comes first.</p>',
+ after:'<p>The drops are the same: 10.1 V across the resistor and 1.9 V across the LED. Only the height of the middle point TP3 changed. The order of parts in one loop changes nothing.</p>',
+ task:'Swap the parts and compare the drops',ok:()=>S.swap},
+{sc:'b',part:'Building the board',t:'Choosing a resistor',s:"Recipe: <b>R = (supply − 1.9 V) / desired current</b>, then the nearest standard value.",bt:["Recipe", "Example", "In real life"],ui:['bR','bMap','bNums','bF'],build:ALL,map:false,enter:()=>{S.ri=12;S.V=12;S.closed=true},
+ b:'<p>Right now it’s 10 kΩ and the LED barely glows. The recipe everyone uses:</p><ol><li>Decide how much current the LED needs (usually 5–15 mA).</li><li>Voltage across the resistor: supply minus 1.9 V.</li><li><b>R = U / I.</b></li><li>Pick the nearest standard value.</li></ol><p>Example: from an ESP32 (3.3 V) we want 10 mA → (3.3 − 1.9) / 0.01 = 140 Ω → use 150.</p><p>In real circuits you usually don’t tweak the voltage; it’s set by the supply rail (12, 5 or 3.3 V). You tweak the resistor.</p>',
+ task:'At 12 V, pick a resistor for about 10 mA',ok:c=>Math.abs(S.V-12)<0.05&&S.closed&&!c.gap&&Math.abs(c.I-0.01)<0.0015},
+{sc:'b',part:'Building the board',t:'What burns first',s:"There’s one current in the loop but different limits: the LED fears <b>current</b>, the resistor fears <b>heat</b>.",bt:["One current for all", "Part limits", "Not obvious", "Where the energy goes"],ui:['bV','bR','bMap','bNums','bF'],build:ALL,map:false,enter:()=>{S.closed=true},
+ b:'<p>The parts in one loop carry the same current. There’s no such thing as overloading “the circuit in general”: each part has its own limit, and the one whose limit is exceeded first dies.</p><ul><li><b>LED</b> is limited by <b>current</b>: 20–25 mA long term, around 50 mA max. The chip is smaller than a millimetre and overheats in milliseconds.</li><li><b>Resistor</b> is limited by <b>heat</b>: P = I × I × R, a small one handles 0.25 W. It’s bulkier, so it heats up and smokes for a while first.</li></ul><p>At 0 Ω the resistor doesn’t heat at all (I × I × 0 = 0), and all that huge current goes through the LED. That’s why without a resistor it’s the LED that burns. At 220–470 Ω the resistor starts suffering first.</p><p>The LED consumes power too: 1.9 V × I. The corner of the scene shows that resistor heat plus LED power equals exactly what the source delivered.</p>',
+ task:'Overheat the resistor or burn the LED',ok:c=>c.P>P_RATED||S.ledDead||S.resDead},
+{sc:'b',part:'Building the board',t:'Your turn',s:"An LED from USB (5 V) needs 15 mA. How many ohms?",bt:["-", "Hint"],ui:['bV','bR','bNums','bF'],build:ALL,map:false,
+ b:'<p>A real-life problem: an LED powered from USB (5 V), and we want 15 mA. How many ohms do we need?</p><p class="note">From I = U / R it follows that <b>R = U / I</b>. First find the voltage across the resistor (5 V minus 1.9 V), then divide it by the current in amps.</p><div class="quiz"><input id="qa" inputmode="decimal" placeholder="Answer in ohms" aria-label="Answer in ohms"><button id="qb">Check</button></div><p class="fb" id="qf"></p>',
+ task:'Solve the problem',ok:()=>S.quiz},
+{sc:'b',part:'At home',t:'Homework on real hardware',s:"Four multimeter measurements on your own hardware.",bt:["Next"],ui:[],build:ALL,map:false,
+ b:'<ul class="hw">'+['Multimeter: black probe in the COM jack, red in the V jack. Set the dial to DC voltage (V with a straight line), 20 V range.','Measure your power supply: black on minus, red on plus. If it shows “−12”, the probes are swapped, no harm done.','Connect the ESP32 over USB and measure between the 3V3 and GND pins. It should read about 3.3 V.','On the same board, between 5V and GND: about 5 V from USB.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${t}</label></li>`).join('')+'</ul><p class="warnbox">Voltage is measured <b>in parallel</b>: probes on two points. Current is measured <b>in series</b>: you break the circuit and route the current through the meter. So never put the probes across a source while the red one is in the A or mA jack: inside it’s almost a wire, and you’ll get a short circuit.</p><p class="note">Next up, lesson 1: 12 V input, fuse, diode, reverse-polarity protection and a voltage divider.</p>',
+ task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+
+function setUI(ui){
+  document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
+  document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden));
+}
+
+function renderBody(st){
+  $('#stepS').innerHTML=st.s||'';
+  const t=document.createElement('template');t.innerHTML=st.b||'';const X=$('#stepX'),Bk=$('#stepB');X.innerHTML='';Bk.innerHTML='';
+  const els=[...t.content.children],groups=[];
+  for(const el of els){
+    if(el.matches('.quiz,.fb,.hw,.warnbox')){X.appendChild(el);continue}
+    const prev=groups[groups.length-1];
+    if(prev&&/^(UL|OL)$/.test(el.tagName)&&prev.els.length===1&&/:\s*$/.test(prev.els[0].textContent))prev.els.push(el);else groups.push({els:[el]});
+  }
+  const bt=st.bt||[];let n=0;
+  groups.forEach((g,i)=>{const title=bt[i];if(title==='-')return;
+    const d=document.createElement('div');d.className='blk'+(g.els[0].classList.contains('note')?' note':'');
+    if(title){const h=document.createElement('h3');h.textContent=title;d.appendChild(h)}
+    g.els.forEach(e=>{e.classList.remove('note');d.appendChild(e)});Bk.appendChild(d);n++});
+  $('#more').hidden=!n;$('#moreN').textContent=n;
+}
+function renderStep(){
+  const st=STEPS[S.step];S.valve=S.step!==0;if(st.enter)st.enter();
+  if(st.build){S.hasR=st.build.R;S.hasSw=st.build.sw;S.tpOn=st.build.tp;S.map=st.map}
+  useScene(st.sc);setUI(st.ui);$('#info').hidden=true;
+  $('#stepN').innerHTML=`<span class="part">${st.part}</span>`;$('#stepC').textContent=`${S.step+1} / ${STEPS.length}`;$('#stepT').textContent=st.t;renderBody(st);
+  $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1;
+  if(S.step===4){const go=()=>{const v=parseFloat(($('#q1a').value||'').replace(',','.'));
+      if(v===4700){S.q1=true;$('#q1f').textContent='Correct: 4k7 = 4.7 kΩ = 4700 Ω.'}else $('#q1f').textContent=v===4.7?'That’s in kilohms. And in ohms?':'Not quite. k means “thousand”, and the letter sits where the decimal point goes: 4.7 × 1000.';update()};
+    $('#q1b').onclick=go;$('#q1a').onkeydown=e=>{if(e.key==='Enter')go()}}
+  if(S.step===12){const go=()=>{const v=parseFloat(($('#qa').value||'').replace(',','.'));let m;
+      if(v>=180&&v<=240){S.quiz=true;m='Correct: (5 − 1.9) / 0.015 ≈ 207 Ω. That value doesn’t exist, so take the nearest standard one: 220 Ω. <button id="qs">Put it on the board</button>'}
+      else if(v>=300&&v<=360)m='You forgot to subtract the LED voltage: the resistor gets 5 − 1.9, not 5 V.';
+      else if(v>=0.15&&v<=0.25)m='Almost: convert the current to amps. 15 mA = 0.015 A, but you divided by 15.';
+      else if(v>0&&v<0.05)m='You divided the wrong way round: current by voltage. You need R = U / I. Unit check: volts / amps = ohms.';
+      else if(v>0&&v<1)m='That resistance is too small, it’s almost a wire and the LED will burn. R = U / I = (5 − 1.9) / 0.015.';
+      else m='Not quite. How many volts are left for the resistor? Divide that by 0.015 A.';
+      $('#qf').innerHTML=m;const qs=$('#qs');if(qs)qs.onclick=()=>{S.V=5;S.ri=5;S.closed=true;update()};update()};
+    $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
+  if(S.step===13)[0,1,2,3].forEach(i=>$('#hw'+i).onchange=e=>{hw[i]=e.target.checked;try{localStorage.setItem('l0hw',JSON.stringify(hw))}catch(_){}update()});
+  buildWater();place();update();
+}
+$('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="Step ${i+1}: ${st.t}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+[...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
+
+$('#tu').oninput=e=>{S.tU=+e.target.value;S.tMoved=true;buildWater();update()};
+$('#tr').oninput=e=>{S.tri=+e.target.value;buildWater();update()};
+$('#power').onclick=()=>{S.powered=true;update()};
+$('#v').oninput=e=>{S.V=+e.target.value;update()};
+$('#r').oninput=e=>{S.ri=+e.target.value;update()};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.V=+b.dataset.v;update()});
+$('#sw').onclick=()=>{S.closed=!S.closed;S.swT=true;update()};
+$('#el').onclick=()=>{S.el=!S.el;update()};
+$('#map').onclick=()=>{S.map=!S.map;update()};
+$('#swap').onclick=()=>{S.swap=!S.swap;place();update()};
+$('#fix').onclick=()=>{S.ledDead=false;S.resDead=false;update()};
+
+let C=solve();
+function update(){
+  C=solve();
+  if(!S.ledDead&&C.I>LED_MAX){S.ledDead=true;flash=1;C=solve()}
+  if(!S.resDead&&C.P>P_BURN){S.resDead=true;C=solve()}
+  const st=STEPS[S.step],ui=st.ui;
+  /* water numbers */
+  const w=water();
+  $('#tu').value=S.tU;$('#tr').value=S.tri;$('#tuO').textContent=fV(S.tU);$('#trO').textContent=fR(w.R);
+  $('#wU').textContent=fV(w.U);$('#wI').textContent=fI(w.I);$('#wR').textContent=fR(w.R);$('#wP').textContent=fP(w.P);
+  $('#wF').innerHTML=`I = U / R = ${nf(w.U,1)} V / ${w.R} Ω = <b>${fI(w.I)}</b>`+(ui.includes('tnP')?`<br>P = U × I = ${nf(w.U,1)} V × ${nf(w.I,4)} A = <b>${fP(w.P)}</b>`+(w.P>P_RATED?' , over 0.25 W, overheating':''):'');
+  LwU.el.textContent='U = '+fV(w.U);LwN.el.textContent='Narrow section · '+fR(w.R);LwC1.el.textContent=LwC2.el.textContent=fI(w.I);LwGa.el.textContent='Gauge: '+fV(w.U)+' above ground';LwTh.el.textContent='Heat: '+(w.P*1000<1000?Math.round(w.P*1000)+' mW':w.P.toFixed(2)+' W')+' · limit 0.25';
+  /* board 3D */
+  jSw.visible=!S.hasSw;gSw.visible=S.hasSw;jR.visible=!S.hasR;gR.visible=S.hasR;gTP.visible=S.tpOn;
+  lever.rotation.z=S.closed?0:0.6;
+  const R=RS[S.ri],s=String(R),cols=R===0?[BC[0]]:[BC[+s[0]],BC[+s[1]],BC[s.length-2],0xc9a227];
+  bands.forEach((b,i)=>{b.visible=i<cols.length;if(cols[i]!==undefined)b.material.color.setHex(cols[i])});
+  mRes.color.setHex(S.resDead?0x2a2420:0xd9c39a);mRes.emissiveIntensity=S.resDead?0:Math.min(1,C.P/P_RATED)*1.1;
+  mLed.color.setHex(S.ledDead?0x3b2622:0xff3326);mLed.emissiveIntensity=C.I>0?Math.min(3,0.35+C.I/0.01*0.6):0;
+  const nv={Sp:C.V,A:C.V,B:C.Vb,C:C.Vb,D:C.Vm,E:C.Vm,F:C.Vm,G:0,H:0,Sm:0,Q1:C.V/5.6,Q2:C.V*4.6/5.6};
+  for(let k=0;k<NS;k++){const o=at(k/(NS-1)*LT*0.9999);ptAt(o,tmpV);const g=SEG[o.i],v=nv[g[0]]+(nv[g[1]]-nv[g[0]])*o.t,h=0.04+v*0.2;
+    tmpC.copy(cCold).lerp(cHot,Math.min(1,v/12));
+    fPos.set([tmpV.x,0.04,tmpV.z,tmpV.x,h,tmpV.z],k*6);fCol.set([tmpC.r*.35,tmpC.g*.35,tmpC.b*.35,tmpC.r,tmpC.g,tmpC.b],k*6);
+    tPos.set([tmpV.x,h,tmpV.z],k*3);tCol.set([tmpC.r,tmpC.g,tmpC.b],k*3)}
+  fGeo.attributes.position.needsUpdate=fGeo.attributes.color.needsUpdate=tGeo.attributes.position.needsUpdate=tGeo.attributes.color.needsUpdate=true;
+  fGeo.computeBoundingSphere();tGeo.computeBoundingSphere();fence.visible=topLine.visible=S.map;
+  const showM=ui.includes('meter');prRed.visible=prBlk.visible=showM;
+  const pr=(m,id)=>{const p=TPS[id][0];m.position.set(p.x,0.5,p.z)};pr(prRed,S.red);pr(prBlk,S.black);if(S.red===S.black)prBlk.position.x+=0.3;
+  if(showM&&S.red!==S.black)S.meas.add([S.red,S.black].sort().join('-'));
+  elec.visible=S.el;
+  Lsrc.el.textContent='Source · '+fV(C.V);Lsw.el.textContent='Switch · '+(S.closed?'closed':'open');
+  Lres.el.textContent='Resistor · '+fR(R)+(S.resDead?' · burnt':'');Lled.el.textContent='LED'+(S.ledDead?' · burnt':'');
+  Object.keys(TPS).forEach(id=>Ltp[id].el.textContent=id+' · '+fV(C.tp[id]));
+  const m=C.tp[S.red]-C.tp[S.black];$('#lcd').innerHTML=(Math.abs(m)<0.005?'0.00':m.toFixed(2))+'<small>V</small>';
+  $('#pRed').textContent=S.red;$('#pBlk').textContent=S.black;$('#pNext').textContent='Click a TP to place the '+(S.next==='red'?'red':'black')+' probe';
+  /* board panel */
+  $('#v').value=S.V;$('#r').value=S.ri;$('#vO').textContent=fV(S.V);$('#rO').textContent=fR(R)+(R===0?' (jumper)':'');
+  $('#sw').setAttribute('aria-pressed',S.closed);$('#sw').textContent=S.closed?'Switch closed':'Switch open';
+  $('#el').setAttribute('aria-pressed',S.el);$('#map').setAttribute('aria-pressed',S.map);$('#swap').setAttribute('aria-pressed',S.swap);
+  $('#power').disabled=S.powered;$('#power').textContent=S.powered?'Power on':'Power on';
+  $('#fix').hidden=!((S.ledDead||S.resDead)&&(ui.includes('bR')||ui.includes('bV')));
+  $('#nI').textContent=fI(C.I);$('#nUR').textContent=S.hasR?fV(C.UR):'—';$('#nUL').textContent=fV(C.UL);$('#nP').textContent=S.hasR?fP(C.P):'—';
+  const led=S.ledDead?['r','LED burnt']:C.I===0?['m','LED off']:C.I<LED_WARN?['g','LED lit']:['y','Too bright, won’t last long'];
+  const res=!S.hasR?['m','No resistor']:S.resDead?['r','Resistor burnt']:C.P>P_RATED?['r','Resistor smoking: overheating']:C.P>0.05?['y','Resistor warm']:['g','Resistor cold'];
+  $('#sLed').className='pill '+led[0];$('#sLed').textContent=led[1];$('#sRes').className='pill '+res[0];$('#sRes').textContent=res[1];
+  let f;
+  if(!S.powered)f='Power is off.';
+  else if(C.gap==='sw')f=`Switch open: current is 0, the full voltage (${fV(C.V)}) sits across the gap.`;
+  else if(C.gap==='res')f='The resistor burnt out and became a gap: current is 0, all the voltage is across it.';
+  else if(C.gap==='led')f=S.ledDead?`The LED burnt out and became a gap: current is 0, all the voltage (${fV(C.V)}) is across it.`+(ui.includes('bR')?' Fit a bigger resistor and press “Replace”.':''):'Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.';
+  else if(C.R===0)f='No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.';
+  else{f=`Across the resistor: U = ${fV(C.V)} − ${fV(C.UL)} = <b>${fV(C.UR)}</b><br>Ohm’s law: I = U / R = ${nf(C.UR,1)} V / ${C.R} Ω = <b>${fI(C.I)}</b><br>Heat: P = U × I = <b>${fP(C.P)}</b> (the resistor handles 250 mW)`;
+    if(S.step>=11)f+=`<br>LED: ${nf(C.UL,1)} V × I = ${fP(C.PL)}; the source delivers ${nf(C.V,1)} V × I = <b>${fP(C.V*C.I)}</b> = ${fP(C.P)} + ${fP(C.PL)}`}
+  $('#formula').innerHTML=f;
+  /* task */
+  if(st.ok(C))S.done.add(S.step);saveQ();
+  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  $('#after').hidden=!(ok&&st.after);if(ok&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
+  [...$('#dots').children].forEach((b,i)=>b.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
+}
+
+/* ---------- render loop ---------- */
+let lastW=0;
+function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;if(w<h)cam.setViewOffset(w,h,0,Math.round(h*0.12),w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
+$('#reset').onclick=fit;
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
+function frame(){
+  const dt=Math.min(clock.getDelta(),0.05);const slow=reduce?0.3:1;
+  if(curSc==='w'){
+    const w=water(),sp=w.I>0?Math.min(5,0.4+8*Math.sqrt(w.I)):0;wflow+=sp*dt*slow;imp.rotation.z-=sp*dt*1.5*slow;
+    for(let i=0;i<NW;i++){wAt(wflow+i*WLT/NW,pv);dummy.position.copy(pv);dummy.updateMatrix();drops.setMatrixAt(i,dummy.matrix)}drops.instanceMatrix.needsUpdate=true;
+    if(w.P>P_RATED){smokeT-=dt;if(smokeT<=0){smokeT=0.15;const s=steam.find(o=>o.life<=0);if(s){s.life=1;const t=0.3+Math.random()*0.4;s.m.position.copy(WP[2]).lerp(WP[3],t).add(V3(0,0.2,0))}}}
+    steam.forEach(o=>{if(o.life>0){o.life-=dt*0.6;o.m.position.y+=dt*0.7;o.m.scale.setScalar(1+(1-o.life)*2);o.m.material.opacity=Math.max(0,o.life*0.4)}else o.m.material.opacity=0});
+    ctl.update();if(wCol){const f=Math.min(1.1,w.P/P_RATED*0.5),h=Math.max(0.02,1.6*f);wCol.scale.y=h;wCol.position.y=0.15+h/2}gl.render(scW,cam);
+  }else{
+    const sp=C.I>0?Math.min(6,0.3+6*Math.sqrt(C.I)):0;flow+=sp*dt*slow;
+    for(let i=0;i<NP;i++){ptAt(at(flow+i*LT/NP),pv);dummy.position.set(pv.x,0.11,pv.z);dummy.updateMatrix();parts.setMatrixAt(i,dummy.matrix);
+      ptAt(at(-flow*0.6+i*LT/NP+LT/(NP*2)),pv);dummy.position.set(pv.x,0.2,pv.z);dummy.updateMatrix();elec.setMatrixAt(i,dummy.matrix)}
+    parts.instanceMatrix.needsUpdate=elec.instanceMatrix.needsUpdate=true;
+    ledLight.intensity=flash>0?flash*9:(C.I>0?Math.min(4,C.I/0.02*1.6):0);ledLight.color.setHex(flash>0?0xffffff:0xff3a20);flash=Math.max(0,flash-dt*1.5);
+    if(C.P>P_RATED&&!S.resDead&&S.hasR){smokeT-=dt;if(smokeT<=0){smokeT=0.14;const s=smoke.find(o=>o.life<=0);if(s){s.life=1;s.m.position.copy(gR.position).add(V3((Math.random()-.5)*0.5,0.5,(Math.random()-.5)*0.5))}}}
+    smoke.forEach(o=>{if(o.life>0){o.life-=dt*0.6;o.m.position.y+=dt*0.7;o.m.scale.setScalar(1+(1-o.life)*2.2);o.m.material.opacity=Math.max(0,o.life*0.45)}else o.m.material.opacity=0});
+    Lres.p.copy(gR.position).add(S.swap?V3(-0.45,0.4,0):V3(0,0.1,0.35));Lled.p.copy(gL.position).add(S.swap?V3(0,0.1,0.35):V3(0.35,0.6,0.3));Lres.tr=TR[S.swap?'left':'down'];Lled.tr=TR[S.swap?'down':'right'];
+    ctl.update();gl.render(scB,cam);
+  }
+  const W=stage.clientWidth,H=stage.clientHeight;
+  const ac=cam;labels.forEach(L=>{let vis=L.sc===curSc&&L.vis();if(vis){pv.copy(L.p).project(ac);vis=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1}
+    L.el.style.display=vis?'block':'none';if(vis)L.el.style.transform=`translate(${(pv.x*.5+.5)*W}px,${(-pv.y*.5+.5)*H}px) ${L.tr}`});
+  requestAnimationFrame(frame);
+}
+try{$('#more').open=localStorage.getItem('moreOpen')==='1'}catch(e){}
+$('#more').addEventListener('toggle',()=>{try{localStorage.setItem('moreOpen',$('#more').open?'1':'0')}catch(e){}});
+function saveQ(){const need=STEPS.length-1,ok=[...Array(need).keys()].every(i=>S.done.has(i));$('#lvlDone').hidden=!ok;try{const q=JSON.parse(localStorage.getItem('quest_v1')||'{}');q.steps=q.steps||{};q.done=q.done||{};q.steps[0]=[...S.done];if(ok)q.done[0]=true;localStorage.setItem('quest_v1',JSON.stringify(q))}catch(e){}}
+try{(JSON.parse(localStorage.getItem('quest_v1')||'{}').steps||{})[0]?.forEach(i=>S.done.add(i))}catch(e){}
+renderStep();frame();
+}
+}
+</script>
+</body>
+</html>

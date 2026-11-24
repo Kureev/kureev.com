@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm. Learn by breaking things on a virtual bench.">
+<meta property="og:title" content="Electronics for a robot arm">
+<meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Level 1: Power input</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning, a workbench lesson for a software engineer
+   IDEA the power input of his own robot-arm board, built part by part, each part added after something burns
+   PICTURE live 3D board: 12 V supply, fuse, protection, servo bus, power LED, divider into a 0–3 V meter; water front view for the check valve and the divider
+   COLOUR night bench #0b110e, solder-mask green, copper, water blue, red for + and danger
+   TYPE Manrope 800 + Manrope
+   LAYOUT laptop: 3D stage left, lesson column 410px right; phone: stage on top, lesson below; only the controls a step needs are shown */
+:root{color-scheme:dark;--bg:#0b110e;--panel:#111a16;--card:#16211c;--line:#25352d;--ink:#e8f1ec;--mute:#9db1a6;--cu:#e39a52;--hot:#ff5a3c;--ok:#5fd38d;--warn:#ffc14d}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;overflow:hidden;background:var(--bg)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(11,17,14,.82);border:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+.lb.big{font-size:15px;color:#ffd1c4;border-color:#6b2a1c}
+.lb.flow{color:#bfe3ff;border-color:#24496b}
+.lb.lvl{background:none;border:0;color:var(--mute);font-size:12px;padding:0}
+.lb.bad{color:#ffb39f;border-color:#6b2a1c}
+.lb.good{color:#9ff0c0;border-color:#2c5a3d}
+.lb.dim{color:var(--mute);border-style:dashed;font-weight:400}
+.tools{position:absolute;left:16px;top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.reset{min-height:36px;font-size:14px;background:rgba(22,33,28,.9)}
+.hint{font-size:13px;color:var(--mute);background:rgba(11,17,14,.7);padding:4px 10px;border-radius:8px}
+.info{position:absolute;right:16px;top:14px;width:min(300px,calc(100% - 32px));background:rgba(22,33,28,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.info b{display:block;font-size:15px;margin:0 28px 4px 0}
+.info p{margin:0;color:#cfdcd5}
+.x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}
+.panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
+h1{font:800 31px/1.06 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+.sub{margin:0 0 16px;color:var(--mute);font-size:15px}
+.card,.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.stephead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--mute);font-size:13px;font-weight:600;flex-wrap:wrap}
+.part{color:var(--cu)}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots button{width:13px;height:13px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer}
+.dots button.on{background:var(--ink);border-color:var(--ink)}
+.dots button.done{border-color:var(--ok)}
+.dots button.on.done{background:var(--ok)}
+h2{font:800 22px/1.15 Manrope,sans-serif;margin:8px 0 8px;letter-spacing:-.01em}
+.stepb p,.stepb ol,.stepb ul{margin:0 0 10px}
+.stepb ol,.stepb ul{padding-left:20px}
+.stepb li{margin-bottom:4px}
+.stepb .note{font-size:14px;color:var(--mute)}
+.stepb b{color:#fff}
+.after{border-left:3px solid var(--ok);padding:2px 0 2px 12px;margin:0 0 10px}
+.after p{margin:0 0 8px}
+.task{border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;background:#1f2a1f;border:1px solid #3a4a2a;color:var(--warn)}
+.task.ok{color:var(--ok);border-color:#2c5a3d;background:#15281d}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+button{font:600 15px Manrope,sans-serif;color:var(--ink);background:#1d2a24;border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer}
+button:hover{border-color:#3d5548}
+button:focus-visible,input:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+button.pri{background:var(--ink);color:#0b110e;border-color:var(--ink)}
+button:disabled{opacity:.35;cursor:default}
+.ctl label{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:15px;margin-top:4px}
+output{color:var(--warn);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--cu);cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.row>*{flex:1 1 140px}
+.row button[aria-pressed=true]{border-color:var(--ok);color:var(--ok)}
+.danger{background:#3a1b14;border-color:#a33d22;color:#ffd1c4}
+.fix{width:100%;margin-top:4px;background:#3a1b14;border-color:#6b2a1c;color:#ffb39f}
+.nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.num span{display:block;font-size:13px;color:var(--mute)}
+.num b{font:800 22px/1.2 Manrope,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.num.u b{color:#ff8a70}.num.i b{color:#8fd0ff}.num.p b{color:#ff6a4d}.num.g b{color:#9ff0c0}
+.st{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 0}
+.pill{font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid var(--line)}
+.pill.g{color:var(--ok);border-color:#2c5a3d}.pill.y{color:var(--warn);border-color:#5a4a1f}.pill.r{color:#ff8a70;border-color:#6b2a1c}.pill.m{color:var(--mute)}
+.formula{grid-column:1/-1;margin:0;padding-top:10px;border-top:1px solid var(--line);font-size:14px;line-height:1.6;color:#cfdcd5}
+.hw{list-style:none;padding:0!important;margin:0 0 10px}
+.hw li{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:14px}
+.hw input{width:20px;height:20px;margin-top:2px;accent-color:var(--ok);flex:none}
+.err{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
+@media(max-width:900px){
+html,body{height:auto}
+.app{grid-template-columns:minmax(0,1fr);height:auto}
+.stage{height:62svh;min-height:360px}
+.panel{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}
+.hint{display:none}
+.info{right:10px;top:10px}
+.lb{font-size:11px;padding:2px 5px}
+.lb.part{display:none!important}
+}
+
+.lead{font-size:16px;line-height:1.5;margin:0 0 12px}.lead b{color:#fff}
+.step .card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 0 4px;margin:0 0 10px}
+.step .after{margin:10px 0 0}
+.stepx:empty{display:none}.stepx{margin-top:12px}.stepx p{margin:0 0 10px}
+.stepx table{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 10px}
+.more{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.more summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px;font-weight:700;font-size:15px;color:var(--mute)}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:'';width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.more[open] summary::before{transform:rotate(45deg)}
+.more summary:hover{color:var(--ink)}
+.blocks{display:grid;gap:8px;margin-top:4px}
+.blk{background:#1a2721;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px}
+.blk h3{margin:0 0 4px;font:800 12px/1.3 Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cu)}
+.blk p,.blk ul,.blk ol{margin:0 0 6px}.blk>:last-child{margin-bottom:0}
+.blk ul,.blk ol{padding-left:20px}
+.blk b{color:#fff}
+.blk.note{background:none;border-style:dashed;color:var(--mute);font-size:14px}
+.blk.note h3{color:var(--mute)}
+.blk table{width:100%;border-collapse:collapse;font-size:14px}
+.blk th{text-align:left;color:var(--mute);font-weight:600;font-size:13px;border-bottom:1px solid var(--line);padding:4px 6px 4px 0}
+.blk td{border-bottom:1px solid var(--line);padding:5px 6px 5px 0;vertical-align:top}
+.hud{position:absolute;right:12px;bottom:12px;display:flex;flex-flow:row wrap;justify-content:flex-end;align-content:flex-end;gap:6px;max-width:min(460px,calc(100% - 24px));pointer-events:none;background:none;border:0;padding:0;margin:0}
+.hud .num{display:flex;align-items:baseline;gap:10px;background:rgba(11,17,14,.86);border:1px solid var(--line);border-radius:10px;padding:4px 10px}
+.hud .num span{display:inline;font-size:12px}
+.hud .num b{font-size:18px}
+.hud .st{margin:0;justify-content:flex-end;flex:1 0 100%}.hud .pill{background:rgba(11,17,14,.86)}
+.hud .formula{border:1px solid var(--line);border-radius:10px;background:rgba(11,17,14,.86);padding:7px 10px;font-size:13px;line-height:1.5;text-align:right}
+.hud .formula:empty{display:none}
+@media(max-width:900px){.hud{right:8px;bottom:8px;gap:4px;max-width:calc(100% - 16px)}.hud .num{padding:2px 8px}.hud .num span{font-size:11px}.hud .num b{font-size:15px}.hud .formula{font-size:11px;padding:5px 8px;max-width:100%}}
+
+/* panel v2: one header line, segmented progress, goal row, sticky footer */
+.app{grid-template-columns:minmax(0,1fr) 384px}
+.panel{display:flex;flex-direction:column;padding:0}
+.ph{display:flex;align-items:baseline;gap:10px;padding:16px 20px 0;font-size:13px;color:var(--mute);flex-wrap:wrap}
+.ph .ltitle{color:var(--ink);font-weight:700;font-size:14px}
+.ph .back{margin:0;font-size:13px}
+.step{background:none;border:0;border-radius:0;padding:14px 20px 10px;margin:0;flex:1 0 auto}
+.prog{margin:0 0 2px}
+.ptop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:6px}
+.ptop .part{color:var(--cu)}
+#stepC{font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:3px;flex-wrap:nowrap}
+.dots button{flex:1 1 0;height:16px;min-height:0;padding:0;border:0;border-radius:0;cursor:pointer;background:linear-gradient(var(--line),var(--line)) center/100% 5px no-repeat}
+.dots button.pb{margin-left:7px}
+.dots button.done{background-image:linear-gradient(#2f7a4f,#2f7a4f)}
+.dots button.on{background-image:linear-gradient(var(--ink),var(--ink));background-size:100% 7px}
+.dots button.on.done{background-image:linear-gradient(var(--ok),var(--ok))}
+.dots button:hover{background-size:100% 7px}
+h2{font-size:23px;margin:10px 0 6px}
+.lead{margin:0 0 6px}
+.step .card{border-top:0;padding:6px 0 0;margin:0 0 6px}
+.task{display:flex;gap:10px;align-items:flex-start;background:#1c1f15;border:1px solid #3a3a22;border-radius:12px;padding:10px 12px;color:var(--ink);font-size:15px;font-weight:600;line-height:1.4}
+.task .tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--warn);margin-top:0;position:relative}
+.task.ok{background:#14241b;border-color:#2c5a3d;color:#cfe9da}
+.task.ok .tick{background:var(--ok);border-color:var(--ok)}
+.task.ok .tick::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #0b110e;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.more summary .cnt{font-weight:600;font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:0 7px;margin-left:2px}
+.nav{position:sticky;bottom:0;z-index:3;margin:0;padding:12px 20px;background:var(--panel);border-top:1px solid var(--line);display:flex;gap:10px}
+.nav #prev{flex:none;width:48px;padding:0;font-size:22px;line-height:1}
+.nav #next{flex:1}
+.lvl-done{margin:0 20px 12px!important}
+@media(max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.ph{padding:14px 16px 0}.step{padding:12px 16px 8px}.nav{padding:10px 16px calc(10px + env(safe-area-inset-bottom))}}
+.back{display:inline-block;color:var(--mute);text-decoration:none;font-size:14px;font-weight:600;margin:0 0 10px}.lvl-done{display:block;text-align:center;background:#15281d;border:1px solid #2c5a3d;color:#9ff0c0;border-radius:12px;padding:12px;font-weight:700;text-decoration:none;margin:0 0 14px}.lvl-done[hidden]{display:none}</style>
+</head>
+<body>
+<div class="app">
+  <section class="stage" id="stage">
+    <canvas id="gl" aria-label="3D model of the lesson"></canvas>
+    <div class="labels" id="labels"></div>
+    <section class="hud" id="hud" data-grp aria-live="polite">
+      <div class="num u" data-ui="wnU"><span>Pump</span><b id="wnU"></b></div>
+      <div class="num i" data-ui="wnI"><span>Flow (current)</span><b id="wnI"></b></div>
+      <div class="num p" data-ui="wnD"><span>Drop across the valve</span><b id="wnD"></b></div>
+      <div class="num g" data-ui="wnOut"><span>Divider output</span><b id="wnOut"></b></div>
+      <p class="formula" data-ui="wF" id="wF"></p>
+      <div class="num i" data-ui="nI"><span>Supply current</span><b id="nI"></b></div>
+      <div class="num u" data-ui="nV"><span>Rail voltage</span><b id="nV"></b></div>
+      <div class="num p" data-ui="nP"><span>Heat in the protection</span><b id="nP"></b></div>
+      <div class="num g" data-ui="nTap"><span>At the meter</span><b id="nTap"></b></div>
+      <p class="st" data-ui="pills" id="pills"></p>
+      <p class="formula" data-ui="bF" id="formula"></p>
+    </section>
+    <div class="tools" id="tools"><button id="reset" class="reset">Reset view</button><span class="hint">Drag to rotate · scroll or pinch to zoom · click a part to see what it is</span></div>
+    <aside class="info" id="info" hidden>
+      <button class="x" id="infoX" aria-label="Close">×</button>
+      <b id="infoT"></b><p id="infoP"></p>
+    </aside>
+  </section>
+  <main class="panel">
+    <header class="ph"><a class="back" href="/electronics">← Map</a><span class="lesson">Lesson 1</span><span class="ltitle">Power input</span></header>
+    <article class="step">
+      <div class="prog"><div class="ptop"><span id="stepN"></span><span id="stepC"></span></div><div class="dots" id="dots" role="group" aria-label="Steps"></div></div>
+      <h2 id="stepT"></h2>
+      <div class="lead" id="stepS"></div>
+      <section class="card ctl" data-grp>
+        <div data-ui="wU"><label for="wu">Pump <output id="wuO"></output></label><input type="range" id="wu" min="0" max="12" step="0.05" value="12"></div>
+        <div data-ui="wR1"><label for="w1">Upper narrow section, R1 <output id="w1O"></output></label><input type="range" id="w1" min="0" max="6" step="1" value="3"></div>
+        <div data-ui="wR2"><label for="w2">Lower narrow section, R2 <output id="w2O"></output></label><input type="range" id="w2" min="0" max="6" step="1" value="3"></div>
+        <div class="row"><button id="wrev" data-ui="wRev" aria-pressed="false">Reverse the pump</button><button id="wtype" data-ui="wType" aria-pressed="false">Regular diode (0.7 V)</button><button id="don" data-ui="dOn" aria-pressed="true">Disconnect R2</button></div>
+        <div data-ui="vin"><label for="vin">Supply voltage <output id="vinO"></output></label><input type="range" id="vin" min="9" max="12.6" step="0.1" value="12"></div>
+        <div data-ui="k"><label for="k">Servos stalled <output id="kO"></output></label><input type="range" id="k" min="0" max="6" step="1" value="0"></div>
+        <div data-ui="fuse"><label for="fu">Fuse (change it and a new one goes in) <output id="fuO"></output></label><input type="range" id="fu" min="0" max="6" step="1" value="4"></div>
+        <div data-ui="ledR"><label for="lr">Indicator resistor <output id="lrO"></output></label><input type="range" id="lr" min="0" max="5" step="1" value="0"></div>
+        <div data-ui="divR1"><label for="d1">R1 (top, from +12 V) <output id="d1O"></output></label><input type="range" id="d1" min="0" max="6" step="1" value="6"></div>
+        <div data-ui="divR2"><label for="d2">R2 (bottom, to ground) <output id="d2O"></output></label><input type="range" id="d2" min="0" max="6" step="1" value="0"></div>
+        <div class="row" data-ui="prot"><button id="pD" aria-pressed="false">Schottky diode</button><button id="pF" aria-pressed="false">MOSFET</button></div>
+        <div class="row">
+          <button id="short" class="danger" data-ui="short">Drop a screwdriver</button>
+          <button id="rev" class="danger" data-ui="rev">Swap the wires</button>
+        </div>
+        <button id="fix" class="fix" hidden>Repair burnt parts</button>
+      </section>
+      <div class="task" id="task"></div>
+      <div class="after" id="after" hidden></div>
+      <div class="stepx" id="stepX"></div>
+      <details class="more" id="more"><summary>Details <span class="cnt" id="moreN"></span></summary><div class="blocks stepb" id="stepB"></div></details>
+    </article><a class="lvl-done" id="lvlDone" href="/electronics" hidden>Level complete ✓ Back to the map</a>
+    <div class="nav"><button id="prev" aria-label="Back">‹</button><button id="next" class="pri">Next</button></div>
+
+
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const nf=(x,d)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fV=v=>nf(v,Math.abs(v)<10?2:1)+' V';
+const fI=i=>Math.abs(i)>=1?nf(i,Math.abs(i)>=100?0:1)+' A':nf(i*1000,1)+' mA';
+const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' kΩ':r+' Ω';
+const fP=p=>p<1?nf(p*1000,0)+' mW':nf(p,p>=100?0:1)+' W';
+const fA=a=>nf(a,a%1?1:0)+' A';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+/* ---------- state & physics ---------- */
+const DR=[1000,2200,4700,10000,22000,47000,100000],FU=[1,2,3,5,7.5,10,15],LR=[220,470,1000,2200,4700,10000];
+const VD=0.45,RFET=0.008,PSU_MAX=10,ESP_MAX=3.6;
+let hw=[];try{hw=JSON.parse(localStorage.getItem('l1hw')||'[]')}catch(e){}
+const S={step:0,done:new Set(),seen:new Set(),
+  wU:12,w1:3,w2:3,wRev:false,vSi:false,dOn:true,
+  vin:12,k:0,fi:4,lri:0,b1:6,b2:0,rev:false,short:false,
+  hasF:false,prot:'none',hasLed:false,hasDiv:false,
+  fuseBlown:false,traceBurnt:false,servosDead:false,ledDead:false,espDead:false,
+  fl:{}};
+let STEPS=[];
+const load=()=>S.servosDead?0:0.3*(6-S.k)+2*S.k;
+function divW(){const R1=DR[S.w1],R2=DR[S.w2];if(!S.dOn)return{mode:'div',U:S.wU,I:0,R1,R2,out:S.wU,f:R1/(R1+R2)};const I=S.wU/(R1+R2);return{mode:'div',U:S.wU,I,R1,R2,out:S.wU*R2/(R1+R2),f:R1/(R1+R2)}}
+function valveW(){const vf=S.vSi?0.7:VD,I=S.wRev||S.wU<=vf?0:(S.wU-vf)/1000;return{mode:'valve',U:S.wU,I,vf,d:I>0?vf:0,before:S.wRev?0:S.wU,after:S.wRev?S.wU:I>0?S.wU-vf:0}}
+function water(){const st=STEPS[S.step]||{};return st.sc==='d'?divW():valveW()}
+function solve(){
+  const Vs=S.vin*(S.rev?-1:1);let open=null,I=0,Vr=0,Pp=0;
+  if(S.traceBurnt)open='trace';else if(S.hasF&&S.fuseBlown)open='fuse';
+  else if(S.rev&&S.prot==='diode')open='diode';else if(S.rev&&S.prot==='fet')open='fet';
+  else if(!S.short&&load()>PSU_MAX)open='psu';
+  if(!open){
+    const vf=S.prot==='diode'?VD:0,rs=0.03+(S.hasF?0.01:0)+(S.prot==='fet'?RFET:0);
+    if(S.short){I=(S.vin-vf)/(rs+0.02);Vr=Math.sign(Vs)*I*0.02}
+    else{I=load();Vr=Vs-Math.sign(Vs)*(vf+I*rs)}
+    Pp=S.prot==='diode'?vf*I:S.prot==='fet'?I*I*RFET:0;
+  }
+  const led=S.hasLed&&!S.ledDead&&Vr>1.9?(Vr-1.9)/LR[S.lri]:0;
+  const tap=S.hasDiv?Vr*DR[S.b2]/(DR[S.b1]+DR[S.b2]):0;
+  return{Vs,I,Vr,Pp,open,led,tap};
+}
+
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">3D failed to load. Check your connection and reload the page.</div>')}
+else{
+const stage=$('#stage'),cv=$('#gl');
+const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
+const cam=new THREE.PerspectiveCamera(42,1,0.1,120);
+const ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.enablePan=false;ctl.maxPolarAngle=1.5;ctl.minDistance=3;ctl.maxDistance=40;
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
+function mkScene(grid){const s=new THREE.Scene();s.background=new THREE.Color(0x0b110e);s.fog=new THREE.Fog(0x0b110e,26,60);
+  s.add(new THREE.HemisphereLight(0xdff5ea,0x0a120e,0.75));const d=new THREE.DirectionalLight(0xffffff,0.85);d.position.set(-4,10,6);s.add(d);
+  if(grid){const g=new THREE.GridHelper(60,60,0x24412f,0x14231b);g.position.y=-0.17;s.add(g)}return s}
+const scB=mkScene(true);
+let curSc=null,lastW=0;
+const FB={c:V3(-0.7,0.3,0.2),w:15.6,h:7.2,d:1.2,dir:V3(-0.05,1,1)};
+const FR={b:FB,v:{c:V3(0,1.9,0.5),w:10.8,h:4.9,d:1.0,dir:V3(0.38,0.42,1)},d:{c:V3(-0.5,1.7,0.4),w:12.6,h:5.0,d:1.2,dir:V3(0.32,0.45,1)}};
+function fit(){const f=FR[curSc];if(!f)return;const th=curSc!=='b';
+  ctl.minAzimuthAngle=th?-0.45:-Infinity;ctl.maxAzimuthAngle=th?1.05:Infinity;ctl.minPolarAngle=th?0.55:0;ctl.maxPolarAngle=th?1.45:1.5;
+  const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect),fw=curSc==='b'&&cam.aspect<1?12:f.w,dist=Math.max((fw/2)/Math.tan(hf/2),(f.h/2)/Math.tan(vf/2))*1.04+f.d;
+  cam.position.copy(f.c).add(f.dir.clone().normalize().multiplyScalar(dist));ctl.target.copy(f.c);ctl.update()}
+function useScene(k){if(k===curSc)return;curSc=k;fit()}
+function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,22,1,true),mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(V3(0,1,0),d.normalize());return m}
+
+/* labels */
+const labels=[],TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=txt;$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+
+/* ---------- theory scenes in 3D: valve (diode) and staircase (divider) ---------- */
+const scV=mkScene(true),scD=mkScene(true);
+const mGlass=new THREE.MeshStandardMaterial({color:0x7fc4ff,transparent:true,opacity:.18,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
+const mNarrow=new THREE.MeshStandardMaterial({color:0xa8d6ff,transparent:true,opacity:.45,roughness:.2,side:THREE.DoubleSide,depthWrite:false});
+const mDropMat=new THREE.MeshBasicMaterial({color:0x6fc3ff}),dummy=new THREE.Object3D();
+const sph=(r,mat,p)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,18,12),mat);m.position.copy(p);return m};
+function polyPath(pts,closed){const L=[];for(let i=0;i<pts.length-(closed?0:1);i++)L.push(pts[i].distanceTo(pts[(i+1)%pts.length]));return{pts,L,T:L.reduce((a,b)=>a+b,0)||1,closed}}
+function pathAt(P,s,out){s=((s%P.T)+P.T)%P.T;for(let i=0;i<P.L.length;i++){if(s<=P.L[i])return out.copy(P.pts[i]).lerp(P.pts[(i+1)%P.pts.length],P.L[i]?s/P.L[i]:0);s-=P.L[i]}return out.copy(P.pts[0])}
+/* valve scene: closed loop with pump, swing check valve, two gauges, load; a real diode in front */
+const VA=V3(-4,0.5,0),VB=V3(-4,2.2,0),VC=V3(4,2.2,0),VE=V3(4,0.5,0);
+[[VA,VB],[VB,VC],[VE,VA]].forEach(([a,b])=>scV.add(tube(a,b,0.32,mGlass)));scV.add(tube(VC,VE,0.13,mNarrow));
+[VA,VB,VC,VE].forEach(p=>scV.add(sph(0.32,mGlass,p)));
+{const pb=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),M(0x2a302d));pb.position.set(-4,1.35,0);scV.add(pb)}
+const impV=new THREE.Group();impV.position.set(-4,1.35,0.57);scV.add(impV);
+for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.13,0.04),M(0xe8332a));b.rotation.z=i*Math.PI/4;impV.add(b)}
+const mHouse=new THREE.MeshStandardMaterial({color:0xffb070,transparent:true,opacity:.22,roughness:.1,side:THREE.DoubleSide,depthWrite:false,emissive:0xff5010,emissiveIntensity:0});
+scV.add(sph(0.75,mHouse,V3(0,2.2,0)));
+{const seat=new THREE.Mesh(new THREE.TorusGeometry(0.29,0.05,10,28),M(0xc8cfd2,{metalness:.6,roughness:.3}));seat.position.set(-0.07,2.2,0);seat.rotation.y=Math.PI/2;scV.add(seat)}
+const hinge=new THREE.Group();hinge.position.set(0,2.52,0);scV.add(hinge);
+const mFlap=M(0x5fd38d);{const d=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.06,26),mFlap);d.rotation.z=Math.PI/2;d.position.set(0.03,-0.32,0);hinge.add(d)}
+hinge.add(cyl(0.035,0.5,mLeadT(),0,0,0,Math.PI/2));
+function mLeadT(){return M(0xc8cfd2,{metalness:.7,roughness:.3})}
+function helix(rad,turns,y0,y1,tubeR){const pts=[];for(let i=0;i<=turns*24;i++){const a=i/24*Math.PI*2;pts.push(V3(Math.cos(a)*rad,y0+(y1-y0)*i/(turns*24),Math.sin(a)*rad))}
+  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),turns*24,tubeR,6,false),M(0xd9b45a,{metalness:.6,roughness:.3}))}
+const springS=helix(0.1,5,2.55,2.92,0.018),springH=helix(0.1,5,2.55,2.92,0.038);scV.add(springS,springH);
+function gauge(x){const g=new THREE.Group();g.position.set(x,2.2,0);scV.add(g);g.add(cyl(0.05,0.62,mLeadT(),0,0.6,0));
+  const dial=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.08,32),M(0xf2f2ee));dial.rotation.x=Math.PI/2;dial.position.set(0,1.3,0);g.add(dial);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.04,8,32),M(0x30363a));rim.position.set(0,1.3,0.02);g.add(rim);
+  for(let i=0;i<=4;i++){const a=2.3-i/4*4.6,t=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.08,0.02),M(0x30363a));t.position.set(-Math.sin(a)*0.33,1.3+Math.cos(a)*0.33,0.05);t.rotation.z=a;g.add(t)}
+  const piv=new THREE.Group();piv.position.set(0,1.3,0.06);g.add(piv);const nd=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.32,0.02),M(0xe8332a));nd.position.y=0.15;piv.add(nd);
+  return{piv,cur:0}}
+const gIn=gauge(-1.7),gOut=gauge(1.7);
+/* the real part, in front: black body, stripe = cathode, arrow = allowed direction */
+const gDio=new THREE.Group();gDio.position.set(0,0.3,1.9);scV.add(gDio);
+gDio.add(cyl(0.16,0.8,M(0x161616),0,0,0,0,Math.PI/2));gDio.add(cyl(0.166,0.12,M(0xbfc5c8),0.3,0,0,0,Math.PI/2));
+[-0.62,0.62].forEach(x=>gDio.add(cyl(0.025,0.44,mLeadT(),x,0,0,0,Math.PI/2)));
+const arrowD=new THREE.Mesh(new THREE.ConeGeometry(0.12,0.3,16),M(0x5fd38d,{emissive:0x5fd38d,emissiveIntensity:.3}));arrowD.rotation.z=-Math.PI/2;arrowD.position.set(1.15,0.3,1.9);scV.add(arrowD);
+scV.add(tube(V3(-1.0,0.3,1.9),V3(1.0,0.3,1.9),0.03,M(0x5fd38d)));
+const VPATH=polyPath([VA,VB,VC,VE],true),NDV=70,dropsV=new THREE.InstancedMesh(new THREE.SphereGeometry(0.1,10,8),mDropMat,NDV);scV.add(dropsV);
+const isV=()=>curSc==='v',isD=()=>curSc==='d';
+const LvPump=lab('v','Pump = source',V3(-4,0.7,0.7),'',null,'down'),LvValve=lab('v','',V3(0,3.0,0.2),'',null,'up'),
+  LvIn=lab('v','',V3(-1.7,4.0,0),'',null,'up'),LvOut=lab('v','',V3(1.7,4.0,0),'',null,'up'),LvLoad=lab('v','Load (narrow pipe)',V3(4,2.75,0),'',null,'up'),
+  LvDio=lab('v','Real diode: current flows towards the stripe',V3(0,0.05,2.1),'flow',null,'down');
+let flapA=0,vflow=0;
+/* divider scene: a staircase; R1 steps coral, R2 steps teal, a lift = source, a meter probing the landing */
+const K2=0.3,RUN0=-3.4,RUN1=3.4,LX=-4.6;
+{const fl=new THREE.Mesh(new THREE.BoxGeometry(11,0.1,3.2),M(0x16211c));fl.position.set(-0.4,-0.05,0);scD.add(fl)}
+scD.add(tube(V3(LX,0,0),V3(LX,4.0,0),0.38,mGlass));
+for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x9db1a6));t.position.set(-5.35,v*K2,0);scD.add(t);if(v%3===0)lab('d',v+' V',V3(-5.5,v*K2,0),'lvl',null,'left')}
+scD.add(tube(V3(-5.35,0,0),V3(-5.35,12*K2,0),0.02,M(0x6c7d74)));
+scD.add(tube(V3(RUN1+1.0,0.12,-1.15),V3(LX,0.12,-1.15),0.16,mGlass));
+const dDyn=new THREE.Group();scD.add(dDyn);
+const mR1=M(0xd85a30,{roughness:.7}),mR2=M(0x1d9e75,{roughness:.7}),mLand=M(0x5fd38d,{emissive:0x5fd38d,emissiveIntensity:.25});
+const mMeter=M(0x30353a,{emissive:0xff2010,emissiveIntensity:0});
+let DPATH=polyPath([V3(0,0,0),V3(1,0,0)],false),ballsN=48;const balls=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,12,8),M(0xffe7a0,{emissive:0xffc860,emissiveIntensity:.3}),ballsN);scD.add(balls);
+const LdLift=lab('d','',V3(),'',null,'up'),LdR1=lab('d','',V3(),'',null,'up'),LdR2=lab('d','',V3(),'',()=>S.dOn,'up'),LdM=lab('d','',V3(),'',null,'down'),LdOff=lab('d','R2 disconnected: dead end, no current flows',V3(2.2,0.3,0),'bad',()=>!S.dOn,'up');
+let dflow=0;
+function buildD(){
+  while(dDyn.children.length){const c=dDyn.children.pop();if(c.geometry)c.geometry.dispose()}
+  const w=divW(),H=w.U*K2,ratio=w.R1/(w.R1+w.R2),xL=RUN0+(RUN1-RUN0)*ratio,hL=S.dOn?H*(1-ratio):H;
+  const n1=Math.max(1,Math.min(23,Math.round(24*ratio))),n2=24-n1,box=(x0,x1,top,mat)=>{const h=Math.max(0.03,top);const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.02,x1-x0),h,1.2),mat);m.position.set((x0+x1)/2,h/2,0);dDyn.add(m)};
+  const pts=[V3(LX,0.15,-1.15),V3(LX,0.15,0),V3(LX,H+0.15,0)];
+  box(LX+0.35,RUN0,H,M(0x3a4640));pts.push(V3(RUN0,H+0.15,0));
+  for(let i=0;i<n1;i++){const x0=RUN0+i*(xL-RUN0)/n1,x1=RUN0+(i+1)*(xL-RUN0)/n1,top=S.dOn?H-(i+1)*(H-hL)/n1:H;box(x0,x1,top,mR1);pts.push(V3(x0,top+0.15,0),V3(x1,top+0.15,0))}
+  {const lm=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.06,1.26),mLand);lm.position.set(xL,hL+0.03,0);dDyn.add(lm)}
+  if(S.dOn){for(let j=0;j<n2;j++){const x0=xL+j*(RUN1-xL)/n2,x1=xL+(j+1)*(RUN1-xL)/n2,top=hL-(j+1)*hL/n2;box(x0,x1,top,mR2);pts.push(V3(x0,top+0.15,0),V3(x1,top+0.15,0))}
+    pts.push(V3(RUN1+1.0,0.15,0),V3(RUN1+1.0,0.15,-1.15))}
+  DPATH=polyPath(pts,S.dOn);
+  const lv=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.05,xL+5.35),0.02,0.02),M(0x5fd38d));lv.position.set((xL-5.35)/2,hL,0.62);dDyn.add(lv);
+  const mz=1.85,mb=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.6,0.5),mMeter);mb.position.set(xL,0.3,mz);dDyn.add(mb);
+  const face=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.3,0.02),M(0xb8c9a2,{emissive:0x4a5a30,emissiveIntensity:.3}));face.position.set(xL,0.36,mz+0.26);dDyn.add(face);
+  dDyn.add(tube(V3(xL,hL+0.05,0.62),V3(xL,0.62,mz-0.1),0.025,M(0xe8332a)));
+  mMeter.emissiveIntensity=w.out>ESP_MAX?0.8:0;
+  LdLift.el.textContent='The source lifts to '+fV(w.U);LdLift.p.set(LX,H+0.45,0);
+  LdR1.el.textContent=`R1 · ${fR(w.R1)} · takes ${fV(S.dOn?w.U-w.out:0)}`;LdR1.p.set((RUN0+xL)/2,(H+hL)/2+0.5,0);
+  LdR2.el.textContent=`R2 · ${fR(w.R2)} · takes ${fV(w.out)}`;LdR2.p.set((xL+RUN1)/2,hL/2+0.5,0);
+  LdM.el.textContent='Meter: '+fV(w.out)+(w.out>ESP_MAX?' , would burn':w.out>3?' , off the scale':'');LdM.el.className='lb '+(w.out>3?'bad':'good');LdM.p.set(xL,0,mz+0.3);
+}
+function buildV(){const w=valveW();
+  springS.visible=!S.vSi;springH.visible=S.vSi;mFlap.color.setHex(w.I>0?0x5fd38d:0xe8332a);
+  mHouse.emissiveIntensity=Math.min(1.2,w.vf*w.I/0.004);
+  LvValve.el.textContent=S.wRev?'Flap pressed against the seat: no backflow':w.I>0?`Valve open · loses ${fV(w.vf)}`:`The spring holds: needs more than ${fV(w.vf)}`;LvValve.el.className='lb '+(w.I>0?'good':'bad');
+  LvIn.el.textContent='Before the valve: '+fV(w.before);LvOut.el.textContent='After: '+fV(w.after);
+  arrowD.material.color.setHex(S.wRev?0x777777:0x5fd38d);
+}
+/* ---------- board scene ---------- */
+const mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3}),mLead=M(0xc8cfd2,{metalness:.7,roughness:.3});
+const hits=[],add=(par,m,part)=>{par.add(m);if(part){m.userData.part=part;hits.push(m)}return m};
+const P=(x,z)=>V3(x,0,z);
+function bar(a,b,w,h,y,mat,ext){const d=b.clone().sub(a);const m=new THREE.Mesh(new THREE.BoxGeometry(d.length()+(ext||0),h,w),mat);m.position.set((a.x+b.x)/2,y,(a.z+b.z)/2);m.rotation.y=-Math.atan2(d.z,d.x);return m}
+function cyl(r,h,mat,x,y,z,rx,rz){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),mat);m.position.set(x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m}
+const trace=(par,a,b,w,mat)=>add(par,bar(a,b,w||0.24,0.03,0.015,mat||mCu,w||0.24),'cu');
+{const brd=new THREE.Mesh(new THREE.BoxGeometry(11.6,0.16,6.4),M(0x1d6b45,{roughness:.85}));brd.position.set(-0.2,-0.08,0);scB.add(brd)}
+/* nets */
+const KP=P(-5,-0.3),KM=P(-5,0.3),F1=P(-4.2,-2),F2=P(-3.0,-2),P1=P(-2.2,-2),P2=P(-1.0,-2),RE=P(4.6,-2),LP=P(5.3,-0.4),LM=P(5.3,0.4),GE=P(4.6,2),GS=P(-5,2);
+[[KP,P(-5,-2)],[P(-5,-2),F1],[P2,RE],[RE,P(4.6,-0.4)],[P(4.6,-0.4),LP],[LM,P(4.6,0.4)],[P(4.6,0.4),GE],[GE,GS],[GS,KM]].forEach(([a,b])=>trace(scB,a,b));
+const mNeck=M(0xe39a52,{metalness:.5,roughness:.35,emissive:0xff3010,emissiveIntensity:0}),neck=trace(scB,F2,P1,0.12,mNeck);
+lab('b','+12 V',V3(1.6,0.05,-2.25),'part');lab('b','GND (ground, 0 V)',V3(1.6,0.05,2.25),'part',null,'down');
+/* supply and connector */
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(1.6,1.0,2.6),M(0x232826)),'psu').position.set(-7.6,0.5,0);
+const wA=add(scB,bar(P(-6.8,-0.3),P(-5.4,-0.3),0.1,0.08,0.12,M(0xe8332a))),wB=add(scB,bar(P(-6.8,0.3),P(-5.4,0.3),0.1,0.08,0.12,M(0x1c1c1c)));
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.7,0.45,1.2),M(0xf2c230)),'conn').position.set(-5.35,0.23,0);
+const Lpsu=lab('b','12 V supply · 10 A',V3(-7.6,1.1,0),'part'),Lrev=lab('b','Wires swapped!',V3(-6.1,0.4,0),'bad',()=>S.rev,'down');
+/* slots: build parts along local x, 1.2 long */
+const SL={F:{a:F1,b:F2},P:{a:P1,b:P2},LR:{a:P(0.5,-1.4),b:P(0.5,-0.2)},LD:{a:P(0.5,0.2),b:P(0.5,1.4)},D1:{a:P(2.4,-1.4),b:P(2.4,-0.2)},D2:{a:P(2.4,0.2),b:P(2.4,1.4)}};
+function slotGroup(k){const g=new THREE.Group(),s=SL[k],d=s.b.clone().sub(s.a);g.position.copy(s.a).add(s.b).multiplyScalar(0.5);g.rotation.y=-Math.atan2(d.z,d.x);scB.add(g);return g}
+Object.values(SL).forEach(s=>[s.a,s.b].forEach(p=>add(scB,cyl(0.16,0.05,mGold,p.x,0.025,p.z))));
+const jF=trace(scB,F1,F2),jP=trace(scB,P1,P2);
+function leads(g,h){[-1,1].forEach(s=>{add(g,cyl(0.025,h,mLead,s*0.58,h/2,0));add(g,cyl(0.025,0.16,mLead,s*0.5,h,0,0,Math.PI/2))})}
+/* fuse */
+const gF=slotGroup('F'),mFg=new THREE.MeshStandardMaterial({color:0xddeeff,transparent:true,opacity:.35,roughness:.1,depthWrite:false});
+leads(gF,0.28);add(gF,cyl(0.15,0.7,mFg,0,0.28,0,0,Math.PI/2),'fuse');[-0.38,0.38].forEach(x=>add(gF,cyl(0.16,0.14,mLead,x,0.28,0,0,Math.PI/2),'fuse'));
+const fWire=add(gF,cyl(0.015,0.62,M(0xd0d6da,{emissive:0xffa040,emissiveIntensity:0}),0,0.28,0,0,Math.PI/2));
+const fSoot=add(gF,cyl(0.14,0.3,M(0x222222),0,0.28,0,0,Math.PI/2));
+/* protection: diode and MOSFET share the slot */
+const gD=slotGroup('P'),mDi=M(0x161616,{emissive:0xff3a10,emissiveIntensity:0});
+leads(gD,0.22);add(gD,cyl(0.13,0.55,mDi,0,0.22,0,0,Math.PI/2),'diode');add(gD,cyl(0.135,0.08,M(0xbfc5c8),0.2,0.22,0,0,Math.PI/2),'diode');
+const gT=slotGroup('P'),mFet=M(0x161616,{emissive:0xff3a10,emissiveIntensity:0});
+add(gT,new THREE.Mesh(new THREE.BoxGeometry(0.6,0.18,0.55),mFet),'fet').position.set(0,0.12,0);add(gT,new THREE.Mesh(new THREE.BoxGeometry(0.3,0.05,0.5),mLead),'fet').position.set(0.42,0.04,0);
+add(gT,new THREE.Mesh(new THREE.BoxGeometry(0.3,0.04,0.08),mLead)).position.set(-0.45,0.04,0);
+const gate=add(gT,bar(P(-0.2,0.3),P(-0.2,4.0),0.08,0.03,0.015,mCu));
+/* resistor factory */
+const BC=[0x111111,0x7a4a21,0xd42222,0xff6a00,0xffd800,0x22a033,0x2255ff,0xa040d0,0x888888,0xeeeeee];
+function mkRes(slot){const g=slotGroup(slot),mat=M(0xd9c39a);leads(g,0.3);add(g,cyl(0.16,0.7,mat,0,0.3,0,0,Math.PI/2),'res');
+  [-0.35,0.35].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(0.18,18,12),mat);e.scale.x=0.5;e.position.set(x,0.3,0);add(g,e,'res')});
+  const b=[-0.2,-0.08,0.04,0.22].map(x=>add(g,cyl(0.165,0.06,new THREE.MeshStandardMaterial({color:0x111111,roughness:.5}),x,0.3,0,0,Math.PI/2),'res'));
+  g.setR=R=>{const s=String(R),c=[BC[+s[0]],BC[+s[1]],BC[s.length-2],0xc9a227];b.forEach((m,i)=>m.material.color.setHex(c[i]))};return g}
+/* power LED branch */
+const gLedB=new THREE.Group();scB.add(gLedB);
+[[P(0.5,-2),SL.LR.a],[SL.LR.b,SL.LD.a],[SL.LD.b,P(0.5,2)]].forEach(([a,b])=>trace(gLedB,a,b,0.14));
+const gLR=mkRes('LR');const gLD=slotGroup('LD'),mLed=M(0x3fdc6a,{transparent:true,opacity:.92,emissive:0x2aff66,emissiveIntensity:0,roughness:.25});
+leads(gLD,0.28);add(gLD,cyl(0.24,0.36,mLed,0,0.45,0),'led');const dm=new THREE.Mesh(new THREE.SphereGeometry(0.24,20,10,0,Math.PI*2,0,Math.PI/2),mLed);dm.position.y=0.63;add(gLD,dm,'led');
+const ledLight=new THREE.PointLight(0x40ff70,0,6);ledLight.position.set(0.5,1.2,0.8);scB.add(ledLight);
+/* divider + 0-3 V meter */
+const gDivB=new THREE.Group();scB.add(gDivB);
+[[P(2.4,-2),SL.D1.a],[SL.D1.b,SL.D2.a],[SL.D2.b,P(2.4,2)],[P(2.4,0),P(3.05,0)],[P(3.7,0.8),P(3.7,2)]].forEach(([a,b])=>trace(gDivB,a,b,0.12));
+const gD1=mkRes('D1'),gD2=mkRes('D2');
+const mEsp=M(0x30353a,{emissive:0xff2010,emissiveIntensity:0});
+add(gDivB,new THREE.Mesh(new THREE.BoxGeometry(1.1,0.3,1.3),mEsp),'meter').position.set(3.7,0.15,0);
+add(gDivB,new THREE.Mesh(new THREE.BoxGeometry(0.8,0.02,0.5),M(0xb8c9a2,{emissive:0x4a5a30,emissiveIntensity:.3})),'meter').position.set(3.7,0.31,-0.1);
+/* servos */
+const mServo=M(0x1f3a66),servos=[];
+for(let i=0;i<6;i++){const s=add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.75,0.5,0.45),mServo.clone()),'servo');s.position.set(6.7,0.25,-1.6+i*0.64);servos.push(s);
+  add(scB,bar(P(5.6,0),P(6.3,-1.6+i*0.64),0.05,0.05,0.1,M(0x333333)))}
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.5,0.35,1.1),M(0x222222)),'servo').position.set(5.4,0.18,0);
+const Lservo=lab('b','',V3(6.7,0.6,-1.9),'part');
+/* screwdriver */
+const gSD=new THREE.Group();scB.add(gSD);
+gSD.add(cyl(0.05,4.3,M(0xc8cfd2,{metalness:.8,roughness:.25,emissive:0xff6020,emissiveIntensity:0}),-0.3,0.12,0,Math.PI/2));
+gSD.add(cyl(0.16,1.1,M(0xff7a1a),-0.3,0.12,2.75,Math.PI/2));
+const sdMat=gSD.children[0].material;
+/* labels */
+const Lf=lab('b','',V3(-3.6,0.55,-2),'part',()=>S.hasF),Lp=lab('b','',V3(-1.6,0.1,-1.65),'part',()=>S.prot!=='none','down'),
+  Lled=lab('b','',V3(0.3,0.6,0.8),'part',()=>S.hasLed,'left'),Lesp=lab('b','',V3(3.7,0.3,0.95),'',()=>S.hasDiv,'down'),
+  Ld1=lab('b','',V3(2.2,0.3,-0.8),'part',()=>S.hasDiv,'left'),Ld2=lab('b','',V3(2.2,0.3,0.8),'part',()=>S.hasDiv,'left'),
+  Lneck=lab('b','Trace burnt',V3(-2.6,0.2,-2),'bad',()=>S.traceBurnt);
+/* charges */
+const PATH_N=[KP,P(-5,-2),RE,P(4.6,-0.4),LP,LM,P(4.6,0.4),GE,GS,KM,P(-6.8,0.3),P(-6.8,-0.3)];
+const PATH_S=[KP,P(-5,-2),P(-0.3,-2),P(-0.3,2),GS,KM,P(-6.8,0.3),P(-6.8,-0.3)];
+let BP=PATH_N,BL=[],BLT=1;const setPath=p=>{if(BP===p&&BL.length)return;BP=p;BL=p.map((q,i)=>q.distanceTo(p[(i+1)%p.length]));BLT=BL.reduce((a,b)=>a+b,0)};setPath(PATH_N);
+const bAt=(s,out)=>{s=((s%BLT)+BLT)%BLT;for(let i=0;i<BP.length;i++){if(s<=BL[i])return out.copy(BP[i]).lerp(BP[(i+1)%BP.length],BL[i]?s/BL[i]:0);s-=BL[i]}return out.copy(BP[0])};
+const NP=80,parts=new THREE.InstancedMesh(new THREE.SphereGeometry(0.07,10,8),new THREE.MeshBasicMaterial({color:0xffe7a0}),NP);scB.add(parts);
+let flow=0,flashT=0,flashAt=V3();
+const flashL=new THREE.PointLight(0xffffff,0,8);scB.add(flashL);
+const smoke=[...Array(16)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8),new THREE.MeshBasicMaterial({color:0x9aa39e,transparent:true,opacity:0,depthWrite:false}));scB.add(m);return{m,life:0}});
+let smokeSrc=[],smokeT=0;
+
+const INFO={
+psu:['12 V · 10 A power supply','Holds 12 V and can deliver up to 10 A. Ask for more and it goes into protection and shuts off. The “12V ⎓ 10A” label is exactly these two numbers.'],
+conn:['Power connector','Plus and minus from the supply come in here. If the wires can be plugged in backwards, one day they will be.'],
+fuse:['Fuse','The deliberately weakest point of the circuit: a thin wire that melts if current exceeds the rating. It dies instead of the traces and electronics. Comes as single-use or self-resetting (PTC).'],
+diode:['Schottky diode','A check valve: passes current only from anode to cathode (the stripe is the cathode). A Schottky drops about 0.45 V, a regular silicon diode about 0.7 V.'],
+fet:['MOSFET','A valve opened by the voltage on its gate. Open, it’s almost a wire (thousandths of an ohm). Here the gate is tied to ground: with correct polarity the valve is open, with reversed polarity it’s shut.'],
+led:['Power indicator','A green LED with a resistor: lit means the rail has voltage. Like in lesson 0, just from 12 V.'],
+res:['Resistor','Resists current. The stripes are the value: two digits, then the number of zeros, gold is the tolerance.'],
+meter:['0–3 V meter','A teaching part: like a multimeter, but with a 3 V limit and no protection. Two legs: “+” to the measuring point, and ground. Inside it has a huge resistance, so it draws almost no current and doesn’t disturb what it measures. Above ~3.6 V it burns. Later an ESP32 input takes its place; it works the same way.'],
+cu:['Copper trace','A wire on the board. The narrower it is, the worse it handles high current.']};
+const showInfo=k=>{$('#infoT').textContent=INFO[k][0];$('#infoP').textContent=INFO[k][1];$('#info').hidden=false};
+$('#infoX').onclick=()=>$('#info').hidden=true;
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
+const shown=o=>{while(o){if(!o.visible)return false;o=o.parent}return true};
+cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+cv.addEventListener('pointerup',e=>{if(!down||curSc!=='b')return;const dx=e.clientX-down[0],dy=e.clientY-down[1];down=null;if(dx*dx+dy*dy>49)return;
+  const r=cv.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,cam);
+  const h=ray.intersectObjects(hits.filter(shown),false)[0];if(!h)return;S.seen.add(h.object.userData.part);showInfo(h.object.userData.part)});
+
+/* ---------- lesson ---------- */
+const B=(f,prot,led,div)=>({f,prot,led,div});
+const repair=()=>{S.fuseBlown=S.traceBurnt=S.servosDead=S.ledDead=S.espDead=false};
+STEPS=[
+{sc:'b',part:'Power',t:'Connecting the power supply',s:"A <b>12V ⎓ 10A</b> supply holds 12 V and delivers <b>up to</b> 10 A. Servos hang on the rail in parallel, so their currents add up.",bt:["What we’re building", "What the label means", "In parallel"],ui:['k','nI','nV','pills'],build:B(false,'none',false,false),enter:()=>{repair();S.rev=false;S.k=0;S.vin=12},
+ b:'<p>Today we build the input stage of the arm board: 12 V supply → connector → copper rail → six servos. We’ll connect the board’s brain (ESP32) later, once we understand the physics of all the basic pieces.</p><p>The supply says <b>12V ⎓ 10A</b>. That means it holds 12 V and can deliver <b>up to</b> 10 A. How much current actually flows is decided by the load, as in lesson 0.</p><p>The servos are connected to the rail <b>in parallel</b> , all to the same plus and minus. This is new: parts in parallel <b>share one voltage, and their currents add up</b>. A moving servo draws about 0.3 A, and when it stalls and pushes with all its might, about 2 A.</p>',
+ after:'<p>0.3 × 4 + 2 × 2 = 5.2 A. Stall all six and the arm wants 12 A, while the supply can only do 10: it goes into protection and shuts off. You get a full reboot out of nowhere. Remember: size the power supply for the worst case.</p>',
+ task:'Stall two servos and watch the current',ok:()=>S.k>=2},
+{sc:'b',part:'Power',t:'A short circuit',s:"<b>A short circuit</b> is plus and minus connected directly. Hundreds of amps flow, and something will burn.",bt:["-", "Why hundreds of amps"],ui:['short','nI','nV','pills','bF'],build:B(false,'none',false,false),enter:()=>{repair();S.rev=false;S.k=1},
+ b:'<p><b>A short circuit</b> is when plus connects to minus directly, with almost no resistance. A dropped screwdriver, a blob of solder, a frayed wire.</p><p>By Ohm’s law I = U / R: with hundredths of an ohm, the current comes out at hundreds of amps. And heat grows as I × I × R. Something in the circuit will burn, usually the thinnest spot.</p>',
+ after:'<p><b>The narrowest trace burnt.</b> The supply gave everything it could for the milliseconds before its protection kicked in, and that was enough for the trace. A battery, like on a drone, has no protection at all and will deliver hundreds of amps until something catches fire.</p><p>We need a part that is deliberately the weakest point and dies first.</p>',
+ task:'Drop a screwdriver on the board',ok:()=>S.traceBurnt},
+{sc:'b',part:'Power',t:'Fuse',s:"<b>Fuse</b> is a deliberately weak point. Its rating is above the working current but below what would kill the board.",bt:["How it works", "Choosing the rating", "In reality"],ui:['k','fuse','short','nI','nV','pills','bF'],build:B(true,'none',false,false),enter:()=>{repair();S.rev=false;S.k=0;S.fi=1;S.fl.k2=S.fl.sh=false},
+ b:'<p><b>Fuse</b> is a deliberately weakest point: a thin wire that melts if current exceeds the rating. It dies and the board survives. There are single-use ones (you put in a new one) and self-resetting ones (PTC): they heat up, open, and conduct again once cool.</p><ul><li><b>above</b> the largest normal current, otherwise it’ll blow during normal work;</li><li><b>below</b> what would kill the traces, wires and supply.</li></ul><p class="note">Real fuses don’t blow instantly: they survive the short current surge when a motor starts. Here it’s instant, for simplicity.</p>',
+ after:'<p>The fuse blew instead of the trace. You replace it for pennies and the board is alive again. In normal operation it doesn’t get in the way: it drops a fraction of a volt.</p>',
+ task:'Pick a rating: two stalled servos (5.2 A) keep working, but the screwdriver blows the fuse',ok:()=>S.fl.k2&&S.fl.sh},
+{sc:'b',part:'Power',t:'Swapped wires',s:"Swap the wires and the rail gets −12 V. Almost all electronics die from that.",bt:["Polarity", "Why it dies", "Rule"],ui:['rev','nV','pills','bF'],build:B(true,'none',false,false),enter:()=>{repair();S.rev=false;S.k=0;S.fi=4},
+ b:'<p><b>Polarity</b> is which side is plus and which is minus. Electronics is designed for one polarity. Swap the wires and the rail gets −12 V.</p><p>Inside almost every chip, tiny protection diodes run from each pin to the supply. With reversed polarity they all open at once, and current flows through the chip that it was never designed for.</p><p>Connectors that can be plugged in backwards will one day be plugged in backwards. Especially at 2 am.</p>',
+ after:'<p>The servos burnt. The fuse didn’t help: the current wasn’t huge, just going the wrong way, and it never reached the rating. We need a part that lets current through in the right direction only.</p>',
+ task:'Swap the wires',ok:()=>S.servosDead},
+{sc:'v',part:'Protection',t:'The diode is a check valve',s:"<b>Diode</b> — a check valve: it passes current one way and takes ~0.45 V for itself.",bt:["Check valve", "Opening threshold", "The price: a drop and heat", "What it looks like in real life"],ui:['wU','wRev','wType','wnU','wnI','wnD','wF'],enter:()=>{S.wRev=false;S.wU=12;S.vSi=false;S.fl.below=false},
+ b:'<p><b>Diode</b> passes current in one direction only. In plumbing it’s a <b>check valve</b>: a hinged flap. Flow in the right direction pushes it open and passes; flow backwards presses it against the seat, and that’s it.</p><p>The flap is held by a <b>spring</b>. To open it you need pressure above a threshold: about <b>0.45 V</b> for a Schottky diode and about <b>0.7 V</b> for a regular silicon one. While the pump is weaker, the valve stays shut and there’s no current, just like the LED in lesson 0 stayed dark below 1.9 V.</p><p>Even an open valve takes those 0.45 V from the flow: compare the gauges before and after. That’s why a diode heats up: P = 0.45 V × current.</p><p>In front lies a real diode: the stripe on the body is the cathode, and current flows towards it, like an arrow.</p>',
+ after:'<p>The pump pushes backwards, so the flap is pressed against the seat and nothing flows. That’s exactly what we want from protection: swap the wires and current simply doesn’t flow.</p>',
+ task:'Lower the pump below the threshold, then reverse it',ok:()=>S.fl.below&&S.wRev},
+{sc:'b',part:'Protection',t:'Diode protection',s:"We put a Schottky diode in the plus line. Swap the wires and current is zero, the board survives. The price: 0.45 V and heat.",bt:["Where it goes", "What it gives us", "The downside"],ui:['rev','k','nI','nV','nP','pills','bF'],build:B(true,'diode',false,false),enter:()=>{repair();S.rev=false;S.k=0;S.fl.rv=S.fl.hot=false},
+ b:'<p>We add a <b>Schottky diode</b> in series in the plus line, right after the fuse. The stripe on the body is the cathode, facing the rail.</p><p>Swap the wires and the diode is shut: zero current, the electronics survive.</p><p>But remember the step at the valve: a diode always drops ~0.45 V and heats up by 0.45 V × current. For an LED that’s nothing; for six servos, let’s see.</p>',
+ after:'<p>At 5.2 A the diode dissipates 0.45 × 5.2 ≈ 2.3 W. That’s a lot for a small package without a heatsink: it gets scorching hot. Plus the servos get half a volt less. For small currents a diode is great protection; for motors, not so much.</p>',
+ task:'Swap the wires, then put them back and stall two servos',ok:()=>S.fl.rv&&S.fl.hot},
+{sc:'b',part:'Protection',t:'MOSFET instead of a diode',s:"<b>MOSFET</b> is a valve opened by voltage. Open, it’s almost a wire, so it barely heats up.",bt:["What it is", "The protection trick", "How hot it gets"],ui:['prot','rev','k','nI','nV','nP','pills','bF'],build:B(true,'fet',false,false),enter:()=>{repair();S.rev=false;S.k=2;S.fl.cd=S.fl.cf=false},
+ b:'<p><b>MOSFET</b> (a field-effect transistor) is a valve opened by voltage. It has three legs: source, drain and <b>gate</b>. Apply the right voltage to the gate and the channel opens, becoming almost a wire: thousandths of an ohm. Remove it and the channel closes.</p><p>The protection trick: we tie the gate to ground (see the thin trace to GND). With correct polarity there are 12 V between gate and source, so the valve is open. With reversed polarity there’s no voltage, so it’s shut.</p><p>Heat is now calculated like a resistor’s: P = I × I × R = 5.2 × 5.2 × 0.008 ≈ 0.2 W. Ten times less than the diode.</p>',
+ task:'Compare diode and MOSFET heating with two servos stalled',ok:()=>S.fl.cd&&S.fl.cf},
+{sc:'b',part:'Extras',t:'Power indicator',s:"A green LED with a resistor: lit means the rail has power. 2–5 mA is enough.",bt:["Like in lesson 0", "-", "Calculating the resistor"],ui:['ledR','nI','nV','pills','bF'],build:B(true,'fet',true,false),enter:()=>{repair();S.rev=false;S.k=0;S.lri=0},
+ b:'<p>Let’s add a green LED: lit means the rail has power. This is straight from lesson 0: an LED plus a resistor, just from 12 V. It’s connected to the rail in parallel with the servos, so it sees the same 12 V, and its current simply adds to the total.</p><p>2–5 mA is enough for an indicator: it should be visible, not blinding.</p><p class="note">Resistor: R = (12 − 1.9) / current. Right now it’s 220 Ω; see what that gives you.</p>',
+ task:'Pick a resistor so 2–5 mA flows through the indicator',ok:c=>c.led>=0.002&&c.led<=0.005},
+{sc:'d',part:'Divider',t:'Voltage divider',s:"Two resistors between plus and ground make a <b>divider</b>: <b>Uout = U × R2 / (R1 + R2)</b>.",bt:["Staircase", "Divider output", "The balls are current", "Without R2", "A classic example"],ui:['wU','wR1','wR2','dOn','wnU','wnI','wnOut','wF'],enter:()=>{S.wU=12;S.w1=3;S.w2=3;S.dOn=true;S.fl.off=false},
+ b:'<p>Two resistors in series between plus and ground make a <b>voltage divider</b>. Picture a staircase from 12 V down to ground. The same current flows through both resistors, so every kilohm takes the same share, like equal steps. Orange steps are R1, teal ones are R2.</p><p>The green landing between them is the divider output, where the meter probe sits. Its height: <b>Uout = U × R2 / (R1 + R2)</b>.</p><p>The balls are current: the source lift raises them to 12 V, they roll down the stairs and come back around.</p><p>Disconnect R2: there’s nowhere left to go down, the balls stop, and the R1 staircase flattens: with no current, nothing drops across it. The landing ends up at the full 12 V.</p><p class="note">A classic example: 40 kΩ and 10 kΩ divide 5 V by five.</p>',
+ task:'Disconnect R2 and look at the meter, then reconnect it and make the output ≈ 1/5 of the source',ok:()=>{const w=water();return S.fl.off&&S.dOn&&w.U>0&&Math.abs(w.out/w.U-0.2)<0.03}},
+{sc:'b',part:'Divider',t:'Measuring the supply voltage',s:"The meter tolerates up to 3 V, but the rail goes up to 12.6 V. A divider brings it down to a safe 2–3 V.",bt:["The problem", "The solution", "How to choose", "Converting back", "Next"],ui:['vin','divR1','divR2','nV','nTap','pills','bF'],build:B(true,'fet',true,true),enter:()=>{repair();S.rev=false;S.k=0;S.lri=3;S.b1=6;S.b2=0;S.vin=12},
+ b:'<p>We want to know how many volts the supply gives, for example to notice a battery running low. Let’s take a <b>0–3 V meter</b>: it’s like your multimeter, but with a 3 V limit and no protection. It has two legs: “+” and ground. Inside it has a huge resistance, so it draws almost no current and just looks at the voltage. Put 12 V on it and it burns.</p><p>The solution is a divider: R1 from the rail, R2 to ground, the meter at the point between them. Without R2 no current would flow through R1 (the meter draws almost none), nothing would drop across R1, and the meter would see the full 12 V.</p><ul><li>at the maximum voltage (12.6 V for a charged 3S battery) the meter sees <b>no more than 3 V</b>;</li><li>but not too little either, ideally above 2 V, or you lose precision;</li><li>resistors in the tens of kilohms: the divider constantly eats U / (R1 + R2), no point wasting it.</li></ul><p>You then convert back to the supply voltage: reading × (R1 + R2) / R2.</p><p class="note">When we build the board’s brain, an ESP32 input takes this meter’s place; it works exactly the same way.</p>',
+ task:'At 12.6 V, get 2 to 3 V at the meter',ok:c=>S.vin>=12.55&&c.tap>=2&&c.tap<=3&&!S.espDead},
+{sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"The input stage is done: connector → fuse → MOSFET → 12 V rail → servos, indicator and meter.",bt:["-", "Next"],ui:[],build:B(true,'fet',true,true),enter:()=>{repair();S.rev=false;S.k=0},
+ b:'<p>The board’s input stage is done: <b>connector → fuse → reverse-polarity MOSFET → 12 V rail</b>, and on the rail: servos, an indicator, and a divider with a meter. Every part is here because something burnt without it.</p><ul class="hw">'+['Look at the label on your power supply: how many volts and how many amps? Is it enough for six servos if two stall?','Find the STS3215 stall current at 12 V in its datasheet and recalculate the worst case.','Find which side is plus on your supply: a barrel plug has a polarity symbol printed next to it.','Think about which fuse you would fit for your supply.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${t}</label></li>`).join('')+'</ul><p class="note">Next up, lesson 2: the capacitor, a tank of spare water. Why boards carry those little “barrels”, and what happens when servos suddenly yank current.</p>',
+ task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+
+function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
+  document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}
+
+function renderBody(st){
+  $('#stepS').innerHTML=st.s||'';
+  const t=document.createElement('template');t.innerHTML=st.b||'';const X=$('#stepX'),Bk=$('#stepB');X.innerHTML='';Bk.innerHTML='';
+  const els=[...t.content.children],groups=[];
+  for(const el of els){
+    if(el.matches('.quiz,.fb,.hw,.warnbox')){X.appendChild(el);continue}
+    const prev=groups[groups.length-1];
+    if(prev&&/^(UL|OL)$/.test(el.tagName)&&prev.els.length===1&&/:\s*$/.test(prev.els[0].textContent))prev.els.push(el);else groups.push({els:[el]});
+  }
+  const bt=st.bt||[];let n=0;
+  groups.forEach((g,i)=>{const title=bt[i];if(title==='-')return;
+    const d=document.createElement('div');d.className='blk'+(g.els[0].classList.contains('note')?' note':'');
+    if(title){const h=document.createElement('h3');h.textContent=title;d.appendChild(h)}
+    g.els.forEach(e=>{e.classList.remove('note');d.appendChild(e)});Bk.appendChild(d);n++});
+  $('#more').hidden=!n;$('#moreN').textContent=n;
+}
+function renderStep(){
+  const st=STEPS[S.step];if(st.enter)st.enter();
+  if(st.build){S.hasF=st.build.f;S.prot=st.build.prot;S.hasLed=st.build.led;S.hasDiv=st.build.div}
+  useScene(st.sc);setUI(st.ui);$('#info').hidden=true;$('#after').dataset.s='';
+  $('#stepN').innerHTML=`<span class="part">${st.part}</span>`;$('#stepC').textContent=`${S.step+1} / ${STEPS.length}`;$('#stepT').textContent=st.t;renderBody(st);
+  $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1;
+  if(S.step===STEPS.length-1)[0,1,2,3].forEach(i=>$('#hw'+i).onchange=e=>{hw[i]=e.target.checked;try{localStorage.setItem('l1hw',JSON.stringify(hw))}catch(_){}update()});
+  buildV();buildD();update();
+}
+$('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="Step ${i+1}: ${st.t}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+[...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
+const bind=(id,key,rebuild)=>$(id).oninput=e=>{S[key]=+e.target.value;if(rebuild){buildV();buildD()}update()};
+bind('#wu','wU',1);bind('#w1','w1',1);bind('#w2','w2',1);bind('#vin','vin');bind('#k','k');$('#fu').oninput=e=>{S.fi=+e.target.value;S.fuseBlown=false;update()};bind('#lr','lri');bind('#d1','b1');bind('#d2','b2');
+$('#wrev').onclick=()=>{S.wRev=!S.wRev;buildV();update()};
+$('#wtype').onclick=()=>{S.vSi=!S.vSi;buildV();update()};
+$('#don').onclick=()=>{S.dOn=!S.dOn;buildD();update()};
+$('#rev').onclick=()=>{S.rev=!S.rev;update()};
+$('#pD').onclick=()=>{S.prot='diode';update()};$('#pF').onclick=()=>{S.prot='fet';update()};
+$('#fix').onclick=()=>{repair();update()};
+let shortTimer=null;
+$('#short').onclick=()=>{S.short=true;update();clearTimeout(shortTimer);shortTimer=setTimeout(()=>{S.short=false;update()},1400)};
+
+let C=solve();
+const boom=(p,src)=>{flashT=1;flashAt.copy(p);if(src)smokeSrc=[src]};
+function update(){
+  const st=STEPS[S.step],ui=st.ui;
+  C=solve();
+  /* what burns */
+  if(!C.open&&S.short){if(S.hasF){S.fuseBlown=true;boom(V3(-3.6,0.5,-2))}else{S.traceBurnt=true;boom(V3(-2.6,0.3,-2),V3(-2.6,0.2,-2))}C=solve()}
+  if(!C.open&&S.hasF&&!S.short&&C.I>FU[S.fi]){S.fuseBlown=true;boom(V3(-3.6,0.5,-2));C=solve()}
+  if(!C.open&&S.rev&&C.Vr<-1){if(!S.servosDead){S.servosDead=true;boom(V3(6.7,0.6,0),V3(6.7,0.6,0))}if(S.hasLed&&!S.ledDead)S.ledDead=true;if(S.hasDiv&&!S.espDead)S.espDead=true;C=solve()}
+  if(S.hasLed&&!S.ledDead&&C.led>0.05){S.ledDead=true;boom(V3(0.5,0.8,0.8));C=solve()}
+  if(S.hasDiv&&!S.espDead&&C.tap>ESP_MAX){S.espDead=true;boom(V3(3.7,0.5,0),V3(3.7,0.4,0));C=solve()}
+  /* step flags */
+  const rating=FU[S.fi];
+  if(S.step===2){if(S.k>=2&&!S.fuseBlown&&rating>=5.2&&rating<=PSU_MAX)S.fl.k2=true;if(S.fuseBlown&&rating>=5.2&&rating<=PSU_MAX&&!S.traceBurnt&&shortTimer&&S.short)S.fl.sh=true}
+  if(S.step===5){if(S.rev&&!S.servosDead)S.fl.rv=true;if(!S.rev&&C.Pp>1.5)S.fl.hot=true}
+  if(S.step===6&&S.k>=2&&!S.rev&&!C.open){if(S.prot==='diode')S.fl.cd=true;if(S.prot==='fet')S.fl.cf=true}
+  /* water panel */
+  const w=water();
+  if(st.sc==='v'&&!S.wRev&&w.I===0&&S.wU>0)S.fl.below=true;if(st.sc==='d'&&!S.dOn)S.fl.off=true;
+  $('#wtype').textContent=S.vSi?'Schottky diode (0.45 V)':'Regular diode (0.7 V)';$('#don').textContent=S.dOn?'Disconnect R2':'Connect R2';$('#don').setAttribute('aria-pressed',S.dOn);
+  $('#wu').value=S.wU;$('#w1').value=S.w1;$('#w2').value=S.w2;$('#wuO').textContent=fV(S.wU);$('#w1O').textContent=fR(DR[S.w1]);$('#w2O').textContent=fR(DR[S.w2]);
+  $('#wrev').setAttribute('aria-pressed',S.wRev);$('#wrev').textContent=S.wRev?'Restore the pump':'Reverse the pump';
+  $('#wnU').textContent=fV(w.U);$('#wnI').textContent=fI(w.I);$('#wnD').textContent=fV(w.d||0);$('#wnOut').textContent=w.out!==undefined?fV(w.out):'—';
+  $('#wF').innerHTML=w.mode==='div'?(S.dOn?`Uout = U × R2 / (R1 + R2) = ${nf(w.U,1)} × ${fR(w.R2)} / (${fR(w.R1)} + ${fR(w.R2)}) = <b>${fV(w.out)}</b><br>Current through both: I = U / (R1 + R2) = <b>${fI(w.I)}</b>`:'R2 disconnected: no path to ground, current is 0, nothing drops across R1, so the output equals the full voltage.'):S.wRev?'The pump pushes backwards: the flap is pressed against the seat, current is 0.':w.I>0?`After the valve: ${fV(w.U)} − ${fV(w.vf)} = <b>${fV(w.after)}</b><br>Heat in the valve: ${fV(w.vf)} × ${fI(w.I)} = <b>${fP(w.vf*w.I)}</b>`:`Pump ${fV(w.U)} , below the threshold ${fV(w.vf)}: the spring holds, no current.`;
+  /* board 3D */
+  jF.visible=!S.hasF;gF.visible=S.hasF;jP.visible=S.prot==='none';gD.visible=S.prot==='diode';gT.visible=S.prot==='fet';
+  gLedB.visible=gLR.visible=gLD.visible=S.hasLed;gDivB.visible=gD1.visible=gD2.visible=S.hasDiv;gSD.visible=S.short;
+  fWire.visible=!S.fuseBlown;fSoot.visible=S.fuseBlown;fWire.material.emissiveIntensity=S.hasF&&!S.fuseBlown?Math.min(1.5,C.I/FU[S.fi]):0;
+  mNeck.color.setHex(S.traceBurnt?0x1a1410:0xe39a52);neck.scale.x=S.traceBurnt?0.35:1;
+  wA.material.color.setHex(S.rev?0x1c1c1c:0xe8332a);wB.material.color.setHex(S.rev?0xe8332a:0x1c1c1c);
+  mDi.emissiveIntensity=S.prot==='diode'?Math.min(1.6,C.Pp/1.5):0;mFet.emissiveIntensity=S.prot==='fet'?Math.min(1.6,C.Pp/1.5):0;
+  servos.forEach((s,i)=>{s.material.color.setHex(S.servosDead?0x221a18:i<S.k?0xc0392b:0x1f3a66)});
+  gLR.setR(LR[S.lri]);gD1.setR(DR[S.b1]);gD2.setR(DR[S.b2]);
+  mLed.color.setHex(S.ledDead?0x2a3a2e:0x3fdc6a);mLed.emissiveIntensity=C.led>0?Math.min(3,0.3+C.led/0.005):0;ledLight.intensity=C.led>0?Math.min(3,C.led/0.005):0;
+  mEsp.emissiveIntensity=S.espDead?0.6:0;
+  setPath(S.short&&!C.open?PATH_S:PATH_N);
+  Lf.el.textContent='Fuse · '+fA(rating)+(S.fuseBlown?' · burnt':'');Lp.el.textContent=S.prot==='diode'?'Schottky diode':'MOSFET';
+  Lled.el.textContent='Indicator · '+fR(LR[S.lri]);Ld1.el.textContent='R1 · '+fR(DR[S.b1]);Ld2.el.textContent='R2 · '+fR(DR[S.b2]);
+  Lesp.el.textContent=S.espDead?'Meter burnt':stage.clientWidth<600?`${fV(Math.max(0,C.tap))}`:`Meter: ${fV(Math.max(0,C.tap))} → supply ${fV(Math.max(0,C.tap)*(DR[S.b1]+DR[S.b2])/DR[S.b2])}`;Lesp.el.className='lb '+(S.espDead?'bad':'good');
+  Lservo.el.textContent=S.servosDead?'Servos burnt':`6 servos · stalled: ${S.k}`;
+  /* board panel */
+  $('#vin').value=S.vin;$('#k').value=S.k;$('#fu').value=S.fi;$('#lr').value=S.lri;$('#d1').value=S.b1;$('#d2').value=S.b2;
+  $('#vinO').textContent=fV(S.vin);$('#kO').textContent=S.k+' of 6';$('#fuO').textContent=fA(rating);$('#lrO').textContent=fR(LR[S.lri]);$('#d1O').textContent=fR(DR[S.b1]);$('#d2O').textContent=fR(DR[S.b2]);
+  $('#pD').setAttribute('aria-pressed',S.prot==='diode');$('#pF').setAttribute('aria-pressed',S.prot==='fet');
+  $('#rev').textContent=S.rev?'Restore the wires':'Swap the wires';$('#short').disabled=S.short;
+  const dead=S.fuseBlown||S.traceBurnt||S.servosDead||S.ledDead||S.espDead;$('#fix').hidden=!(dead&&ui.length);
+  const Itot=C.I+C.led+(S.hasDiv?Math.abs(C.Vr)/(DR[S.b1]+DR[S.b2]):0);
+  $('#nI').textContent=fI(Itot);$('#nV').textContent=fV(C.Vr);$('#nP').textContent=fP(C.Pp);$('#nTap').textContent=S.espDead?'burnt':fV(Math.max(0,C.tap));
+  const pills=[];
+  pills.push(C.open==='psu'?['r','Supply in protection mode']:load()>8&&!C.open?['y','Supply at its limit']:['g','Supply OK']);
+  if(S.hasF)pills.push(S.fuseBlown?['r','Fuse blown']:['g','Fuse intact']);
+  if(S.traceBurnt)pills.push(['r','Trace burnt']);
+  pills.push(S.servosDead?['r','Servos burnt']:['g','Servos alive']);
+  if(S.prot!=='none')pills.push(C.Pp>1.5?['r',(S.prot==='diode'?'Diode':'MOSFET')+' scorching']:C.Pp>0.5?['y',(S.prot==='diode'?'Diode':'MOSFET')+' warm']:['g',(S.prot==='diode'?'Diode':'MOSFET')+' cold']);
+  if(S.hasLed)pills.push(S.ledDead?['r','Indicator burnt']:C.led>0.01?['y','Indicator blinding']:C.led>0?['g','Indicator lit']:['m','Indicator off']);
+  if(S.hasDiv)pills.push(S.espDead?['r','Meter burnt']:C.tap>3?['r','Off the scale: above 3 V']:C.tap>=2?['g','Meter OK']:['y','Too low for an accurate reading']);
+  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join('');
+  let f='';
+  if(C.open==='trace')f='Trace burnt: the circuit is broken, the rail is at 0 V. Press “Repair”.';
+  else if(C.open==='fuse')f='Fuse blown: the circuit is broken, the board is fine. Replace the fuse.';
+  else if(C.open==='psu')f=`The arm asks for ${fI(load())}, but the supply can only do 10 A, so it shut off.`;
+  else if(C.open==='diode'||C.open==='fet')f='Wires swapped, but the protection is shut: current is 0, the rail is at 0 V. Everything survives.';
+  else if(S.short)f=`Short: I = U / R = 12 V / 0.05 Ω ≈ <b>${fI(C.I)}</b>`;
+  else if(S.rev)f=`Rail at ${fV(C.Vr)}: the electronics got reversed polarity.`;
+  else{f=`Load current: 0.3 A × ${6-S.k} + 2 A × ${S.k} = <b>${fI(C.I)}</b>`;
+    if(S.hasF)f+=`<br>Fuse ${fA(rating)}: `+(C.I<rating*0.8?'has headroom':'on the edge');
+    if(S.prot==='diode')f+=`<br>Diode: P = 0.45 V × ${nf(C.I,1)} A = <b>${fP(C.Pp)}</b>`;
+    if(S.prot==='fet')f+=`<br>MOSFET: P = I × I × R = ${nf(C.I,1)} × ${nf(C.I,1)} × 0.008 = <b>${fP(C.Pp)}</b>`;
+    if(S.hasLed)f+=`<br>Indicator: I = (${nf(C.Vr,1)} − 1.9) / ${LR[S.lri]} Ω = <b>${fI(C.led)}</b>`;
+    if(S.hasDiv)f+=`<br>Divider: ${nf(C.Vr,1)} × ${fR(DR[S.b2])} / (${fR(DR[S.b1])} + ${fR(DR[S.b2])}) = <b>${fV(C.tap)}</b> at the meter`}
+  $('#formula').innerHTML=f;
+  /* task */
+  if(st.ok(C))S.done.add(S.step);saveQ();
+  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  $('#after').hidden=!(ok&&st.after);if(ok&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
+  [...$('#dots').children].forEach((b,i)=>b.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
+}
+
+/* ---------- render loop ---------- */
+function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;if(w<h)cam.setViewOffset(w,h,0,Math.round(h*0.12),w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
+$('#reset').onclick=fit;
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
+function frame(){
+  const dt=Math.min(clock.getDelta(),0.05),slow=reduce?0.3:1;
+  if(curSc==='v'){
+    ctl.update();const w=water(),sp=w.I>0?Math.min(4,0.4+25*Math.sqrt(w.I)):0;vflow+=sp*dt*slow;impV.rotation.z+=(S.wRev?1:-1)*(S.wU>0?2.5:0)*dt*slow;
+    for(let i=0;i<NDV;i++){pathAt(VPATH,vflow+i*VPATH.T/NDV,pv);dummy.position.copy(pv);dummy.updateMatrix();dropsV.setMatrixAt(i,dummy.matrix)}dropsV.instanceMatrix.needsUpdate=true;
+    const tA=w.I>0?Math.min(1.25,0.5+w.I*60):0;flapA+=(tA-flapA)*Math.min(1,dt*8);hinge.rotation.z=flapA;
+    [[gIn,w.before],[gOut,w.after]].forEach(([g,v])=>{const t=2.3-v/12*4.6;g.cur+=(t-g.cur)*Math.min(1,dt*6);g.piv.rotation.z=g.cur});
+    gl.render(scV,cam);
+  }else if(curSc==='d'){
+    ctl.update();const w=water(),sp=w.I>0?Math.min(4,0.4+30*Math.sqrt(w.I)):0;dflow+=sp*dt*slow;
+    for(let i=0;i<ballsN;i++){pathAt(DPATH,dflow+i*DPATH.T/ballsN,pv);dummy.position.copy(pv);dummy.updateMatrix();balls.setMatrixAt(i,dummy.matrix)}balls.instanceMatrix.needsUpdate=true;
+    gl.render(scD,cam);
+  }else{
+    ctl.update();
+    const I=Math.abs(C.I),sp=I>0?Math.min(14,0.6+2.2*Math.sqrt(I)):0;flow+=(S.rev?-1:1)*sp*dt*slow;
+    for(let i=0;i<NP;i++){bAt(flow+i*BLT/NP,pv);dummy.position.set(pv.x,0.11,pv.z);dummy.updateMatrix();parts.setMatrixAt(i,dummy.matrix)}parts.instanceMatrix.needsUpdate=true;
+    flashL.intensity=flashT*10;flashL.position.copy(flashAt).add(V3(0,0.6,0));flashT=Math.max(0,flashT-dt*1.4);sdMat.emissiveIntensity=S.short?1.2:0;
+    const hot=[];if(S.prot!=='none'&&C.Pp>1.5)hot.push(V3(-1.6,0.4,-2));if(S.servosDead)hot.push(V3(6.7,0.6,0));if(S.traceBurnt)hot.push(V3(-2.6,0.2,-2));if(S.espDead)hot.push(V3(3.7,0.4,0));
+    smokeT-=dt;if(hot.length&&smokeT<=0){smokeT=0.16;const s=smoke.find(o=>o.life<=0);if(s){s.life=1;s.m.position.copy(hot[Math.floor(Math.random()*hot.length)]).add(V3((Math.random()-.5)*0.4,0,(Math.random()-.5)*0.4))}}
+    smoke.forEach(o=>{if(o.life>0){o.life-=dt*0.55;o.m.position.y+=dt*0.7;o.m.scale.setScalar(1+(1-o.life)*2.2);o.m.material.opacity=Math.max(0,o.life*0.45)}else o.m.material.opacity=0});
+    gl.render(scB,cam);
+  }
+  const W=stage.clientWidth,H=stage.clientHeight,ac=cam;
+  labels.forEach(L=>{let vis=L.sc===curSc&&L.vis();if(vis){pv.copy(L.p).project(ac);vis=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1}
+    L.el.style.display=vis?'block':'none';if(vis)L.el.style.transform=`translate(${(pv.x*.5+.5)*W}px,${(-pv.y*.5+.5)*H}px) ${L.tr}`});
+  requestAnimationFrame(frame);
+}
+try{$('#more').open=localStorage.getItem('moreOpen')==='1'}catch(e){}
+$('#more').addEventListener('toggle',()=>{try{localStorage.setItem('moreOpen',$('#more').open?'1':'0')}catch(e){}});
+function saveQ(){const need=STEPS.length-1,ok=[...Array(need).keys()].every(i=>S.done.has(i));$('#lvlDone').hidden=!ok;try{const q=JSON.parse(localStorage.getItem('quest_v1')||'{}');q.steps=q.steps||{};q.done=q.done||{};q.steps[1]=[...S.done];if(ok)q.done[1]=true;localStorage.setItem('quest_v1',JSON.stringify(q))}catch(e){}}
+try{(JSON.parse(localStorage.getItem('quest_v1')||'{}').steps||{})[1]?.forEach(i=>S.done.add(i))}catch(e){}
+renderStep();frame();
+}
+}
+</script>
+</body>
+</html>
