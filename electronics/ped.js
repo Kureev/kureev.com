@@ -25,6 +25,7 @@ function layout(){const step=document.querySelector('.panel .step');if(!step)ret
 function tidy(){if(!seg)return;
   const shown=c=>!c.hidden&&getComputedStyle(c).display!=='none';
   if(ctl)ctl.querySelectorAll('.row').forEach(r=>{const v=[...r.children].some(shown),want=v?'':'none';if(r.style.display!==want)r.style.display=want});
+  const sd=seg.try.querySelector('.side');if(sd){const v=[...sd.children].some(c=>shown(c)&&c.textContent.trim()),want=v?'':'none';if(sd.style.display!==want)sd.style.display=want}
   Object.values(seg).forEach(d=>{const v=[...d.children].some(c=>shown(c)&&c.offsetHeight>0);if(d.classList.contains('empty')===v)d.classList.toggle('empty',!v)})}
 let tq=0;const queue=()=>{if(tq)return;tq=requestAnimationFrame(()=>{tq=0;layout();tidy()})};
 
@@ -74,6 +75,7 @@ function after(ok){const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;c
   const f=document.getElementById('pedEx');if(!f)return;doneShown[cur]=true;
   f.className='pq-f'+(p===pr.a?' ok':'');f.innerHTML='<b class="wh">'+(p===pr.a?'Your prediction held.':'What happened: '+pr.o[pr.a]+'.')+'</b> '+pr.ex}
 function wrap(fn,step){return function(){fn.apply(this,arguments);render(step())}}
+window.PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
 window.PED={init(k,data){L=k;D=data;load();
   const mount=()=>{const lead=document.getElementById('stepS');ctl=document.querySelector('.card.ctl');
     box=document.createElement('div');box.id='ped';lead.insertAdjacentElement('afterend',box);note=document.createElement('p');note.className='ped-note';note.hidden=true;ctl.insertAdjacentElement('afterend',note);
@@ -82,9 +84,9 @@ window.PED={init(k,data){L=k;D=data;load();
   render,ready,after,wrap};
 const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 #ped:empty{display:none}
-.panel{background:#040716!important;border-left:0!important;padding:12px 12px 0!important;gap:0}
+.panel{background:#040716;border-left:0!important;padding:12px 12px 0!important;gap:0}
 .panel .step{display:flex!important;flex-direction:column;gap:10px;padding:0!important;margin:0!important;background:none!important;border:0!important}
-.seg{background:linear-gradient(180deg,#0c1434,#0a102b);border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:16px 18px;box-shadow:0 1px 0 rgba(140,160,255,.06) inset}
+.seg{background:rgba(10,15,40,.84);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);pointer-events:auto;border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:16px 18px;box-shadow:0 1px 0 rgba(140,160,255,.06) inset}
 .seg.empty{height:0;padding:0;border:0;margin-top:-10px;overflow:hidden}
 .seg>*:last-child{margin-bottom:0!important}
 .seg-orient .ph{padding:0!important;margin:0 0 14px}
@@ -132,7 +134,14 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .card.ctl.ped-lock{opacity:.4;pointer-events:none}
 .ped-note{margin:-4px 0 10px;font-size:12px;color:#8f9bc4}
 @media(prefers-reduced-motion:reduce){.card.ctl{transition:none}}
-@media(min-width:901px){.app{grid-template-columns:minmax(0,1fr) clamp(420px,31vw,500px)!important}}
+@media(min-width:901px){
+.app{display:block!important;position:relative;height:100%;--pw:calc(clamp(420px,31vw,500px) + 12px)}
+.app>.stage{position:absolute!important;inset:0}
+.app>.panel{position:absolute!important;z-index:5;top:0;right:12px;bottom:0;width:clamp(420px,31vw,500px);background:none!important;border:0!important;box-shadow:none!important;pointer-events:none;padding:12px 0 0!important;scrollbar-width:none}
+.app>.panel::-webkit-scrollbar{display:none}
+.app>.panel .step{pointer-events:none}
+.app>.panel .nav{pointer-events:auto;margin:auto 0 0!important;padding:12px 0!important;background:none!important}
+.hud{right:calc(var(--pw) + 12px)!important}.info{right:calc(var(--pw) + 4px)!important}}
 .blk table{font-size:13.5px;table-layout:auto}.blk table th,.blk table td{padding:7px 8px 7px 0;vertical-align:top}.blk table td:nth-child(-n+3),.blk table th{white-space:nowrap}
 .dots button,.dots button:hover{background:linear-gradient(#1d2752,#1d2752) center/100% 4px no-repeat!important;border-radius:0!important}
 .dots button.done{background-image:linear-gradient(#4b5fc8,#4b5fc8)!important}

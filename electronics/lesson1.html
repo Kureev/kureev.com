@@ -282,6 +282,9 @@ input[type=range]{accent-color:#7d8cff}
 
 
 
+
+
+
 <!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l1",{"brief": {"short": "A dropped screwdriver or a reversed plug can kill the board. Build the stage that survives both.", "problem": "Your arm runs six servos from a 12 V, 10 A supply. A dropped screwdriver or a plug pushed in backwards can kill the whole board. In this level you build the input stage that survives both.", "goals": ["Pick a fuse between the working current and the fault current", "Protect against reversed power with a diode or a MOSFET, and compare their losses", "Bring 12 V down to a safe measuring voltage with a divider"]}, "pr": {"1": {"q": "A screwdriver connects plus and minus directly. The current…", "o": ["drops to zero", "stays at the working level", "becomes huge"], "a": 2, "ex": "Resistance is almost zero, so I = U / R explodes. Only the supply and the copper hold it back, and something burns."}, "3": {"q": "The supply goes in backwards and nothing protects the board. The servos…", "o": ["run in reverse", "don’t notice", "are likely to die"], "a": 2, "ex": "Chips expect plus on the plus pin. −12 V on the rail destroys most of them, including the servos’ own electronics."}, "4": {"q": "You reverse the pump. The check valve…", "o": ["lets the water flow back", "blocks it"], "a": 1, "ex": "Pressure from behind pushes the flap onto its seat, so nothing flows back. A diode does the same with current."}, "6": {"q": "Two servos stalled, 5.2 A through the protection. Which heats more?", "o": ["The diode", "The MOSFET", "About the same"], "a": 0, "ex": "Diode: 0.45 V × 5.2 A ≈ 2.3 W. MOSFET: 0.008 Ω × 5.2 A × 5.2 A ≈ 0.2 W. Same protection, a tenth of the heat."}, "8": {"q": "R1 and R2 are equal. The output sits at…", "o": ["the full source voltage", "half of it", "zero"], "a": 1, "ex": "Uout = U × R2 / (R1 + R2) = U / 2."}}, "recall": {"0": [{"q": "Ohm’s law, solved for current:", "o": ["I = U × R", "I = U / R", "I = R / U"], "a": 1}, {"q": "In one closed loop, the current is…", "o": ["largest near the source", "the same everywhere", "largest after the resistor"], "a": 1}, {"q": "A part has 2 V across it and 3 A through it. Its power:", "o": ["0.67 W", "5 W", "6 W"], "a": 2, "ex": "P = U × I = 2 × 3 = 6 W."}], "4": [{"q": "A fuse rating should be…", "o": ["below the working current", "between the working current and the fault current", "as high as possible"], "a": 1}, {"q": "Servos on one rail are connected…", "o": ["in series", "in parallel"], "a": 1}]}, "end": {"step": 10, "items": [{"q": "A divider with R1 = 30 kΩ and R2 = 10 kΩ on 12 V outputs…", "o": ["3 V", "4 V", "9 V"], "a": 0, "ex": "12 × 10 / (30 + 10) = 3 V."}, {"q": "Why use a MOSFET instead of a diode for reverse protection?", "o": ["It blocks more current", "It drops far less voltage, so it barely heats", "It needs no wiring"], "a": 1}, {"q": "A green indicator LED (≈1.9 V) on 12 V should get 4 mA. The resistor is about…", "o": ["500 Ω", "2.5 kΩ", "25 kΩ"], "a": 1, "ex": "(12 − 1.9) / 0.004 ≈ 2.5 kΩ."}]}})</script><!-- /ped -->
 <script>
 {
@@ -342,7 +345,7 @@ const FB={c:V3(-0.7,0.3,0.2),w:15.6,h:7.2,d:1.2,dir:V3(-0.05,1,1)};
 const FR={b:FB,v:{c:V3(0,1.9,0.5),w:10.8,h:4.9,d:1.0,dir:V3(0.38,0.42,1)},d:{c:V3(-0.5,1.7,0.4),w:12.6,h:5.0,d:1.2,dir:V3(0.32,0.45,1)}};
 function fit(){const f=FR[curSc];if(!f)return;const th=curSc!=='b';
   ctl.minAzimuthAngle=th?-0.45:-Infinity;ctl.maxAzimuthAngle=th?1.05:Infinity;ctl.minPolarAngle=th?0.55:0;ctl.maxPolarAngle=th?1.45:1.5;
-  const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect),fw=curSc==='b'&&cam.aspect<1?12:f.w,dist=Math.max((fw/2)/Math.tan(hf/2),(f.h/2)/Math.tan(vf/2))*(stage.clientWidth<=640?1.2:1.04)+f.d;
+  const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*((stage.clientWidth-(window.PW?PW():0))/stage.clientHeight)),fw=curSc==='b'&&cam.aspect<1?12:f.w,dist=Math.max((fw/2)/Math.tan(hf/2),(f.h/2)/Math.tan(vf/2))*(stage.clientWidth<=640?1.2:1.04)+f.d;
   cam.position.copy(f.c).add(f.dir.clone().normalize().multiplyScalar(dist));ctl.target.copy(f.c);ctl.update()}
 function useScene(k){if(k===curSc)return;curSc=k;fit()}
 function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,22,1,true),mat);
@@ -703,7 +706,7 @@ function update(){
 }
 
 /* ---------- render loop ---------- */
-function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;if(w<h)cam.setViewOffset(w,h,0,Math.round(h*0.12),w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
+function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;const pw=window.PW?PW():0;if(w<h)cam.setViewOffset(w,h,0,Math.round(h*0.12),w,h);else if(pw)cam.setViewOffset(w,h,Math.round(pw/2),0,w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
 $('#reset').onclick=fit;
 const ro=new ResizeObserver(size);ro.observe(stage);size();
 const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
@@ -731,7 +734,7 @@ function frame(){
   }
   const W=stage.clientWidth,H=stage.clientHeight,ac=cam;
   labels.forEach(L=>{let vis=L.sc===curSc&&L.vis();if(vis){pv.copy(L.p).project(ac);vis=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1}
-    L.el.style.display=vis?'block':'none';if(vis){let x=(pv.x*.5+.5)*W;if(L.tr===TR.up||L.tr===TR.down){const ow=L.el.offsetWidth;x=Math.max(8+ow/2,Math.min(W-8-ow/2,x))}L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) ${L.tr}`}});
+    L.el.style.display=vis?'block':'none';if(vis){let x=(pv.x*.5+.5)*W;if(L.tr===TR.up||L.tr===TR.down){const ow=L.el.offsetWidth;x=Math.max(8+ow/2,Math.min(W-(window.PW?PW():0)-8-ow/2,x))}L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) ${L.tr}`}});
   requestAnimationFrame(frame);
 }
 try{$('#more').open=localStorage.getItem('moreOpen')==='1'}catch(e){}

@@ -122,7 +122,24 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 .hint{background:rgba(5,8,23,.55)}
 @media(max-width:900px){.panel{border-top:0!important;box-shadow:0 -1px 0 rgba(143,155,196,.10)}.app{grid-template-columns:minmax(0,1fr)}.grid{grid-template-columns:1fr 1fr}.lv .g{display:none}.lv.now .g{display:block}}
 @media(prefers-reduced-motion:reduce){.lv,.lv .art img{transition:none}}
-.by{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;font-size:14px;font-weight:600;color:var(--mute);text-decoration:none}.by:hover{color:var(--ink)}.by img{border-radius:6px}</style>
+
+/* no panel background: the room runs under the column, the content sits on it as standalone blocks */
+.by{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;font-size:14px;font-weight:600;color:var(--mute);text-decoration:none}.by:hover{color:var(--ink)}.by img{border-radius:6px}
+.blk{background:rgba(10,15,40,.84);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:20px}
+.blk.intro h1{margin-top:0}.blk.intro .prog{margin-bottom:0}
+.blk.more .invd{margin:0}.blk.more .foot{margin:12px 0 0}
+.panel .grid{margin:10px 0}
+.lv{background:rgba(10,15,40,.88)!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+@media(min-width:901px){
+.app{display:block!important;position:relative;height:100%}
+.app>.stage{position:absolute!important;inset:0}
+.app>.panel{position:absolute!important;z-index:5;top:0;right:12px;bottom:0;width:460px;background:none!important;border:0!important;box-shadow:none!important;padding:12px 0!important;pointer-events:none;scrollbar-width:none}
+.app>.panel::-webkit-scrollbar{display:none}
+.app>.panel .blk,.app>.panel .lv{pointer-events:auto}
+.app>.panel .grid{pointer-events:none}
+.info{right:488px!important}}
+@media(max-width:900px){.panel{background:#050817!important;padding:12px!important}}
+</style>
 <link rel="stylesheet" href="/electronics/theme.css">
 </head>
 <body>
@@ -134,13 +151,17 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
     <aside class="info" id="info" hidden><button class="x" id="infoX" aria-label="Close">×</button><b id="infoT"></b><p id="infoP"></p><a class="go" id="infoGo" href="#">Open</a></aside>
   </section>
   <main class="panel">
+    <section class="blk intro">
     <a class="by" href="/"><img src="/logo.svg" alt="" width="22" height="22">by Alexey Kureev</a>
     <h1>Electronics for a robot arm</h1>
     <p class="sub">From Ohm’s law to the power board of an SO-101 arm. Every level you clear adds its piece to the board on the desk.</p>
     <div class="prog"><div class="segs" id="segs" aria-hidden="true"></div><b id="progT"></b></div>
+    </section>
     <div class="grid" id="levels"></div>
+    <section class="blk more">
     <details class="invd"><summary>Parts you understand <span id="invN"></span></summary><div class="inv" id="inv"></div></details>
     <p class="foot">Progress is saved in this browser. <button class="ghost" id="reset">Reset progress</button></p>
+    </section>
   </main>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -212,9 +233,11 @@ const MAT={pcb:M(0x173a8c,{roughness:.6}),blk:M(0x15171f,{roughness:.45}),cu:M(0
 const ghost=new THREE.MeshStandardMaterial({color:0x8f9bc4,emissive:0x24306a,emissiveIntensity:.6,transparent:true,opacity:.2,depthWrite:false,roughness:.6});
 function model(i){const g=new THREE.Group(),b=(w,h,d,m,x,y,z)=>box(w,h,d,m,x,y,z,g),c=(r,h,m,x,y,z,rz,rx)=>{const o=cyl(r,h,m,x,y,z,g,rz);if(rx)o.rotation.x=rx;return o};
   const pcb=(w,d)=>b(w,0.06,d,MAT.pcb,0,0.03,0);
-  if(i===0){pcb(1.3,1.0);b(0.42,0.36,0.46,MAT.blk,-0.36,0.24,0);c(0.08,0.2,MAT.al,-0.36,0.27,-0.24,0,Math.PI/2);
-    c(0.09,0.5,MAT.glass,0.2,0.2,-0.2,Math.PI/2);c(0.095,0.09,MAT.al,-0.05,0.2,-0.2,Math.PI/2);c(0.095,0.09,MAT.al,0.45,0.2,-0.2,Math.PI/2);
-    c(0.065,0.3,MAT.blk,0.22,0.15,0.25,Math.PI/2);c(0.067,0.05,MAT.al,0.33,0.15,0.25,Math.PI/2)}
+  if(i===0){pcb(1.3,1.0);/* screw terminal, blade fuse in its holder, reverse-polarity MOSFET on a small heatsink */
+    b(0.34,0.3,0.5,MAT.blk,-0.4,0.21,0);[-0.12,0.12].forEach(z=>{c(0.07,0.05,MAT.al,-0.4,0.385,z);b(0.1,0.012,0.02,M(0x6b7080),-0.4,0.415,z)});
+    b(0.3,0.16,0.18,MAT.blk,0.02,0.14,0);b(0.24,0.26,0.07,M(0xff9a4a,{roughness:.45}),0.02,0.33,0);
+    b(0.26,0.3,0.06,MAT.blk,0.4,0.24,0.05);b(0.26,0.4,0.02,MAT.al,0.4,0.29,-0.01);[-0.09,0,0.09].forEach(x=>b(0.025,0.1,0.02,MAT.al,0.4+x,0.08,0.06));
+    [-0.1,-0.03,0.04,0.11].forEach(x=>b(0.035,0.32,0.16,M(0x2a2e37,{roughness:.5,metalness:.6}),0.4+x,0.22,-0.12))}
   if(i===1){pcb(1.2,0.9);[-0.27,0.27].forEach(x=>{c(0.23,0.72,MAT.cap,x,0.42,0);c(0.21,0.02,MAT.al,x,0.79,0);b(0.03,0.6,0.01,M(0xc9d0f2),x-0.1,0.42,0.225)})}
   if(i===2){const t=new THREE.Mesh(new THREE.TorusGeometry(0.36,0.13,16,40),MAT.fer);t.rotation.x=Math.PI/2;t.position.y=0.18;g.add(t);
     const pts=[];for(let k=0;k<=360;k++){const a=k/360*Math.PI*2,w=a*18;pts.push(V3(Math.cos(a)*(0.36+Math.cos(w)*0.15),0.18+Math.sin(w)*0.15,Math.sin(a)*(0.36+Math.cos(w)*0.15)))}
@@ -342,8 +365,9 @@ cv.addEventListener('pointerup',e=>{if(!down)return;const dx=e.clientX-down[0],d
   const h=ray.intersectObjects(hits,false)[0];if(h)showInfo(h.object.userData.lv)});
 /* camera */
 const FC=V3(-1.8,0,-0.4),FD=V3(0.08,Math.sin(28*Math.PI/180),Math.cos(28*Math.PI/180));
-function fit(){const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect),d=Math.max(10.2/Math.tan(hf/2),4.6/Math.tan(vf/2));cam.position.copy(FC).add(FD.clone().normalize().multiplyScalar(d));ctl.target.copy(FC).add(V3(-1.2,1.7,-1.4));ctl.update()}
-let lastW=0;function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
+function fit(){const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*((stage.clientWidth-PW())/stage.clientHeight)),d=Math.max(10.2/Math.tan(hf/2),4.6/Math.tan(vf/2));cam.position.copy(FC).add(FD.clone().normalize().multiplyScalar(d));ctl.target.copy(FC).add(V3(-1.2,1.7,-1.4));ctl.update()}
+const PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
+let lastW=0;function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;const pw=PW();if(pw)cam.setViewOffset(w,h,Math.round(pw/2),0,w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}}
 const ro=new ResizeObserver(size);ro.observe(stage);size();
 const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,pv=V3();
 function frame(){const t=clock.getElapsedTime();ctl.update();
@@ -351,7 +375,7 @@ function frame(){const t=clock.getElapsedTime();ctl.update();
   if(ledL)ledL.intensity=1.2+Math.sin(t*3)*0.25;floaters.forEach(f=>{f.m.position.y=f.y+Math.sin(t*1.4+f.ph)*0.06;f.m.rotation.y+=0.004});if(studio)studio.update(t);
   gl.render(scene,cam);
   const W=stage.clientWidth,H=stage.clientHeight;
-  labels.forEach(L=>{pv.copy(L.p).project(cam);const v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;L.el.style.display=v?'block':'none';if(v){const ow=L.el.offsetWidth,x=Math.max(12+ow/2,Math.min(W-12-ow/2,(pv.x*.5+.5)*W));L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) translate(-50%,-100%)`}});
+  labels.forEach(L=>{pv.copy(L.p).project(cam);const v=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1;L.el.style.display=v?'block':'none';if(v){const ow=L.el.offsetWidth,x=Math.max(12+ow/2,Math.min(W-PW()-12-ow/2,(pv.x*.5+.5)*W));L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) translate(-50%,-100%)`}});
   requestAnimationFrame(frame)}
 frame();
 }
