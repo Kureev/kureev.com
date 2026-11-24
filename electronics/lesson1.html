@@ -271,6 +271,8 @@ input[type=range]{accent-color:#7d8cff}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l1",{"brief": {"short": "A dropped screwdriver or a reversed plug can kill the board. Build the stage that survives both.", "problem": "Your arm runs six servos from a 12 V, 10 A supply. A dropped screwdriver or a plug pushed in backwards can kill the whole board. In this level you build the input stage that survives both.", "goals": ["Pick a fuse between the working current and the fault current", "Protect against reversed power with a diode or a MOSFET, and compare their losses", "Bring 12 V down to a safe measuring voltage with a divider"]}, "pr": {"1": {"q": "A screwdriver connects plus and minus directly. The current…", "o": ["drops to zero", "stays at the working level", "becomes huge"], "a": 2, "ex": "Resistance is almost zero, so I = U / R explodes. Only the supply and the copper hold it back, and something burns."}, "3": {"q": "The supply goes in backwards and nothing protects the board. The servos…", "o": ["run in reverse", "don’t notice", "are likely to die"], "a": 2, "ex": "Chips expect plus on the plus pin. −12 V on the rail destroys most of them, including the servos’ own electronics."}, "4": {"q": "You reverse the pump. The check valve…", "o": ["lets the water flow back", "blocks it"], "a": 1, "ex": "Pressure from behind pushes the flap onto its seat, so nothing flows back. A diode does the same with current."}, "6": {"q": "Two servos stalled, 5.2 A through the protection. Which heats more?", "o": ["The diode", "The MOSFET", "About the same"], "a": 0, "ex": "Diode: 0.45 V × 5.2 A ≈ 2.3 W. MOSFET: 0.008 Ω × 5.2 A × 5.2 A ≈ 0.2 W. Same protection, a tenth of the heat."}, "8": {"q": "R1 and R2 are equal. The output sits at…", "o": ["the full source voltage", "half of it", "zero"], "a": 1, "ex": "Uout = U × R2 / (R1 + R2) = U / 2."}}, "recall": {"0": [{"q": "Ohm’s law, solved for current:", "o": ["I = U × R", "I = U / R", "I = R / U"], "a": 1}, {"q": "In one closed loop, the current is…", "o": ["largest near the source", "the same everywhere", "largest after the resistor"], "a": 1}, {"q": "A part has 2 V across it and 3 A through it. Its power:", "o": ["0.67 W", "5 W", "6 W"], "a": 2, "ex": "P = U × I = 2 × 3 = 6 W."}], "4": [{"q": "A fuse rating should be…", "o": ["below the working current", "between the working current and the fault current", "as high as possible"], "a": 1}, {"q": "Servos on one rail are connected…", "o": ["in series", "in parallel"], "a": 1}]}, "end": {"step": 10, "items": [{"q": "A divider with R1 = 30 kΩ and R2 = 10 kΩ on 12 V outputs…", "o": ["3 V", "4 V", "9 V"], "a": 0, "ex": "12 × 10 / (30 + 10) = 3 V."}, {"q": "Why use a MOSFET instead of a diode for reverse protection?", "o": ["It blocks more current", "It drops far less voltage, so it barely heats", "It needs no wiring"], "a": 1}, {"q": "A green indicator LED (≈1.9 V) on 12 V should get 4 mA. The resistor is about…", "o": ["500 Ω", "2.5 kΩ", "25 kΩ"], "a": 1, "ex": "(12 − 1.9) / 0.004 ≈ 2.5 kΩ."}]}})</script><!-- /ped -->
 <script>
 {
 const $=s=>document.querySelector(s);
@@ -684,8 +686,8 @@ function update(){
     if(S.hasDiv)f+=`<br>Divider: ${nf(C.Vr,1)} × ${fR(DR[S.b2])} / (${fR(DR[S.b1])} + ${fR(DR[S.b2])}) = <b>${fV(C.tap)}</b> at the meter`}
   $('#formula').innerHTML=f;
   /* task */
-  if(st.ok(C))S.done.add(S.step);saveQ();
-  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();
+  const ok=S.done.has(S.step);$('#task').className='task'+(ok?' ok':'');PED.after(S.done.has(S.step));$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+(ok?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
   $('#after').hidden=!(ok&&st.after);if(ok&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
   [...$('#dots').children].forEach((b,i)=>b.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
 }
@@ -724,7 +726,7 @@ function frame(){
 }
 try{$('#more').open=localStorage.getItem('moreOpen')==='1'}catch(e){}
 $('#more').addEventListener('toggle',()=>{try{localStorage.setItem('moreOpen',$('#more').open?'1':'0')}catch(e){}});
-function saveQ(){const need=STEPS.length-1,ok=[...Array(need).keys()].every(i=>S.done.has(i));$('#lvlDone').hidden=!ok;try{const q=JSON.parse(localStorage.getItem('quest_v1')||'{}');q.steps=q.steps||{};q.done=q.done||{};q.steps[1]=[...S.done];if(ok)q.done[1]=true;localStorage.setItem('quest_v1',JSON.stringify(q))}catch(e){}}
+renderStep=PED.wrap(renderStep,()=>S.step);function saveQ(){const need=STEPS.length-1,ok=[...Array(need).keys()].every(i=>S.done.has(i));$('#lvlDone').hidden=!ok;try{const q=JSON.parse(localStorage.getItem('quest_v1')||'{}');q.steps=q.steps||{};q.done=q.done||{};q.steps[1]=[...S.done];if(ok)q.done[1]=true;localStorage.setItem('quest_v1',JSON.stringify(q))}catch(e){}}
 try{(JSON.parse(localStorage.getItem('quest_v1')||'{}').steps||{})[1]?.forEach(i=>S.done.add(i))}catch(e){}
 renderStep();frame();
 }
