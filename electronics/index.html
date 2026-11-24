@@ -6,19 +6,21 @@
 <meta name="description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm. Learn by breaking things on a virtual bench.">
 <meta property="og:title" content="Electronics for a robot arm">
 <meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<meta property="og:image" content="https://kureev.com/og-electronics.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>Quest: electronics for a robot arm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 /* VOICE everyday learning quest: a workbench at night where your own arm comes alive level by level
    IDEA the bench itself is the map: a ghost circuit board fills in section by section, the arm beside it wakes up
    PICTURE live 3D bench: arm, board with 8 sections, multimeter, cable from servo bus to the arm
-   COLOUR night bench #0b110e, solder-mask green, copper, servo blue, power-LED green, locked parts as dashed ghosts
+   COLOUR night bench #050817, solder-mask green, copper, servo blue, power-LED green, locked parts as dashed ghosts
    TYPE Manrope 800 + Manrope
    LAYOUT laptop: 3D bench left, quest column 410px right (progress, levels, inventory); phone: bench on top */
-:root{color-scheme:dark;--bg:#0b110e;--panel:#111a16;--card:#16211c;--line:#25352d;--ink:#e8f1ec;--mute:#9db1a6;--cu:#e39a52;--ok:#5fd38d;--warn:#ffc14d}
+:root{color-scheme:dark;--bg:#050817;--panel:#0a1230;--card:#0e1840;--line:#1e2a5c;--ink:#eef1ff;--mute:#8f9bc4;--cu:#e39a52;--ok:#5fd38d;--warn:#ffc14d}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
@@ -27,28 +29,28 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,syste
 .stage{position:relative;overflow:hidden}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 .labels{position:absolute;inset:0;pointer-events:none}
-.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(11,17,14,.82);border:1px dashed #3a4d43;white-space:nowrap;color:var(--mute)}
-.lb.done{border:1px solid #2c5a3d;color:#9ff0c0}
+.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(5,8,23,.82);border:1px dashed #33407a;white-space:nowrap;color:var(--mute)}
+.lb.done{border:1px solid #2f4a9e;color:#9ff0c0}
 .lb.open{border:1px solid #5a4a1f;color:var(--warn)}
 .tools{position:absolute;left:16px;top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.hint{font-size:13px;color:var(--mute);background:rgba(11,17,14,.7);padding:4px 10px;border-radius:8px}
-.info{position:absolute;right:16px;bottom:16px;width:min(320px,calc(100% - 32px));background:rgba(22,33,28,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
-.info b{display:block;font-size:15px;margin:0 28px 4px 0}.info p{margin:0 0 8px;color:#cfdcd5}
+.hint{font-size:13px;color:var(--mute);background:rgba(5,8,23,.7);padding:4px 10px;border-radius:8px}
+.info{position:absolute;right:16px;bottom:16px;width:min(320px,calc(100% - 32px));background:rgba(14,22,60,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.info b{display:block;font-size:15px;margin:0 28px 4px 0}.info p{margin:0 0 8px;color:#c9d2f5}
 .x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer}
 .panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
 h1{font:800 32px/1.05 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
 h2{font:800 19px/1.2 Manrope,sans-serif;margin:22px 0 10px}
 .sub{margin:0 0 16px;color:var(--mute);font-size:15px}
 .prog{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.bar{flex:1;height:10px;border-radius:99px;background:#1d2a24;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.bar{flex:1;height:10px;border-radius:99px;background:#141f4d;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
 .prog b{font-variant-numeric:tabular-nums;white-space:nowrap}
 .lv{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px}
 .lv .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;border:2px solid var(--line);color:var(--mute)}
-.lv.done .n{background:var(--ok);border-color:var(--ok);color:#0b110e}
+.lv.done .n{background:var(--ok);border-color:var(--ok);color:#050817}
 .lv.open .n{border-color:var(--warn);color:var(--warn)}
 .lv .t{font-weight:700;line-height:1.25}.lv .g{font-size:13px;color:var(--mute);line-height:1.35}
 .lv.locked{opacity:.55}
-a.go,button{font:600 14px Manrope,sans-serif;color:#0b110e;background:var(--ink);border:1px solid var(--ink);border-radius:10px;min-height:40px;padding:0 12px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;cursor:pointer}
+a.go,button{font:600 14px Manrope,sans-serif;color:#050817;background:var(--ink);border:1px solid var(--ink);border-radius:10px;min-height:40px;padding:0 12px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;cursor:pointer}
 a.go.ghost,button.ghost{background:none;color:var(--ink);border-color:var(--line)}
 .st{font-size:12px;color:var(--mute);white-space:nowrap}
 a:focus-visible,button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
@@ -60,7 +62,29 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--warn);outline-offse
 .foot button{min-height:36px;font-size:13px}
 .err{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
 @media(max-width:900px){html,body{height:auto}.app{grid-template-columns:minmax(0,1fr);height:auto}.stage{height:58svh;min-height:340px}.panel{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}.hint{display:none}.lb{font-size:11px;padding:2px 5px}}
-</style>
+/* polish v2 */
+.lv.locked{opacity:.8}.lv.locked .t{color:#b4bce0}.lv.locked .g{color:#8f9bc4}
+@media(max-width:900px){.stage{height:46svh;min-height:300px}}
+/* brand v1 */
+:root{--blue:#5b9cff;--violet:#8a6bff;--grad:linear-gradient(100deg,#5b9cff,#8a6bff 60%,#c77dff);--ok:#59f3a8;--warn:#ffb26b}
+body{background:radial-gradient(60% 50% at 20% 0%,rgba(40,70,190,.18),transparent 70%),var(--bg)}
+.panel{background:linear-gradient(180deg,#0a1230,#070c24 60%)}
+h1,h2,.ltitle{font-family:Unbounded,Manrope,sans-serif;font-weight:600;letter-spacing:-.02em}
+h2#stepT{font-size:clamp(19px,1.7vw,23px);line-height:1.2}
+button.pri,a.go{background:#E8ECFF;color:#0A0F2E;border-color:#E8ECFF;border-radius:999px}
+button.pri:hover,a.go:hover{background:#fff}
+a.go.ghost{background:rgba(140,160,255,.08);color:var(--ink);border-color:rgba(140,160,255,.25)}
+.dots button.on,.dots button.on.done{background-image:var(--grad)}
+.dots button.done{background-image:linear-gradient(#34479a,#34479a)}
+.bar i{background:var(--grad)}
+.lb.tp{color:#ffc58f}
+input[type=range]{accent-color:#7d8cff}
+.row button,#prev{border-radius:999px;background:rgba(91,156,255,.08);border:1px solid rgba(91,156,255,.35)}
+.formula,.side .formula{font-size:13px;line-height:1.5;color:#b4bde0}
+.row button[aria-pressed=true]{border-color:rgba(91,156,255,.8);color:#dbe4ff;background:rgba(91,156,255,.18)}
+.task .tick{border-color:#8a9bff}
+.meter{border-color:rgba(140,160,255,.25);box-shadow:0 12px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(140,160,255,.12)}
+.by{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;font-size:14px;font-weight:600;color:var(--mute);text-decoration:none}.by:hover{color:var(--ink)}.by img{border-radius:6px}</style>
 </head>
 <body>
 <div class="app">
@@ -71,6 +95,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--warn);outline-offse
     <aside class="info" id="info" hidden><button class="x" id="infoX" aria-label="Close">×</button><b id="infoT"></b><p id="infoP"></p><a class="go" id="infoGo" href="#">Open</a></aside>
   </section>
   <main class="panel">
+    <a class="by" href="/"><img src="/logo.svg" alt="" width="22" height="22">by Alexey Kureev</a>
     <h1>Electronics for a robot arm</h1>
     <p class="sub">A quest from zero: from Ohm’s law to a board that powers and drives a robot arm on STS3215 servos. Each level builds out the board on the bench, and the arm comes alive.</p>
     <div class="prog"><div class="bar"><i id="barI"></i></div><b id="progT"></b></div>
@@ -116,20 +141,20 @@ if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeen
 else{
 const stage=$('#stage'),cv=$('#gl'),V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b110e);scene.fog=new THREE.Fog(0x0b110e,22,50);
-scene.add(new THREE.HemisphereLight(0xdff5ea,0x0a120e,0.7));const sun=new THREE.DirectionalLight(0xffffff,0.85);sun.position.set(-5,10,7);scene.add(sun);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x050817);scene.fog=new THREE.Fog(0x050817,22,50);
+scene.add(new THREE.HemisphereLight(0xe6ebff,0x050817,0.55));const sun=new THREE.DirectionalLight(0xffffff,0.85);sun.position.set(-5,10,7);scene.add(sun);
 const cam=new THREE.PerspectiveCamera(40,1,0.1,120),ctl=new THREE.OrbitControls(cam,cv);
 ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=6;ctl.maxDistance=30;ctl.minPolarAngle=0.5;ctl.maxPolarAngle=1.35;ctl.minAzimuthAngle=-0.9;ctl.maxAzimuthAngle=0.9;
 const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
 const box=(w,h,d,mat,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(par||scene).add(m);return m};
 const cyl=(r,h,mat,x,y,z,par,rz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat);m.position.set(x,y,z);if(rz)m.rotation.z=rz;(par||scene).add(m);return m};
-box(17,0.3,10,M(0x2a2119,{roughness:.9}),0,-0.15,0);
+box(17,0.3,10,M(0x01020a,{roughness:.9}),0,-0.15,0);
 const narrow=document.getElementById('stage').clientWidth<600,labels=[],lab=(t,p,cls)=>{const el=document.createElement('div');el.className='lb '+(cls||'');el.textContent=t;$('#labels').appendChild(el);labels.push({el,p});return el};
 
 /* board with 8 sections */
 const B0=V3(-0.8,0,-1.9),CW=1.8,CD=2.3,hits=[];
 const all=isDone(9);
-box(4*CW+0.4,0.1,2*CD+0.4,new THREE.MeshStandardMaterial({color:0x1d6b45,transparent:!all,opacity:all?1:.28,roughness:.85}),B0.x+2*CW,0.05,B0.z+CD);
+box(4*CW+0.4,0.1,2*CD+0.4,new THREE.MeshStandardMaterial({color:0x01030e,transparent:!all,opacity:all?1:.28,roughness:.85}),B0.x+2*CW,0.05,B0.z+CD);
 const mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3});
 function sectionParts(i,g){const r=n=>Math.sin(i*12.9898+n*78.233)*0.5+0.5;
   for(let k=0;k<3;k++)box(CW*0.8,0.02,0.07,mCu,0,0.12,-0.7+k*0.6,g);
@@ -141,19 +166,19 @@ const SECN=['Power input','Capacitors','Inductor','Regulator','Switches','Signal
 const secLevel=s=>LEVELS.findIndex(L=>L.sec===s);
 for(let s=0;s<8;s++){const c=s%4,rw=Math.floor(s/4),cx=B0.x+0.2+c*CW+CW/2,cz=B0.z+0.2+rw*CD+CD/2,lv=secLevel(s),d=isDone(lv),a=avail(lv)&&built(lv);
   const g=new THREE.Group();g.position.set(cx,0,cz);scene.add(g);
-  if(d){box(CW-0.08,0.04,CD-0.08,M(0x1f7a4e,{roughness:.8}),0,0.1,0,g);sectionParts(s,g)}
+  if(d){box(CW-0.08,0.04,CD-0.08,M(0x060d33,{roughness:.8}),0,0.1,0,g);sectionParts(s,g)}
   else{const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW-0.12,0.02,CD-0.12)),new THREE.LineDashedMaterial({color:a?0xffc14d:0x55705f,dashSize:0.15,gapSize:0.1}));e.computeLineDistances();e.position.y=0.12;g.add(e)}
   const hit=box(CW-0.1,0.3,CD-0.1,new THREE.MeshBasicMaterial({visible:false}),0,0.15,0,g);hit.userData.lv=lv;hits.push(hit);
   lab(narrow?String(lv):`${lv} · ${SECN[s]}`,V3(cx,0.2,cz+CD/2-0.25),d?'done':a?'open':'')}
 /* power LED once the input works */
 let ledL=null;if(isDone(1)){const led=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,10),M(0x3fdc6a,{emissive:0x2aff66,emissiveIntensity:2}));led.position.set(B0.x+0.2+CW/2+0.55,0.25,B0.z+0.2+CD/2-0.7);scene.add(led);ledL=new THREE.PointLight(0x40ff70,1.4,4);ledL.position.copy(led.position).add(V3(0,0.4,0));scene.add(ledL)}
 /* multimeter: the lab level */
-const mm=box(1.1,0.25,1.6,M(0xf2c230),-6.2,0.12,3.0);mm.userData.lv=0;hits.push(mm);
+const mm=box(1.1,0.25,1.6,M(0xffb26b,{emissive:0xffb26b,emissiveIntensity:.15}),-6.2,0.12,3.0);mm.userData.lv=0;hits.push(mm);
 box(0.8,0.02,0.5,M(isDone(0)?0xb8c9a2:0x56604a,{emissive:isDone(0)?0x4a5a30:0,emissiveIntensity:.4}),-6.2,0.26,2.7);
 lab(narrow?'0':isDone(0)?'0 · The lab ✓':'0 · The lab',V3(-6.2,0.4,3.9),isDone(0)?'done':'open');
 /* the arm */
 const powered=isDone(1),alive=isDone(8);
-const mBody=M(0xd9dcd6,{roughness:.5}),mServo=M(powered?0x1f3a66:0x4a4f52),mLedS=M(0xff3030,{emissive:0xff2020,emissiveIntensity:powered?1.5:0});
+const mBody=M(0xd7ddff,{roughness:.5}),mServo=M(powered?0x1f3a66:0x4a4f52),mLedS=M(0xff3030,{emissive:0xff2020,emissiveIntensity:powered?1.5:0});
 const base=new THREE.Group();base.position.set(-5.2,0,-1.0);scene.add(base);
 cyl(0.8,0.3,mBody,0,0.15,0,base);
 const turn=new THREE.Group();turn.position.y=0.3;base.add(turn);box(0.75,0.55,0.6,mServo,0,0.3,0,turn);box(0.08,0.08,0.02,mLedS,0.25,0.45,0.31,turn);
