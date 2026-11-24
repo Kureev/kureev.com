@@ -1,0 +1,78 @@
+/* The studio around the course desk: back wall, walnut shelving with LED strips, books, trailing pothos,
+   blueprint frames, a desk lamp with a soft light cone and dust in its beam. three.js r128.
+   STUDIO.build(scene, {tex:'/electronics/tex/', quality}) → {update(t), lights} */
+(function(){
+const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
+function merge(geos){let n=0,iN=0;geos.forEach(g=>{n+=g.attributes.position.count;iN+=g.index.count});
+  const p=new Float32Array(n*3),no=new Float32Array(n*3),uv=new Float32Array(n*2),idx=new Uint32Array(iN);let o=0,io=0;
+  geos.forEach(g=>{p.set(g.attributes.position.array,o*3);no.set(g.attributes.normal.array,o*3);uv.set(g.attributes.uv.array,o*2);
+    const gi=g.index.array;for(let k=0;k<gi.length;k++)idx[io+k]=gi[k]+o;o+=g.attributes.position.count;io+=gi.length});
+  const m=new T.BufferGeometry();m.setAttribute('position',new T.BufferAttribute(p,3));m.setAttribute('normal',new T.BufferAttribute(no,3));m.setAttribute('uv',new T.BufferAttribute(uv,2));m.setIndex(new T.BufferAttribute(idx,1));return m}
+function build(scene,opt){
+  opt=opt||{};const L=new T.TextureLoader(),base=opt.tex||'/electronics/tex/',tex=n=>{const t=L.load(base+n);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t};
+  const root=new T.Group();scene.add(root);const upd=[];
+  const wood=tex('wood.webp');wood.wrapS=wood.wrapT=T.RepeatWrapping;
+  const mWood=new T.MeshStandardMaterial({map:wood,color:0x8a7a70,roughness:.55,metalness:0});
+  /* back wall: deep navy plaster with a faint vertical gradient baked into vertex colours */
+  {const g=new T.PlaneGeometry(60,22,1,8),c=[];for(let i=0;i<g.attributes.position.count;i++){const y=g.attributes.position.getY(i),k=.55+.45*(y+11)/22;c.push(.035*k,.05*k,.11*k)}
+   g.setAttribute('color',new T.Float32BufferAttribute(c,3));const w=new T.Mesh(g,new T.MeshStandardMaterial({vertexColors:true,roughness:.95}));w.position.set(0,8,-9.6);root.add(w)}
+  /* shelving: three bays of walnut uprights and boards */
+  const X0=-15,BW=10,YS=[3.2,6.2,9.2,12.2],D=1.7,Z=-8.6;
+  const parts=[];const plank=(w,h,d,x,y,z,uvs)=>{const g=new T.BoxGeometry(w,h,d);g.translate(x,y,z);const a=g.attributes.uv;for(let i=0;i<a.count;i++)a.setXY(i,a.getX(i)*uvs[0]+uvs[2],a.getY(i)*uvs[1]+uvs[3]);parts.push(g)};
+  for(let b=0;b<=3;b++)plank(.28,13.4,D,X0+b*BW,6.7,Z,[.2,2,b*.23,0]);
+  YS.forEach((y,i)=>plank(BW*3+.28,.22,D,X0+BW*1.5,y,Z,[3,.05,0,i*.21]));
+  root.add(new T.Mesh(merge(parts),mWood));
+  /* LED strips under each board, blue to violet across the bays, plus a few real lights */
+  YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
+      const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(.75)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
+  [[-10,6.0,-7.2,0x4d86ff],[0,9.0,-7.2,0x7a63ff],[10,6.0,-7.2,0x8a5bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,.9,9,1.6);l.position.set(x,y,z);root.add(l)});
+  /* books: one merged mesh, spines from a generated atlas, tops and pages in plain regions */
+  {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
+   const shelf=(x0,x1,y,lean)=>{let x=x0;while(x<x1){const w=.22+r()*.22,h=1.4+r()*.9,d=1.1+r()*.3;if(x+w>x1)break;const g=new T.BoxGeometry(w,h,d);
+      const k=Math.floor(r()*16),uv=g.attributes.uv,u0=k/16+.006,u1=(k+1)/16-.006;
+      for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=f*4+v;if(f===4){uv.setXY(i,u0+(u1-u0)*uv.getX(i),.04+.92*uv.getY(i))}else{uv.setXY(i,u0+.3*(u1-u0),.5)}}
+      g.translate(0,h/2,0);if(lean&&r()<.12){g.rotateZ(-.22);x+=.25}g.translate(x+w/2,y+.11,Z+.05);geos.push(g);x+=w+.015+(r()<.08?.6+r()*1.2:0)}};
+   [[X0+.4,X0+6.2,YS[0]],[X0+BW+3.6,X0+2*BW-.4,YS[0]],[X0+2*BW+.4,X0+2*BW+4.4,YS[0]],[X0+.4,X0+3.8,YS[1]],[X0+BW+.4,X0+BW+5.6,YS[1]],[X0+2*BW+5.4,X0+3*BW-.4,YS[1]],[X0+3.4,X0+BW-.4,YS[2]],[X0+2*BW+.4,X0+2*BW+6,YS[2]]].forEach(([a,b,y])=>shelf(a,b,y,true));
+   root.add(new T.Mesh(merge(geos),mats))}
+  /* blueprints in thin black frames, faintly backlit */
+  [['bp1.webp',X0+BW*1.5-1.8,7.65,4.6,3.07],['bp2.webp',X0+BW*2+7.0,4.55,3.6,2.4],['bp3.webp',X0+6.6,10.65,2.0,3.0]].forEach(([f,x,y,w,h])=>{
+    const fr=new T.Mesh(new T.BoxGeometry(w+.22,h+.22,.1),new T.MeshStandardMaterial({color:0x07090f,roughness:.4}));fr.position.set(x,y,Z-.55);root.add(fr);
+    const p=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex(f),roughness:.7,emissive:0x2a3f8f,emissiveIntensity:.25}));p.position.set(x,y,Z-.49);root.add(p)});
+  /* plants: pots + pothos leaves as instanced cards with a generated leaf texture */
+  const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,alphaTest:.45,side:T.DoubleSide,roughness:.45,color:0xbfd6c8});
+  const leafG=new T.PlaneGeometry(.95,.95);leafG.translate(0,.42,0);
+  const pots=[],leaves=[];let s2=5;const rr=()=>((s2=s2*16807%2147483647)-1)/2147483646;
+  const pot=(x,y,z,r,h,c)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r*.8,h,24),new T.MeshStandardMaterial({color:c,roughness:.75}));m.position.set(x,y+h/2,z);root.add(m);pots.push(m);return y+h};
+  const bush=(x,y,z,n,sp)=>{for(let i=0;i<n;i++){const a=rr()*6.283,e=rr();leaves.push({p:V(x+Math.cos(a)*sp*e,y+.1+rr()*sp*.9,z+Math.sin(a)*sp*e*.7),ry:a+Math.PI/2,rx:-.6-rr()*.6,s:.7+rr()*.5})}};
+  const vine=(x,y,z,len,sway)=>{const pts=[];for(let k=0;k<=8;k++){const u=k/8;pts.push(V(x+Math.sin(u*2.2)*sway,y-u*len,z+.25+u*.5))}const c=new T.CatmullRomCurve3(pts);
+    for(let i=0;i<len*7;i++){const u=i/(len*7),p=c.getPoint(u);leaves.push({p,ry:(i%2?1:-1)*1.1+rr()*.6,rx:.4+rr()*.5,s:.55+rr()*.35*(1-u)})}};
+  let top=pot(X0+BW+6.4,YS[2]+.11,Z+.1,.55,.8,0xd9def7);bush(X0+BW+6.4,top,Z+.1,22,.7);vine(X0+BW+6.2,top,Z+.2,6.5,.6);vine(X0+BW+6.9,top,Z+.3,4.2,-.5);
+  top=pot(X0+2*BW+7.6,YS[2]+.11,Z+.1,.5,.75,0x1d2752);bush(X0+2*BW+7.6,top,Z+.1,20,.65);vine(X0+2*BW+7.8,top,Z+.2,3.6,.4);
+  top=pot(X0+7.6,YS[0]+.11,Z+.1,.5,.7,0xd9def7);bush(X0+7.6,top,Z+.1,24,.8);
+  top=pot(X0+2*BW+4.9,YS[1]+.11,Z+.1,.42,.6,0x8a6bff);bush(X0+2*BW+4.9,top,Z+.1,14,.55);
+  {const im=new T.InstancedMesh(leafG,mLeaf,leaves.length),o=new T.Object3D();leaves.forEach((l,i)=>{o.position.copy(l.p);o.rotation.set(l.rx,l.ry,0,'YXZ');o.scale.setScalar(l.s);o.updateMatrix();im.setMatrixAt(i,o.matrix)});root.add(im)}
+  /* desk lamp on the right: warm cone of light, dust drifting through it */
+  const LP=V(6.1,4.3,-3.4);
+  {const m=new T.MeshStandardMaterial({color:0x1a1f33,roughness:.35,metalness:.6});
+   const b=new T.Mesh(new T.CylinderGeometry(.5,.6,.12,24),m);b.position.set(LP.x+1.2,.06,LP.z-.8);root.add(b);
+   const arm1=new T.Mesh(new T.CylinderGeometry(.05,.05,3.2,8),m);arm1.position.set(LP.x+1.0,1.6,LP.z-.6);arm1.rotation.z=.25;root.add(arm1);
+   const arm2=new T.Mesh(new T.CylinderGeometry(.05,.05,2.0,8),m);arm2.position.set(LP.x+.45,3.6,LP.z-.3);arm2.rotation.z=-1.0;root.add(arm2);
+   const sh=new T.Mesh(new T.ConeGeometry(.55,.8,28,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));sh.position.copy(LP);sh.rotation.z=.5;root.add(sh);
+   const bulb=new T.Mesh(new T.SphereGeometry(.16,16,10),new T.MeshBasicMaterial({color:0xffd9a8}));bulb.position.copy(LP).add(V(-.1,-.25,0));root.add(bulb);
+   const spot=new T.SpotLight(0xffc48a,2.2,16,.55,.6,1.4);spot.position.copy(LP);spot.target.position.set(opt.aim?opt.aim.x:LP.x-2.6,0,opt.aim?opt.aim.z:LP.z+1.4);root.add(spot,spot.target);
+   /* soft volumetric cone: additive, fades along its length and toward the edges */
+   const cg=new T.ConeGeometry(2.6,5,40,1,true);cg.translate(0,-2.5,0);
+   const cm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:{uT:{value:0}},
+     vertexShader:'varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){vP=position;vec4 w=modelViewMatrix*vec4(position,1.);vV=normalize(-w.xyz);vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*w;}',
+     fragmentShader:'uniform float uT;varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){float along=clamp(-vP.y/5.,0.,1.);float rim=pow(abs(dot(vN,vV)),1.6);float n=.85+.15*sin(vP.y*3.+uT*.6)*sin(vP.x*4.-uT*.4);gl_FragColor=vec4(vec3(1.,.78,.55)*.07*rim*(1.-along)*(1.-along)*n,1.);}'});
+   const cone=new T.Mesh(cg,cm);cone.position.copy(LP);cone.lookAt(spot.target.position);cone.rotateX(-Math.PI/2);root.add(cone);upd.push(t=>cm.uniforms.uT.value=t);
+   /* dust motes */
+   const N=opt.quality==='low'?70:120,pp=new Float32Array(N*3),ph=new Float32Array(N);for(let i=0;i<N;i++){pp.set([LP.x-3.5+Math.random()*4.5,Math.random()*4.4,LP.z-1+Math.random()*3.5],i*3);ph[i]=Math.random()*6.28}
+   const dg=new T.BufferGeometry();dg.setAttribute('position',new T.BufferAttribute(pp,3));dg.setAttribute('aPh',new T.BufferAttribute(ph,1));
+   const dm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:{uT:{value:0},uL:{value:LP},uS:{value:innerHeight*.012}},
+     vertexShader:'uniform float uT;uniform vec3 uL;uniform float uS;attribute float aPh;varying float vA;void main(){vec3 p=position;p.y=mod(p.y+uT*.05+aPh,4.4);p.x+=sin(uT*.2+aPh)*.25;p.z+=cos(uT*.17+aPh*1.3)*.25;float d=length(p.xz-vec2(uL.x-1.3,uL.z+.6));vA=smoothstep(2.4,.2,d)*(.4+.6*sin(uT*.8+aPh*3.)*.5+.3);vec4 w=modelViewMatrix*vec4(p,1.);gl_PointSize=uS*2.5/-w.z;gl_Position=projectionMatrix*w;}',
+     fragmentShader:'varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.85,.65)*smoothstep(.5,0.,d)*vA*.9,1.);}'});
+   root.add(new T.Points(dg,dm));upd.push(t=>dm.uniforms.uT.value=t)}
+  return {root,desk:mWood,update:t=>upd.forEach(f=>f(t))}}
+window.STUDIO={build};
+})();
