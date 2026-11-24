@@ -57,8 +57,8 @@ const deg=n=>Math.round(arm.joint[n].userData.q*57.3);
 let wide=true,baseRY=-.5;
 function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;wide=w/h>1.1;
   cam.position.set(0,1.8,14);cam.lookAt(0,.4,0);cam.updateProjectionMatrix();
-  const half=Math.tan(cam.fov*Math.PI/360)*14,tx=Math.min(w*.7,w/2+430),wx=(tx/w-.5)*2*half*cam.aspect,sc=.56*2*half/4.2;
-  group.position.set(wx-1.5*sc,-2.0*sc,0);group.scale.setScalar(sc)}
+  const half=Math.tan(cam.fov*Math.PI/360)*14,tx=Math.min(w*.7,w/2+430),wx=(tx/w-.5)*2*half*cam.aspect,sc=Math.min(.76*2*half/4.2,.62*half*cam.aspect/2.6);
+  group.position.set(wx-1.6*sc,.45-2.15*sc,0);group.scale.setScalar(sc)}
 new ResizeObserver(size).observe(cv);size();group.rotation.y=baseRY;
 
 const clock=new T.Clock();let t=0,vis=1;
@@ -83,7 +83,7 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
     m.position.copy(m.userData.home).addScaledVector(m.userData.ex,k)});
   const on=kMax<.02;if(on!==capOn){capOn=on;cap.classList.toggle('on',on);cap.style.opacity=on?vis:0}
   if((capT-=dt)<0&&capOn){capT=.2;cap.textContent=`Pan ${deg('shoulder_pan')}° · Lift ${deg('shoulder_lift')}° · Elbow ${deg('elbow_flex')}° · Gripper ${Math.round(arm.joint.gripper.userData.q/1.1*100)}%`;
-    group.localToWorld(wp.set(1.4,0,1.9));wp.project(cam);cap.style.transform=`translate(${(wp.x*.5+.5)*cv.clientWidth}px,${(-wp.y*.5+.5)*cv.clientHeight+18}px) translateX(-50%)`}
+    group.localToWorld(wp.set(1.4,0,1.9));wp.project(cam);cap.style.transform=`translate(${(wp.x*.5+.5)*cv.clientWidth}px,${Math.min((-wp.y*.5+.5)*cv.clientHeight+14,cv.clientHeight-40)}px) translateX(-50%)`}
   gl.render(scene,cam)}
 frame();
 addEventListener('pageshow',()=>{vis=-1});
