@@ -13,8 +13,8 @@ let box,ctl,note,cur=-1,doneShown={};
 
 function chips(id,q,opts,ans,picked,onPick){
   const w=document.createElement('div');w.className='pq';
-  w.innerHTML=`<p class="pq-q">${esc(q)}</p><div class="pq-o" role="group" aria-label="${esc(q).replace(/<[^>]+>/g,'').replace(/"/g,'')}">`+
-    opts.map((o,i)=>`<button type="button" data-i="${i}" class="${picked==null?'':i===picked?(ans==null||i===ans?'pick':'pick no'):(ans!=null&&picked!=null&&i===ans?'right':'')}" ${picked!=null?'disabled':''}>${esc(o)}</button>`).join('')+'</div>';
+  w.innerHTML=`<p class="pq-q" id="${id}q">${esc(q)}</p><div class="pq-o" role="group" aria-labelledby="${id}q" aria-label="${esc(q).replace(/<[^>]+>/g,'').replace(/"/g,'')}">`+
+    opts.map((o,i)=>`<button type="button" data-i="${i}" aria-pressed="${picked===i}" class="${picked==null?'':i===picked?(ans==null||i===ans?'pick':'pick no'):(ans!=null&&picked!=null&&i===ans?'right':'')}" ${picked!=null?'disabled':''}>${esc(o)}</button>`).join('')+'</div>';
   w.querySelectorAll('button').forEach(b=>b.onclick=()=>onPick(+b.dataset.i));return w}
 
 function render(step){
@@ -44,7 +44,7 @@ function render(step){
     c.innerHTML=`<p class="ped-k">I can</p>`+D.brief.goals.map((x,i)=>`<label><input type="checkbox" data-i="${i}" ${g('c'+i)?'checked':''}> ${x}</label>`).join('');
     c.querySelectorAll('input').forEach(b=>b.onchange=()=>s('c'+b.dataset.i,b.checked));box.appendChild(c)}
   if(!end){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}
-  const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent='Warm up, then make a prediction';else note.textContent='Pick a prediction first'}
+  const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent='Warm up, then make a prediction';else note.textContent='Pick a prediction first'}
   doneShown[step]=false;
 }
 function ready(step){const pr=D.pr&&D.pr[step];return!pr||g('p'+step)!=null}
@@ -61,7 +61,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:8px;margin:2px 0 12px}
 #ped:empty{display:none}
 .ped{border-radius:12px;padding:14px;background:rgba(91,156,255,.04)}
 .ped-k{display:flex;justify-content:space-between;margin:0 0 8px;font:600 12px/1.3 Manrope,sans-serif;letter-spacing:.04em;color:#8f9bc4}
-.ped-k span{font-weight:500;color:#6f7aa8}
+.ped-k span{font-weight:500;color:#8f9bc4}
 .ped.brief{padding:10px 14px}
 .ped.brief summary{display:flex;gap:12px;align-items:baseline;cursor:pointer;list-style:none;font-size:14px;line-height:1.45;color:#c9d2f5}
 .ped.brief summary::-webkit-details-marker{display:none}

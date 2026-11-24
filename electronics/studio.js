@@ -13,7 +13,7 @@ function build(scene,opt){
   const root=new T.Group();scene.add(root);const upd=[];
   const rep=(n,lin)=>{const t=lin?L.load(base+n):tex(n);t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t};
   /* walnut with grain relief and uneven sheen: colour, bump and roughness maps */
-  const mWood=new T.MeshStandardMaterial({map:rep('shelf.webp'),bumpMap:rep('shelf_bump.webp',1),bumpScale:.025,roughnessMap:rep('shelf_rough.webp',1),color:0xb59a88,roughness:1,metalness:0});
+  const mWood=new T.MeshStandardMaterial({map:rep('shelf.webp'),bumpMap:rep('shelf_bump.webp',1),bumpScale:.02,color:0x6e5d52,roughness:.95,metalness:0,envMapIntensity:0});
   const mDesk=new T.MeshStandardMaterial({map:rep('desk.webp'),bumpMap:rep('desk_bump.webp',1),bumpScale:.035,roughnessMap:rep('desk_rough.webp',1),color:0xc9a993,roughness:1,metalness:0});
   /* back wall: deep navy plaster with a faint vertical gradient baked into vertex colours */
   {const g=new T.PlaneGeometry(60,22,1,8),c=[];for(let i=0;i<g.attributes.position.count;i++){const y=g.attributes.position.getY(i),k=.55+.45*(y+11)/22;c.push(.022*k,.028*k,.055*k)}
@@ -30,10 +30,11 @@ function build(scene,opt){
   {const sm=new T.Mesh(merge(parts),mWood);sm.receiveShadow=true;root.add(sm)}
   /* LED strips under each board, blue to violet across the bays, plus a few real lights */
   YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
-      const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(3)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
+      const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(.9)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
   [[-10,YS[1]-.5,-7.6,0x5b9cff],[0,YS[2]-.5,-7.6,0x5b9cff],[10,YS[1]-.5,-7.6,0x6f7bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,1.6,5.5,2);l.position.set(x,y,z);root.add(l)});
+  {const w=new T.SpotLight(0xffe6cc,2.6,40,.5,.8,1.2);w.position.set(1,17,-1);w.target.position.set(0,8,-8.6);root.add(w,w.target)}
   /* books: one merged mesh, spines from a generated atlas, tops and pages in plain regions */
-  {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
+  {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8,emissiveMap:sp,emissive:0xffffff,emissiveIntensity:.1});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
    const shelf=(x0,x1,y,lean)=>{let x=x0;while(x<x1){const w=.22+r()*.22,h=1.4+r()*.9,d=1.1+r()*.3;if(x+w>x1)break;const g=new T.BoxGeometry(w,h,d);
       const k=Math.floor(r()*16),uv=g.attributes.uv,u0=k/16+.006,u1=(k+1)/16-.006;
       for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=f*4+v;if(f===4){uv.setXY(i,u0+(u1-u0)*uv.getX(i),.04+.92*uv.getY(i))}else{uv.setXY(i,u0+.3*(u1-u0),.5)}}
@@ -45,7 +46,7 @@ function build(scene,opt){
     const fr=new T.Mesh(new T.BoxGeometry(w+.22,h+.22,.1),new T.MeshStandardMaterial({color:0x07090f,roughness:.4}));fr.position.set(x,y,Z-.55);root.add(fr);
     const p=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex(f),roughness:.7,emissive:0x2a3f8f,emissiveIntensity:.25}));p.position.set(x,y,Z-.49);root.add(p)});
   /* plants: pots + pothos leaves as instanced cards with a generated leaf texture */
-  const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,alphaTest:.45,side:T.DoubleSide,roughness:.45,color:0xbfd6c8});
+  const leafTex=tex('leaf.webp'),mLeaf=new T.MeshStandardMaterial({map:leafTex,emissiveMap:leafTex,emissive:0xffffff,emissiveIntensity:.14,alphaTest:.45,side:T.DoubleSide,roughness:.45,color:0xbfd6c8});
   const leafG=new T.PlaneGeometry(.95,.95);leafG.translate(0,.42,0);
   const pots=[],leaves=[];let s2=5;const rr=()=>((s2=s2*16807%2147483647)-1)/2147483646;
   const pot=(x,y,z,r,h,c)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r*.8,h,24),new T.MeshStandardMaterial({color:c,roughness:.75}));m.position.set(x,y+h/2,z);root.add(m);pots.push(m);return y+h};

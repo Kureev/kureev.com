@@ -1,0 +1,68 @@
+/* Course theme: one display face, one text face, one type scale, AA contrast everywhere.
+   Display: Unbounded 600 (titles only). Text: Manrope 400/600/700 (everything else).
+   Scale: 13 meta · 15 UI · 16 body · 18 lead-in · 24 step title. Minimum text size 13px.
+   Colours on navy (#0a1230): ink 16.3:1, soft 12.3:1, mute 6.7:1, copper 10.4:1, blue 6.7:1 (all ≥ 4.5:1). */
+:root{
+  --f-display:Unbounded,Manrope,system-ui,sans-serif;--f-text:Manrope,system-ui,sans-serif;
+  --t-meta:13px;--t-ui:15px;--t-body:16px;--t-lead:16px;--t-title:24px;
+  --ink:#eef1ff;--soft:#c9d2f5;--mute:#8f9bc4;--copper:#ffb26b;--blue:#5b9cff;--violet:#8a6bff;--ok:#59f3a8;--bad:#ff8a70;
+  --bg:#050817;--panel:#0a1230;--raise:#0e1840;--line:rgba(143,155,196,.18);--focus:#8a9bff;
+  --r-sm:10px;--r-md:14px;--r-pill:999px}
+html{-webkit-text-size-adjust:100%}
+body,button,input,select,textarea{font-family:var(--f-text)}
+body{font-size:var(--t-body);line-height:1.55;color:var(--ink)}
+/* titles: the only places that use the display face */
+h1,h2,.ltitle,#stepT{font-family:var(--f-display);font-weight:600;letter-spacing:-.015em}
+#stepT{font-size:var(--t-title)!important;line-height:1.2!important;margin:8px 0 10px!important}
+.ph{gap:10px!important;align-items:baseline}
+.ph .ltitle{font-size:15px!important;line-height:1.3}
+.ph .lesson,.ph a{font:600 var(--t-meta)/1.3 var(--f-text)!important;color:var(--mute)!important}
+/* progress line */
+.prog .ptop,#stepN,#stepC{font:600 var(--t-meta)/1.3 var(--f-text)!important;font-variant-numeric:tabular-nums}
+#stepN .part{color:var(--copper)}#stepC{color:var(--mute)}
+/* reading text */
+.lead,#stepS{font-size:var(--t-lead)!important;line-height:1.55!important;color:#dfe4fb!important;font-weight:400}
+.lead b,#stepS b{color:var(--ink);font-weight:700}
+.blk p,.blk li,.after,.stepx p{font-size:var(--t-ui)!important;line-height:1.6!important;color:var(--soft)}
+.blk h3{font:700 var(--t-meta)/1.3 var(--f-text)!important;text-transform:none!important;letter-spacing:0!important;color:var(--copper)!important;margin:0 0 6px!important}
+.blk table{font-size:14px!important}.blk th{font-weight:600;color:var(--mute)}
+/* controls */
+label{font:600 var(--t-ui)/1.4 var(--f-text)!important;color:var(--ink)}
+output{font:700 var(--t-ui)/1.4 var(--f-text)!important;color:var(--copper)!important;font-variant-numeric:tabular-nums}
+button,.row button,.power,.fix,a.go{font:600 var(--t-ui)/1.2 var(--f-text)!important;min-height:44px}
+.dots button,#infoX,.x{min-height:0}
+.power{border-radius:var(--r-pill)!important}
+.card.ctl.ped-lock .power{background:transparent!important;border-color:var(--line)!important;color:var(--mute)!important}
+.task{font:600 var(--t-ui)/1.45 var(--f-text)!important}
+.side .formula,.formula{font:400 14px/1.55 var(--f-text)!important;color:var(--soft)!important;font-variant-numeric:tabular-nums}
+.side .formula b,.formula b{font-weight:700;color:var(--ink)}
+.pill,.st .pill{font:600 var(--t-meta)/1.2 var(--f-text)!important;padding:5px 11px!important}
+details.more summary{font:600 var(--t-ui)/1.3 var(--f-text)!important}
+.quiz input{font:600 var(--t-ui)/1.2 var(--f-text)!important;min-height:44px}
+.quiz input::placeholder{color:var(--mute);opacity:1}
+.fb{font-size:var(--t-ui)!important;line-height:1.5!important;color:var(--soft)}
+#next{font:600 16px/1 var(--f-text)!important}
+/* the learning layer (ped.js) on the same scale */
+.ped-k{font:600 var(--t-meta)/1.3 var(--f-text)!important;letter-spacing:0!important;color:var(--mute)!important}
+.ped-k span{color:var(--mute)!important;font-weight:500}
+.pq-q{font:600 var(--t-body)/1.45 var(--f-text)!important;color:var(--ink)!important}
+.pq-o{gap:8px!important}
+.pq-o button{font:600 var(--t-ui)/1.3 var(--f-text)!important;min-height:40px!important;padding:8px 16px!important}
+.pq-f,.pq-done{font-size:14px!important;line-height:1.5!important}
+.pq-done{color:var(--mute)!important}.pq-done em{color:var(--soft)!important}
+.ped-note{font:500 var(--t-meta)/1.4 var(--f-text)!important;color:var(--mute)!important}
+.ped.brief summary{font:400 var(--t-ui)/1.5 var(--f-text)!important;color:var(--soft)!important}
+.brief-t{font:600 var(--t-meta)/1.5 var(--f-text)!important;color:var(--focus)!important}
+.ped.cando label{font:400 var(--t-ui)/1.5 var(--f-text)!important;color:var(--soft)!important}
+/* the stage */
+.lb{font:500 var(--t-meta)/1.25 var(--f-text)!important}
+.hint{font:500 var(--t-meta)/1.3 var(--f-text)!important;color:var(--mute)!important}
+.hud .num span{font:500 var(--t-meta)/1 var(--f-text)!important;color:var(--mute)!important}
+.hud .num b{font-family:var(--f-text)!important;font-weight:700!important}
+/* accessibility: visible focus, real disabled state, no motion when asked */
+:focus{outline:none}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus)!important;outline-offset:2px!important;border-radius:8px}
+.skip{position:absolute;left:12px;top:-60px;z-index:99;padding:10px 14px;border-radius:var(--r-sm);background:var(--ink);color:#0A0F2E;font:600 var(--t-ui) var(--f-text);text-decoration:none}
+.skip:focus{top:12px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+@media(prefers-contrast:more){:root{--mute:#b4bde0;--line:rgba(143,155,196,.45)}}
