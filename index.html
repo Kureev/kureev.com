@@ -56,9 +56,9 @@ h2{font:800 clamp(30px,3.6vw,46px)/1 'Bricolage Grotesque',sans-serif;letter-spa
 .oss li{display:grid;grid-template-columns:minmax(0,15em) 1fr;gap:6px 24px;padding:18px 0;border-bottom:1px solid var(--line)}
 .oss li:first-child{padding-top:0}
 .oss a{font-weight:700;text-decoration-color:#3b4d44;text-underline-offset:4px}.oss a:hover{text-decoration-color:var(--cu)}
-.oss span{color:var(--mute)}
+.oss span{color:var(--mute)}.oss.dated li{grid-template-columns:minmax(0,1fr) minmax(0,15em) 4.5em}.oss time{color:var(--mute);text-align:right;font-variant-numeric:tabular-nums}
 .places{display:flex;flex-wrap:wrap;gap:6px 26px;font:800 clamp(24px,3vw,38px)/1.25 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;margin:0;padding:0;list-style:none}
-.places li:nth-child(odd){color:#c9d6cf}
+.places a{text-decoration:none;color:inherit;background:linear-gradient(var(--cu),var(--cu)) 0 100%/0 3px no-repeat;transition:background-size .2s}.places a:hover,.places a:focus-visible{background-size:100% 3px;color:var(--ink)}.places li:nth-child(odd){color:#c9d6cf}.note a{color:var(--ink);text-decoration-color:var(--cu);text-underline-offset:3px}@media(prefers-reduced-motion:reduce){.places a{transition:none}}
 .note{color:var(--mute);margin:22px 0 0;max-width:52ch}
 footer{padding:40px clamp(20px,4vw,48px) 56px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:15px}
 footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92em/1 ui-monospace,Menlo,monospace;color:#cddad3}
@@ -68,7 +68,7 @@ footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92e
 .hint{display:none}
 .copy{padding-top:12px}
 .wrap{grid-template-columns:1fr}
-.oss li{grid-template-columns:1fr}
+.oss li{grid-template-columns:1fr}.oss.dated li{grid-template-columns:1fr auto;gap:4px 12px}.oss.dated a{grid-column:1/-1}
 .course{grid-template-columns:1fr;padding:22px}
 }
 </style>
@@ -76,7 +76,7 @@ footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92e
 <body>
 <header class="top">
   <a class="mark" href="/">Kureev</a>
-  <nav aria-label="Main"><a href="#now">Now</a><a href="#oss">Open source</a><a href="#talks">Talks</a><a href="#work">Work</a></nav>
+  <nav aria-label="Main"><a href="#now">Now</a><a href="#oss">Open source</a><a href="#talks">Talks</a><a href="#writing">Writing</a><a href="#work">Work</a></nav>
 </header>
 
 <main>
@@ -84,7 +84,7 @@ footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92e
   <canvas id="gl" aria-label="A 3D servo arm that reaches toward your cursor"></canvas>
   <div class="copy">
     <h1>Alexey<span>Kureev</span></h1>
-    <p class="lede">Senior React Native engineer in Barcelona, consulting with Margelo. Former React Native core contributor and author of react-native-blur and rnpm. These days my code is learning to move: I’m building a robot arm and turning what I learn into a free course.</p>
+    <p class="lede">Senior React Native engineer in Barcelona, consulting with Margelo. Former React Native core contributor, co-author of <code>react-native link</code> and author of react-native-blur. These days my code is learning to move: I’m building a robot arm and turning what I learn into a free course.</p>
     <div class="cta"><a class="btn" href="/electronics">Take the electronics course</a><a class="btn ghost" href="https://github.com/Kureev">GitHub</a></div>
   </div>
   <p class="hint" id="hint">Move your cursor. The arm follows.</p>
@@ -110,21 +110,36 @@ footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92e
   <div class="wrap">
     <div><h2>Open source</h2><p class="kick">Libraries I wrote in the early days of React Native.</p></div>
     <ul class="oss">
-      <li><a href="https://github.com/Kureev/react-native-blur">react-native-blur</a><span>Native blur and vibrancy views for React Native. 3.8k stars; now maintained as <code>@react-native-community/blur</code>.</span></li>
-      <li><a href="https://github.com/rnpm/rnpm">rnpm</a><span>Linking native dependencies in one command. It later became part of the React Native CLI.</span></li>
-      <li><a href="https://github.com/Kureev/react-native-side-menu">react-native-side-menu</a><span>A customizable side menu component.</span></li>
-      <li><a href="https://github.com/Kureev/react-native-navbar">react-native-navbar</a><span>A customizable navigation bar component.</span></li>
+      <li><a href="https://github.com/margelo/react-native-blur">react-native-blur</a><span>Native blur and vibrancy views for React Native. 3.9k stars; now maintained by Margelo as <code>@react-native-community/blur</code>.</span></li>
+      <li><a href="https://github.com/rnpm/rnpm">rnpm</a><span>Linking native dependencies in one command; co-authored with Mike Grabowski. It became <code>react-native link</code> in the React Native CLI. 2.5k stars.</span></li>
+      <li><a href="https://github.com/Kureev/react-native-side-menu">react-native-side-menu</a><span>A customizable side menu component. 2.2k stars.</span></li>
+      <li><a href="https://github.com/Kureev/react-native-navbar">react-native-navbar</a><span>A customizable navigation bar component. 1.9k stars.</span></li>
     </ul>
   </div>
 </section>
 
 <section id="talks">
   <div class="wrap">
-    <div><h2>Talks and writing</h2><p class="kick">Explaining how things work under the hood.</p></div>
-    <ul class="oss">
-      <li><a href="https://cotalks.dev/talks/alexey-kureev-mike-grabowski-solving-a-tooling-problem-for-react-native">Solving a tooling problem for React Native</a><span>With Mike Grabowski, on developer tooling for React Native.</span></li>
-      <li><a href="https://cotalks.dev/talks/network-layer-in-react-native-alexey-kureev">Network layer in React Native</a><span>How networking works in React Native.</span></li>
-      <li><a href="https://habr.com/en/users/xamd/posts">13 articles on Habr</a><span>In Russian, 2014–2015: React’s diff algorithm, the React Native announcement, fetch, Browserify and frontend build tools.</span></li>
+    <div><h2>Talks</h2><p class="kick">Conference talks on React Native internals and tooling.</p></div>
+    <ul class="oss dated">
+      <li><a href="https://www.react-native.eu/talks/alexey-kureev-react-native-codegen">React Native CodeGen</a><span>React Native EU, Wrocław</span><time>2019</time></li>
+      <li><a href="https://devworld-conference.medium.com/react-live-speakers-and-topics-a971442e0048">React Native Codegen</a><span>React Live, Amsterdam</span><time>2019</time></li>
+      <li><a href="https://archive.reactsummit.com/2018/">Network layer in React Native</a><span>React Amsterdam</span><time>2018</time></li>
+      <li><a href="https://www.react-native.eu/talks/2017-3-alexey-kureev-network-layer-in-react-native">Network layer in React Native</a><span>React Native EU, Wrocław</span><time>2017</time></li>
+      <li><a href="https://speakerdeck.com/grabbou/solving-a-react-native-tooling-problem">Solving a React Native tooling problem</a><span>React Amsterdam, with Mike Grabowski</span><time>2016</time></li>
+    </ul>
+  </div>
+</section>
+
+<section id="writing">
+  <div class="wrap">
+    <div><h2>Writing</h2><p class="kick">Deep dives into how React Native works under the hood.</p></div>
+    <ul class="oss dated">
+      <li><a href="https://medium.com/better-programming/react-native-meets-swiftui-d1606a8e1681">React Native meets SwiftUI</a><span>Better Programming</span><time>2020</time></li>
+      <li><a href="https://www.apollographql.com/blog/query-components-with-apollo-ec603188c157">Query components with Apollo</a><span>Apollo GraphQL blog</span><time>2017</time></li>
+      <li><a href="https://medium.com/dailyjs/network-layer-in-react-native-eec841f11861">Network layer in React Native</a><span>DailyJS</span><time>2017</time></li>
+      <li><a href="https://medium.com/@kureevalexey/how-to-create-you-own-native-bridge-93a8d4a40bd2">How to create your own native bridge, parts 1–2</a><span>Medium</span><time>2016</time></li>
+      <li><a href="https://habr.com/en/users/xamd/posts">13 articles on React and frontend tooling</a><span>Habr, in Russian</span><time>2014–15</time></li>
     </ul>
   </div>
 </section>
@@ -133,14 +148,14 @@ footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92e
   <div class="wrap">
     <div><h2>Work</h2><p class="kick">Teams I’ve shipped with.</p></div>
     <div>
-      <ul class="places"><li>Facebook</li><li>Twilio</li><li>Margelo</li><li>Novoic</li><li>Werkspot</li><li>Publitas</li><li>Shuffle</li></ul>
-      <p class="note">Products I’ve worked on include MetaMask and Rainbow Wallet.</p>
+      <ul class="places"><li><a href="https://about.meta.com">Facebook</a></li><li><a href="https://www.twilio.com">Twilio</a></li><li><a href="https://margelo.com">Margelo</a></li><li><a href="https://novoic.com">Novoic</a></li><li><a href="https://www.werkspot.nl">Werkspot</a></li><li><a href="https://www.publitas.com">Publitas</a></li><li>Shuffle</li></ul>
+      <p class="note">Products I’ve worked on include <a href="https://metamask.io">MetaMask</a> and <a href="https://rainbow.me">Rainbow Wallet</a>.</p>
     </div>
   </div>
 </section>
 </main>
 
-<footer><span>Alexey Kureev, Barcelona</span><span class="links"><a href="https://github.com/Kureev">GitHub</a><a href="https://x.com/kureevalexey">X</a><a href="https://habr.com/en/users/xamd/posts">Habr</a></span></footer>
+<footer><span>Alexey Kureev, Barcelona</span><span class="links"><a href="https://github.com/Kureev">GitHub</a><a href="https://x.com/kureevalexey">X</a><a href="https://www.linkedin.com/in/kureev/">LinkedIn</a><a href="https://medium.com/@kureevalexey">Medium</a><a href="https://habr.com/en/users/xamd/posts">Habr</a></span></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
