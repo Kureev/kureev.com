@@ -61,7 +61,7 @@ h2{font:800 clamp(30px,3.6vw,46px)/1 'Bricolage Grotesque',sans-serif;letter-spa
 .places li:nth-child(odd){color:#c9d6cf}
 .note{color:var(--mute);margin:22px 0 0;max-width:52ch}
 footer{padding:40px clamp(20px,4vw,48px) 56px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:15px}
-footer a{color:var(--ink)}
+footer a{color:var(--ink)}footer .links{display:flex;gap:20px}code{font:600 .92em/1 ui-monospace,Menlo,monospace;color:#cddad3}
 @media(max-width:860px){
 .hero{grid-template-columns:1fr;min-height:auto;padding-top:56svh}
 #gl{height:62svh;bottom:auto}
@@ -76,7 +76,7 @@ footer a{color:var(--ink)}
 <body>
 <header class="top">
   <a class="mark" href="/">Kureev</a>
-  <nav aria-label="Main"><a href="#now">Now</a><a href="#oss">Open source</a><a href="#work">Work</a></nav>
+  <nav aria-label="Main"><a href="#now">Now</a><a href="#oss">Open source</a><a href="#talks">Talks</a><a href="#work">Work</a></nav>
 </header>
 
 <main>
@@ -84,7 +84,7 @@ footer a{color:var(--ink)}
   <canvas id="gl" aria-label="A 3D servo arm that reaches toward your cursor"></canvas>
   <div class="copy">
     <h1>Alexey<span>Kureev</span></h1>
-    <p class="lede">Senior React Native engineer in Barcelona, consulting with Margelo. Former React Native core contributor. These days my code is learning to move: I’m building a robot arm and turning what I learn into a free course.</p>
+    <p class="lede">Senior React Native engineer in Barcelona, consulting with Margelo. Former React Native core contributor and author of react-native-blur and rnpm. These days my code is learning to move: I’m building a robot arm and turning what I learn into a free course.</p>
     <div class="cta"><a class="btn" href="/electronics">Take the electronics course</a><a class="btn ghost" href="https://github.com/Kureev">GitHub</a></div>
   </div>
   <p class="hint" id="hint">Move your cursor. The arm follows.</p>
@@ -110,10 +110,21 @@ footer a{color:var(--ink)}
   <div class="wrap">
     <div><h2>Open source</h2><p class="kick">Libraries I wrote in the early days of React Native.</p></div>
     <ul class="oss">
-      <li><a href="https://github.com/Kureev/react-native-blur">react-native-blur</a><span>Native blur and vibrancy views for React Native.</span></li>
+      <li><a href="https://github.com/Kureev/react-native-blur">react-native-blur</a><span>Native blur and vibrancy views for React Native. 3.8k stars; now maintained as <code>@react-native-community/blur</code>.</span></li>
       <li><a href="https://github.com/rnpm/rnpm">rnpm</a><span>Linking native dependencies in one command. It later became part of the React Native CLI.</span></li>
       <li><a href="https://github.com/Kureev/react-native-side-menu">react-native-side-menu</a><span>A customizable side menu component.</span></li>
       <li><a href="https://github.com/Kureev/react-native-navbar">react-native-navbar</a><span>A customizable navigation bar component.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="talks">
+  <div class="wrap">
+    <div><h2>Talks and writing</h2><p class="kick">Explaining how things work under the hood.</p></div>
+    <ul class="oss">
+      <li><a href="https://cotalks.dev/talks/alexey-kureev-mike-grabowski-solving-a-tooling-problem-for-react-native">Solving a tooling problem for React Native</a><span>With Mike Grabowski, on developer tooling for React Native.</span></li>
+      <li><a href="https://cotalks.dev/talks/network-layer-in-react-native-alexey-kureev">Network layer in React Native</a><span>How networking works in React Native.</span></li>
+      <li><a href="https://habr.com/en/users/xamd/posts">13 articles on Habr</a><span>In Russian, 2014–2015: React’s diff algorithm, the React Native announcement, fetch, Browserify and frontend build tools.</span></li>
     </ul>
   </div>
 </section>
@@ -129,7 +140,7 @@ footer a{color:var(--ink)}
 </section>
 </main>
 
-<footer><span>Alexey Kureev, Barcelona</span><a href="https://github.com/Kureev">github.com/Kureev</a></footer>
+<footer><span>Alexey Kureev, Barcelona</span><span class="links"><a href="https://github.com/Kureev">GitHub</a><a href="https://x.com/kureevalexey">X</a><a href="https://habr.com/en/users/xamd/posts">Habr</a></span></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
