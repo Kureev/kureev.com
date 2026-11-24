@@ -31,8 +31,9 @@ function build(scene,opt){
   /* LED strips under each board, blue to violet across the bays, plus a few real lights */
   YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
       const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(.9)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
-  [[-10,YS[1]-.5,-7.6,0x5b9cff],[0,YS[2]-.5,-7.6,0x5b9cff],[10,YS[1]-.5,-7.6,0x6f7bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,1.6,5.5,2);l.position.set(x,y,z);root.add(l)});
-  {const w=new T.SpotLight(0xffe6cc,2.6,40,.5,.8,1.2);w.position.set(1,17,-1);w.target.position.set(0,8,-8.6);root.add(w,w.target)}
+  /* the strips are the only light on the shelving: each one shines down onto the shelf below it */
+  if(opt.quality==='low')[[-10,YS[1]-.4],[0,YS[2]-.4],[10,YS[1]-.4]].forEach(([x,y])=>{const l=new T.PointLight(0x8fb4ff,1.4,5,2);l.position.set(x,y,Z+D/2-.4);root.add(l)});
+  else YS.forEach((y,i)=>[0,1,2].forEach(b=>{const x=X0+b*BW+BW/2,l=new T.SpotLight(0x9dbcff,i===0?3.4:5.2,6.5,1.2,1,1.3);l.position.set(x,y-.15,Z+D/2+.15);l.target.position.set(x,y-2.6,Z-.6);root.add(l,l.target)}));
   /* books: one merged mesh, spines from a generated atlas, tops and pages in plain regions */
   {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8,emissiveMap:sp,emissive:0xffffff,emissiveIntensity:.1});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
    const shelf=(x0,x1,y,lean)=>{let x=x0;while(x<x1){const w=.22+r()*.22,h=1.4+r()*.9,d=1.1+r()*.3;if(x+w>x1)break;const g=new T.BoxGeometry(w,h,d);
@@ -68,10 +69,10 @@ function build(scene,opt){
    const bulb=new T.Mesh(new T.SphereGeometry(.17,16,10),new T.MeshBasicMaterial({color:new T.Color(0xffd9a8).multiplyScalar(4)}));bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
    {const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,214,170,.9)');g.addColorStop(.25,'rgba(255,178,107,.35)');g.addColorStop(1,'rgba(255,178,107,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
     const sp=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));sp.scale.setScalar(1.6);sp.position.copy(bulb.position);root.add(sp)}
-   const spot=new T.SpotLight(0xffb26b,6,26,.56,.65,1.6);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
+   const spot=new T.SpotLight(0xffb26b,7,26,.7,.7,1.5);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
    spot.castShadow=true;spot.shadow.mapSize.set(2048,2048);spot.shadow.bias=-.0004;spot.shadow.radius=4;spot.shadow.camera.near=1;spot.shadow.camera.far=18;root.add(spot,spot.target);
    /* soft volumetric cone: additive, fades along its length and toward the edges */
-   const cg=new T.ConeGeometry(2.6,5,40,1,true);cg.translate(0,-2.5,0);
+   const cg=new T.ConeGeometry(3.4,5,40,1,true);cg.translate(0,-2.5,0);
    const cm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:{uT:{value:0}},
      vertexShader:'varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){vP=position;vec4 w=modelViewMatrix*vec4(position,1.);vV=normalize(-w.xyz);vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*w;}',
      fragmentShader:'uniform float uT;varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){float along=clamp(-vP.y/5.,0.,1.);float rim=pow(abs(dot(vN,vV)),1.6);float n=.85+.15*sin(vP.y*3.+uT*.6)*sin(vP.x*4.-uT*.4);gl_FragColor=vec4(vec3(1.,.78,.55)*.07*rim*(1.-along)*(1.-along)*n,1.);}'});

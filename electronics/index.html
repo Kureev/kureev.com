@@ -182,11 +182,9 @@ else{
 const stage=$('#stage'),cv=$('#gl'),V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=.85;gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap;gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x03050f);scene.fog=new THREE.Fog(0x03050f,28,70);
-const studio=window.STUDIO?STUDIO.build(scene,{tex:'/electronics/tex/',quality:innerWidth<900?'low':'high',aim:{x:3.4,z:-0.85}}):null;
+const studio=window.STUDIO?STUDIO.build(scene,{tex:'/electronics/tex/',quality:innerWidth<900?'low':'high',aim:{x:0.9,z:-0.7}}):null;
 /* light only from sources: the lamp, the shelf LEDs, a cool contour light from behind; a breath of fill so shadows aren't holes */
-scene.add(new THREE.HemisphereLight(0x1a2040,0x050817,0.04));
-{const a=new THREE.DirectionalLight(0x8fb4ff,1.5);a.position.set(-12,22,-18);a.castShadow=true;a.shadow.mapSize.set(1536,1536);Object.assign(a.shadow.camera,{left:-22,right:22,top:20,bottom:-20,near:1,far:75});a.shadow.mapSize.set(2048,2048);a.shadow.bias=-.0006;a.shadow.radius=3;scene.add(a);
- }
+scene.add(new THREE.HemisphereLight(0x1a2040,0x0a0d1c,0.14));
 const cam=new THREE.PerspectiveCamera(34,1,0.1,140),ctl=new THREE.OrbitControls(cam,cv);
 ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=6;ctl.maxDistance=30;ctl.minPolarAngle=0.5;ctl.maxPolarAngle=1.35;ctl.minAzimuthAngle=-0.9;ctl.maxAzimuthAngle=0.9;
 const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));const ML=c=>new THREE.MeshLambertMaterial({color:c});

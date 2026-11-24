@@ -10,7 +10,23 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(_){}};
 const g=k=>st[L+':'+k],s=(k,v)=>{if(v==null)delete st[L+':'+k];else st[L+':'+k]=v;save()};
 const again=(label,fn)=>{const b=document.createElement('button');b.type='button';b.className='pq-again';b.textContent=label;b.onclick=fn;return b};
 const esc=t=>String(t);
-let box,ctl,note,cur=-1,doneShown={};
+let box,ctl,note,cur=-1,doneShown={},seg=null,briefBox;
+/* the side panel as standalone blocks, one per intention: where am I · think · try · do · read more */
+function layout(){const step=document.querySelector('.panel .step');if(!step)return;
+  if(!seg){seg={};['orient','think','try','goal','more'].forEach(k=>{const d=document.createElement('div');d.className='seg seg-'+k;seg[k]=d});
+    const ph=document.querySelector('.panel .ph');step.prepend(seg.orient,seg.think,seg.try,seg.goal,seg.more);
+    [ph,step.querySelector('.prog'),document.getElementById('stepT'),document.getElementById('stepS')].forEach(e=>e&&seg.orient.appendChild(e));
+    briefBox=document.createElement('div');briefBox.className='ped-briefbox';seg.orient.appendChild(briefBox)}
+  [ctl,note,step.querySelector('.side')].forEach(e=>e&&e.parentNode!==seg.try&&seg.try.appendChild(e));
+  ['task','after','stepX'].forEach(id=>{const e=document.getElementById(id);if(e&&e.parentNode!==seg.goal)seg.goal.appendChild(e)});
+  const m=document.getElementById('more');if(m&&m.parentNode!==seg.more)seg.more.appendChild(m);
+}
+/* collapse button rows and blocks with nothing visible this step; re-run whenever the lesson changes the panel */
+function tidy(){if(!seg)return;
+  const shown=c=>!c.hidden&&getComputedStyle(c).display!=='none';
+  if(ctl)ctl.querySelectorAll('.row').forEach(r=>{const v=[...r.children].some(shown),want=v?'':'none';if(r.style.display!==want)r.style.display=want});
+  Object.values(seg).forEach(d=>{const v=[...d.children].some(c=>shown(c)&&c.offsetHeight>0);if(d.classList.contains('empty')===v)d.classList.toggle('empty',!v)})}
+let tq=0;const queue=()=>{if(tq)return;tq=requestAnimationFrame(()=>{tq=0;layout();tidy()})};
 
 function chips(id,q,opts,ans,picked,onPick){
   const w=document.createElement('div');w.className='pq';
@@ -19,10 +35,10 @@ function chips(id,q,opts,ans,picked,onPick){
   w.querySelectorAll('button').forEach(b=>b.onclick=()=>onPick(+b.dataset.i));return w}
 
 function render(step){
-  if(!box)return;cur=step;box.innerHTML='';
+  if(!box)return;cur=step;box.innerHTML='';layout();if(briefBox)briefBox.innerHTML='';
   const pr=D.pr&&D.pr[step],rc=D.recall&&D.recall[step],br=step===0&&D.brief,end=D.end&&D.end.step===step;
   if(br){const c=document.createElement('details');c.className='ped brief';
-    c.innerHTML=`<summary><span class="brief-s">${D.brief.short}</span><span class="brief-t">Goals</span></summary><p class="brief-p">${D.brief.problem}</p><ul>${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>`;box.appendChild(c)}
+    c.innerHTML=`<summary><span class="brief-s">${D.brief.short}</span><span class="brief-t">Goals</span></summary><p class="brief-p">${D.brief.problem}</p><ul>${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>`;(briefBox||box).appendChild(c)}
   const quiz=(items,key,title,note)=>{const c=document.createElement('section');c.className='ped recall';
     const n=items.filter((_,i)=>g(key+i)!=null).length,ok=items.filter((q,i)=>g(key+i)===q.a).length;
     c.innerHTML=`<p class="ped-k">${title}<span>${n===items.length?ok+' / '+items.length:note}</span></p>`;
@@ -48,7 +64,8 @@ function render(step){
     const c=document.createElement('section');c.className='ped cando';
     c.innerHTML=`<p class="ped-k">I can</p>`+D.brief.goals.map((x,i)=>`<label><input type="checkbox" data-i="${i}" ${g('c'+i)?'checked':''}> ${x}</label>`).join('');
     c.querySelectorAll('input').forEach(b=>b.onchange=()=>s('c'+b.dataset.i,b.checked));box.appendChild(c)}
-  if(!end){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}
+  if(!end){if(seg&&box.parentNode!==seg.think)seg.think.appendChild(box);else if(!seg){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}}
+  if(seg)queue();
   const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent='Warm up, then make a prediction';else note.textContent='Pick a prediction first'}
   doneShown[step]=false;
 }
@@ -59,11 +76,31 @@ function after(ok){const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;c
 function wrap(fn,step){return function(){fn.apply(this,arguments);render(step())}}
 window.PED={init(k,data){L=k;D=data;load();
   const mount=()=>{const lead=document.getElementById('stepS');ctl=document.querySelector('.card.ctl');
-    box=document.createElement('div');box.id='ped';lead.insertAdjacentElement('afterend',box);note=document.createElement('p');note.className='ped-note';note.hidden=true;ctl.insertAdjacentElement('afterend',note)};
+    box=document.createElement('div');box.id='ped';lead.insertAdjacentElement('afterend',box);note=document.createElement('p');note.className='ped-note';note.hidden=true;ctl.insertAdjacentElement('afterend',note);
+    const pn=document.querySelector('.panel');if(pn&&window.MutationObserver)new MutationObserver(queue).observe(pn,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','style','class']});queue()};
   if(document.getElementById('stepS'))mount();else document.addEventListener('DOMContentLoaded',mount)},
   render,ready,after,wrap};
 const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 #ped:empty{display:none}
+.panel{background:#040716!important;border-left:0!important;padding:12px 12px 0!important;gap:0}
+.panel .step{display:flex!important;flex-direction:column;gap:10px;padding:0!important;margin:0!important;background:none!important;border:0!important}
+.seg{background:linear-gradient(180deg,#0c1434,#0a102b);border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:16px 18px;box-shadow:0 1px 0 rgba(140,160,255,.06) inset}
+.seg.empty{height:0;padding:0;border:0;margin-top:-10px;overflow:hidden}
+.seg>*:last-child{margin-bottom:0!important}
+.seg-orient .ph{padding:0!important;margin:0 0 14px}
+.seg-orient #stepS{margin-bottom:0}
+.ped-briefbox:empty{display:none}.ped-briefbox{margin-top:12px;padding-top:12px;border-top:1px solid rgba(140,160,255,.1)}
+.seg-think #ped{margin:0;gap:0}
+.seg-think .ped.recall,.seg-think .ped.predict{background:none;padding:0;border-radius:0}
+.seg-think .ped+.ped{margin-top:14px;padding-top:14px;border-top:1px solid rgba(140,160,255,.1)}
+.seg-try .card.ctl{margin:0!important;padding:0!important;border:0!important;background:none!important}
+.seg-try .side{margin:6px 0 0!important;padding-top:12px;border-top:1px solid rgba(140,160,255,.1)}
+.seg-try .side:empty{display:none}
+.seg-try .ped-note{margin:10px 0 0}
+.seg-goal .task{margin:0;background:none!important;border:0!important;padding:0!important}.seg-goal .after:not([hidden]),.seg-goal .stepx:not(:empty){margin-top:14px}
+.seg-goal #ped{margin:14px 0 0}
+.seg-more{padding:4px 18px}.seg-more .more{margin:0!important;border:0!important;padding:10px 0!important}
+.panel .nav{margin:auto -12px 0!important;padding:12px!important;background:linear-gradient(180deg,rgba(4,7,22,0),#040716 35%)!important;border-top:0!important}
 .ped{padding:0}
 .ped.recall,.ped.predict{padding:14px 16px;border-radius:12px;background:rgba(91,156,255,.05)}
 .ped-k{display:flex;align-items:baseline;gap:12px;margin:0 0 8px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
@@ -77,7 +114,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .ped.brief li{position:relative;padding-left:16px;font-size:14px;line-height:1.45;color:#c9d2f5}
 .ped.brief li::before{content:'';position:absolute;left:2px;top:.55em;width:5px;height:5px;border-radius:50%;background:#7d8cff}
 .pq-again{appearance:none;border:0;background:none;padding:0 0 0 10px;font:600 13px/1.3 Manrope,sans-serif;color:#8a9bff;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(138,155,255,.4)}
-.pq-again:hover{color:#b7c2ff}.pq-again.k{padding:0;margin-left:12px}
+.pq-done .pq-again{display:block;padding:0;margin:3px 0 0}.pq-again:hover{color:#b7c2ff}.pq-again.k{padding:0;margin-left:12px}
 .pq-done{margin:0 0 6px;font-size:13px;line-height:1.45;color:#8f9bc4}.pq-done b{font-weight:600;color:#ffb08a}.pq-done.ok b{color:#9fe8c4}.pq-done em{display:block;font-style:normal;color:#a3acd0;margin-top:2px}
 .pq-q{margin:0 0 8px;font-size:15px;line-height:1.45;color:#eef1ff;font-weight:600}
 .pq-o{display:flex;flex-wrap:wrap;gap:6px}
