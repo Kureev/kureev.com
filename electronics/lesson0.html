@@ -195,7 +195,7 @@ h2{font-size:23px;margin:10px 0 6px}
 .dots button,.dots button:hover,.dots button.on{background-size:100% 4px}
 .dots button.done{background-image:linear-gradient(#34479a,#34479a)}
 .dots button.on,.dots button.on.done{background-image:linear-gradient(var(--ok),var(--ok))}
-.side{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
+.side{display:flex;flex-direction:column;gap:6px;margin:4px 0 14px}
 .side:empty{display:none}
 .side .formula{margin:0;padding:0;border:0;background:none;font-size:13px;line-height:18px;color:#a3acd0;text-align:left;font-variant-numeric:tabular-nums}
 .side .formula:empty{display:none}
@@ -293,6 +293,7 @@ input[type=range]{accent-color:#7d8cff}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
 
 
 
@@ -714,7 +715,7 @@ renderStep();frame();
 </script>
 <script>/* polish v2 */
 (function(){var hud=document.getElementById('hud'),task=document.getElementById('task');if(!hud||!task)return;
-var side=document.createElement('div');side.className='side';task.insertAdjacentElement('afterend',side);
+var side=document.createElement('div');side.className='side';task.insertAdjacentElement('beforebegin',side);
 hud.querySelectorAll('.formula,.st').forEach(function(e){side.appendChild(e)});
 var st=document.getElementById('stage'),c=document.getElementById('gl');
 if(st&&c)['pointerdown','wheel'].forEach(function(ev){c.addEventListener(ev,function(){st.classList.add('touched')},{once:true,passive:true})});})();
