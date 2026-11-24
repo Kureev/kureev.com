@@ -14,7 +14,7 @@ function build(scene,opt){
   const wood=tex('wood.webp');wood.wrapS=wood.wrapT=T.RepeatWrapping;
   const mWood=new T.MeshStandardMaterial({map:wood,color:0x8a7a70,roughness:.55,metalness:0});
   /* back wall: deep navy plaster with a faint vertical gradient baked into vertex colours */
-  {const g=new T.PlaneGeometry(60,22,1,8),c=[];for(let i=0;i<g.attributes.position.count;i++){const y=g.attributes.position.getY(i),k=.55+.45*(y+11)/22;c.push(.035*k,.05*k,.11*k)}
+  {const g=new T.PlaneGeometry(60,22,1,8),c=[];for(let i=0;i<g.attributes.position.count;i++){const y=g.attributes.position.getY(i),k=.55+.45*(y+11)/22;c.push(.022*k,.028*k,.055*k)}
    g.setAttribute('color',new T.Float32BufferAttribute(c,3));const w=new T.Mesh(g,new T.MeshStandardMaterial({vertexColors:true,roughness:.95}));w.position.set(0,8,-9.6);root.add(w)}
   /* shelving: three bays of walnut uprights and boards */
   const X0=-15,BW=10,YS=[3.2,6.2,9.2,12.2],D=1.7,Z=-8.6;
@@ -24,8 +24,8 @@ function build(scene,opt){
   {const sm=new T.Mesh(merge(parts),mWood);sm.receiveShadow=true;root.add(sm)}
   /* LED strips under each board, blue to violet across the bays, plus a few real lights */
   YS.slice(0,3).forEach((y,i)=>{for(let b=0;b<3;b++){const c=new T.Color().lerpColors(new T.Color(0x3d7bff),new T.Color(0x8a5bff),(b+i*.3)/3);
-      const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(.75)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
-  [[-10,6.0,-7.2,0x4d86ff],[0,9.0,-7.2,0x7a63ff],[10,6.0,-7.2,0x8a5bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,1.4,8,1.8);l.position.set(x,y,z);root.add(l)});
+      const s=new T.Mesh(new T.BoxGeometry(BW-.5,.04,.06),new T.MeshBasicMaterial({color:new T.Color(0x5b9cff).multiplyScalar(3)}));s.position.set(X0+b*BW+BW/2,y-.13,Z+D/2-.12);root.add(s)}});
+  [[-10,YS[1]-.5,-7.6,0x5b9cff],[0,YS[2]-.5,-7.6,0x5b9cff],[10,YS[1]-.5,-7.6,0x6f7bff]].forEach(([x,y,z,c])=>{const l=new T.PointLight(c,1.6,5.5,2);l.position.set(x,y,z);root.add(l)});
   /* books: one merged mesh, spines from a generated atlas, tops and pages in plain regions */
   {const sp=tex('spines.webp'),mats=new T.MeshStandardMaterial({map:sp,roughness:.8});const geos=[];let seed=11;const r=()=>((seed=seed*16807%2147483647)-1)/2147483646;
    const shelf=(x0,x1,y,lean)=>{let x=x0;while(x<x1){const w=.22+r()*.22,h=1.4+r()*.9,d=1.1+r()*.3;if(x+w>x1)break;const g=new T.BoxGeometry(w,h,d);
@@ -60,9 +60,11 @@ function build(scene,opt){
    const j=new T.Mesh(new T.SphereGeometry(.09,12,8),m);j.position.copy(ELB);root.add(j);
    const sh=new T.Mesh(new T.ConeGeometry(.6,.85,32,1,true),new T.MeshStandardMaterial({color:0x1a1f33,roughness:.4,metalness:.5,side:T.DoubleSide}));
    sh.position.copy(LP);sh.quaternion.setFromUnitVectors(V(0,-1,0),dir);sh.castShadow=true;root.add(sh);
-   const bulb=new T.Mesh(new T.SphereGeometry(.17,16,10),new T.MeshBasicMaterial({color:0xffe2bd}));bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
-   const spot=new T.SpotLight(0xffc48a,3.2,22,.62,.55,1.3);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
-   spot.castShadow=true;spot.shadow.mapSize.set(1536,1536);spot.shadow.bias=-.0008;spot.shadow.radius=4;spot.shadow.camera.near=1;spot.shadow.camera.far=18;root.add(spot,spot.target);
+   const bulb=new T.Mesh(new T.SphereGeometry(.17,16,10),new T.MeshBasicMaterial({color:new T.Color(0xffd9a8).multiplyScalar(4)}));bulb.position.copy(LP).addScaledVector(dir,.22);root.add(bulb);
+   {const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,214,170,.9)');g.addColorStop(.25,'rgba(255,178,107,.35)');g.addColorStop(1,'rgba(255,178,107,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
+    const sp=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));sp.scale.setScalar(1.6);sp.position.copy(bulb.position);root.add(sp)}
+   const spot=new T.SpotLight(0xffb26b,6,26,.56,.65,1.6);spot.position.copy(LP).addScaledVector(dir,.25);spot.target.position.copy(AIM);
+   spot.castShadow=true;spot.shadow.mapSize.set(2048,2048);spot.shadow.bias=-.0004;spot.shadow.radius=4;spot.shadow.camera.near=1;spot.shadow.camera.far=18;root.add(spot,spot.target);
    /* soft volumetric cone: additive, fades along its length and toward the edges */
    const cg=new T.ConeGeometry(2.6,5,40,1,true);cg.translate(0,-2.5,0);
    const cm=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:{uT:{value:0}},
