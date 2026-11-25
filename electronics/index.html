@@ -121,7 +121,7 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 .invd .inv{padding:0 12px 12px}
 .achbtn{white-space:normal;display:flex;align-items:center;gap:12px;width:100%;min-height:56px;margin:14px 0 0;padding:8px 14px 8px 10px;border:1px solid rgba(255,178,107,.28);border-radius:14px;background:rgba(255,178,107,.06);color:#eef1ff;font:inherit;text-align:left;cursor:pointer;transition:background .2s,border-color .2s}
 .achbtn:hover{background:rgba(255,178,107,.1);border-color:rgba(255,178,107,.45)}.achbtn:focus-visible,.adx:focus-visible{outline:2px solid #8a9bff;outline-offset:3px}
-.achbtn .ast{display:flex;flex:none}.achbtn .ast .am{width:36px;height:36px;margin-left:-10px;box-shadow:0 0 0 3px #0b1135}.achbtn .ast .am:first-child{margin-left:0}.achbtn .ast .am svg{width:18px;height:18px}
+.achbtn .ast{display:flex;flex:none}.achbtn .ast .am{width:40px;height:40px;margin-left:-12px;box-shadow:0 0 0 3px #0b1135}.achbtn .ast .am:first-child{margin-left:0}.achbtn .ast .am svg{width:18px;height:18px}
 .achbtn .atx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 0;white-space:normal}.achbtn .atx span{text-wrap:pretty}.achbtn .atx b{font:600 15px/1.3 Manrope,sans-serif;color:#eef1ff}.achbtn .atx span{font-size:13px;line-height:1.3;color:#a3acd0}
 .achbtn .chev{flex:none;color:#ffb26b}
 .achdlg{width:min(480px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:16px 24px 24px;border:1px solid rgba(140,160,255,.3);border-radius:22px;background:radial-gradient(120% 60% at 50% 0%,#17235a 0%,#0b1233 55%,#080d26 100%);color:#eef1ff;box-shadow:0 40px 120px rgba(0,0,0,.6)}
@@ -243,15 +243,14 @@ $('#levels').innerHTML=LEVELS.map((L,i)=>{const d=isDone(i),a=avail(i)&&built(i)
   const cls=d?'done':a?'open':'locked',lock=!d&&!a,tag=d?_t('Cleared'):a?_t(st?'Continue':'Start'):built(i)?_t('Unlocks after level {0}',i-1):_t('Coming soon');
   const inner=`<span class="art"><img src="/electronics/levels/lv${i}.webp" alt="" loading="lazy" width="320" height="320"></span><span class="meta"><span class="no">${_t('Level {0}',i)}</span><span class="t">${_t(L.t)}</span><span class="g">${_t(L.g)}</span><span class="tag">${tag}</span></span>`;
   const fin=i===LEVELS.length-1?' final':'';const half=i===0?halfCard():'';return (a||d&&built(i)?`<a class="lv ${cls}${a&&!d?' now':''}${fin}" href="${L.href}">${inner}</a>`:`<div class="lv ${cls}${fin}" aria-disabled="true">${inner}</div>`)+half}).join('');
-{const LOCK={stage:'Do every step of this stage.',intuition:'Get every prediction on this level right the first time.',memory:'Answer the warm-ups without a mistake.',check:'Pass the end check without a mistake.',level:'Finish every task on this level.',streak:'Get five predictions right in a row.'};const A=window.ACH?ACH.read():{},ks=Object.keys(A).filter(k=>k!=='course'&&A[k].list).sort((a,b)=>A[a].lv-A[b].lv),ru=I18N.lang==='ru';
-  let H=0,N=0,G=0,T=0;const got=[];
-  const grp=(head,list)=>`<p class="achl">${head}</p><ul class="al">${list.map(a=>`<li class="${a.got?'':'off'}">${ACH.med(a.kind,a.got)}<span>${_t(a.en)}${a.got?'':`<span class="sr"> · ${_t('not yet')}</span>`}${a.d?`<span class="ad">${_t(a.got?a.d:(LOCK[a.kind]||a.d))}</span>`:''}</span></li>`).join('')}</ul>`;
-  let out='';ks.forEach(k=>{const x=A[k];H+=x.h||0;N+=x.n||0;x.list.forEach(a=>{T++;if(a.got){G++;got.push(a)}});out+=grp(`${_t('Level {0}',x.lv)} · ${_t((LEVELS[x.lv]||{}).t||'')}`,x.list)});
-  const C=(A.course&&A.course.length?A.course:[{kind:'streak',en:'Five in a row',d:'Five predictions in a row right.',got:false}]);C.forEach(a=>{T++;if(a.got){G++;got.push(a)}});out+=grp(_t('Course'),C);
-  const word=n=>ru?I18N.pl(n,{one:'ачивка',few:'ачивки',many:'ачивок',other:'ачивки'}):(n===1?'achievement':'achievements');
-  const stack=(got.length?got.filter(a=>a.kind!=='level').slice(-4).reverse():[]).map(a=>ACH.med(a.kind,true)).join('')||ACH.med('stage',false);
-  $('#achBtn').innerHTML=`<span class="ast" aria-hidden="true">${stack}</span><span class="atx"><b>${G?_t('Achievements: {0} of {1}',G,T):_t('Achievements')}</b><span>${N?_t('On target: {0} of {1}',H,N):_t('Clear any stage to get the first one.')}</span></span><svg class="chev" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M7 4l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  $('#ach').innerHTML=`<p class="achi">${_t('Earned: {0} of {1}',G,T)}${N?'<br>'+_t('Predictions on target: {0} of {1}',H,N):''}</p>`+out+`<p class="achn">${_t('A level’s achievements appear here once you open it.')}</p>`;
+{const A=window.ACH?ACH.read():{},ks=Object.keys(A).filter(k=>k!=='course'&&A[k].list).sort((a,b)=>A[a].lv-A[b].lv),ru=I18N.lang==='ru';
+  let G=0,T=0;const got=[];
+  const grp=(head,list)=>`<p class="achl">${head}</p><ul class="al">${list.map(a=>`<li class="${a.got?'':'off'}">${ACH.med(a.kind,a.got,a.img)}<span>${_t(a.en)}${a.got?'':`<span class="sr"> · ${_t('not yet')}</span>`}${a.d?`<span class="ad">${_t(a.got?a.d:(a.lock||a.d))}</span>`:''}</span></li>`).join('')}</ul>`;
+  let out='';ks.forEach(k=>{const x=A[k];x.list.forEach(a=>{T++;if(a.got){G++;got.push(a)}});out+=grp(`${_t('Level {0}',x.lv)} · ${_t((LEVELS[x.lv]||{}).t||'')}`,x.list)});
+  const C=ACH.course();C.forEach(a=>{T++;if(a.got){G++;got.push(a)}});out+=grp(_t('Course'),C);
+  const stack=(got.length?got.filter(a=>a.kind!=='level').slice(-4).reverse():[]).map(a=>ACH.med(a.kind,true,a.img)).join('')||ACH.med('stage',false,'/electronics/ach/l0-s0.webp');
+  $('#achBtn').innerHTML=`<span class="ast" aria-hidden="true">${stack}</span><span class="atx"><b>${G?_t('Achievements: {0} of {1}',G,T):_t('Achievements')}</b><span>${G?_t('Every one has its own art. Open to see what’s next.'):_t('Clear any stage to get the first one.')}</span></span><svg class="chev" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M7 4l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  $('#ach').innerHTML=`<p class="achi">${_t('Earned: {0} of {1}',G,T)}</p>`+out+`<p class="achn">${_t('A level’s achievements appear here once you open it.')}</p>`;
   const dl=$('#achDlg');$('#achBtn').onclick=()=>{dl.showModal();$('#achX').focus()};$('#achX').onclick=()=>dl.close();dl.addEventListener('click',e=>{if(e.target===dl)dl.close()})}
 
 {const btn=$('#revBtn'),dl=$('#revDlg'),bk=$('#revBook');const n=BOOK.due().length;

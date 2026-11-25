@@ -12,7 +12,7 @@ const g=k=>st[L+':'+k],s=(k,v)=>{if(v==null)delete st[L+':'+k];else st[L+':'+k]=
 const again=(label,fn)=>{const b=document.createElement('button');b.type='button';b.className='pq-again';b.textContent=label;b.onclick=fn;return b};
 const esc=t=>String(t);
 let box,ctl,note,cur=-1,doneShown={},seg=null,briefBox,parts=[],busy=false,fresh=-1,primed=false;
-const MED=(k,on)=>window.ACH?ACH.med(k,on):'';
+const MED=(k,on,img)=>window.ACH?ACH.med(k,on,img):'';
 const ICK='<svg class="pq-i" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',IX='<svg class="pq-i" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 /* the side panel as standalone blocks, one per intention: where am I · think · try · do · read more */
 function layout(){const step=document.querySelector('.panel .step');if(!step)return;
@@ -69,47 +69,48 @@ function render(step){
   doneShown[step]=false;
   const tk=document.getElementById('task');if(tk&&tk.classList.contains('ok'))after(true);
 }
-/* the prediction block: pick → try it → a clear verdict, scored once per prediction (the first reveal counts) */
-function predSec(step){const pr=D.pr[step],p=g('p'+step),rev=p!=null&&doneShown[step],hit=p===pr.a;
-  const c=document.createElement('section');c.className='ped predict'+(rev?(hit?' hit':' miss'):'')+(rev&&fresh===step?' fresh':'');c.id='pedPr';
-  const sc=score();
-  c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):rev?`<span class="pv">${hit?T('Intuition on target'):T('Intuition missed')}</span>`:T('Your prediction')}<span class="pq-sc">${rev&&hit&&fresh===step?'<i class="pq-plus" aria-hidden="true">+1</i>':''}${sc.n?T('{0} of {1} on target',sc.h,sc.n)+(st.streak>1?T(' · streak {0}',st.streak):''):''}</span></p>`;
+/* the prediction block: pick, say how sure you are, try it, then a clear verdict. A confident miss is the best kind: it sticks. */
+const CONF=['Guessing','Fairly sure','Sure'];
+function predSec(step){const pr=D.pr[step],p=g('p'+step),rev=p!=null&&doneShown[step],hit=p===pr.a,cf=g('c'+step),sur=rev&&!hit&&cf===2;
+  const c=document.createElement('section');c.className='ped predict'+(rev?(hit?' hit':' miss'):'')+(sur?' sur':'')+(rev&&fresh===step?' fresh':'');c.id='pedPr';
+  c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):rev?`<span class="pv">${hit?T('Intuition on target'):sur?T('A real surprise'):T('Intuition missed')}</span>`:T('Your prediction')}</p>`;
   c.appendChild(chips('p'+step,pr.q,pr.o,rev?pr.a:null,p,v=>{s('p'+step,v);render(cur)}));
+  if(p!=null&&!rev){const w=document.createElement('div');w.className='pq-cf';w.setAttribute('role','group');w.setAttribute('aria-label',T('How sure are you?'));
+    w.innerHTML=`<span>${T('How sure?')}</span>`+CONF.map((x,i)=>`<button type="button" aria-pressed="${cf===i}" data-i="${i}">${T(x)}</button>`).join('');
+    w.querySelectorAll('button').forEach(b=>b.onclick=()=>{s('c'+step,+b.dataset.i);render(cur)});c.appendChild(w)}
   if(p!=null){const f=document.createElement('p');f.className='pq-f'+(rev&&hit?' ok':'');f.id='pedEx';
-    f.innerHTML=rev?'<b class="wh">'+(hit?T('Your prediction held.'):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex:T('Now try it and see.');c.appendChild(f);
-    const r=again(T('Change'),()=>{s('p'+step,null);doneShown[step]=false;render(cur)});if(rev){r.classList.add('pq-ch');f.append(' ');f.appendChild(r)}else{r.classList.add('k');c.querySelector('.ped-k .pq-sc').insertAdjacentElement('beforebegin',r)}}
+    f.innerHTML=rev?'<b class="wh">'+(hit?T('Your prediction held.'):sur?T('You were sure, and the bench disagreed: “{0}”. That’s the moment it sticks.',pr.o[pr.a]):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex:T('Now try it and see.');c.appendChild(f);
+    const r=again(T('Change'),()=>{s('p'+step,null);s('c'+step,null);doneShown[step]=false;render(cur)});if(rev){r.classList.add('pq-ch');f.append(' ');f.appendChild(r)}else{r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}}
   if(fresh===step)fresh=-1;return c}
 function score(){let h=0,n=0;Object.keys(D.pr||{}).forEach(k=>{const v=g('v'+k);if(v!=null){n++;h+=v}});return{h,n}}
 function ready(step){const pr=D.pr&&D.pr[step];return!pr||g('p'+step)!=null}
 function after(ok){if(busy)return;const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;const p=g('p'+cur);if(p==null)return;
   const old=document.getElementById('pedPr');if(!old)return;doneShown[cur]=true;
-  if(g('v'+cur)==null){const hit=p===pr.a?1:0;s('v'+cur,hit);st.streak=hit?(st.streak||0)+1:0;st.streakMax=Math.max(st.streakMax||0,st.streak);save();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)fresh=cur}
+  if(g('v'+cur)==null){const hit=p===pr.a?1:0;s('v'+cur,hit);if(!hit&&g('c'+cur)===2)s('sur'+cur,1);if(!matchMedia('(prefers-reduced-motion: reduce)').matches)fresh=cur}
   old.replaceWith(predSec(cur));queue();check()}
 function wrap(fn,step){return function(){busy=true;try{fn.apply(this,arguments)}finally{busy=false}render(step())}}
 
-/* achievements: one per cleared stage, plus intuition, memory, a clean check, the level, and a streak across the course */
-function stages(){const out=[];parts.forEach((n,i)=>{const l=out[out.length-1];if(l&&l.n===n)l.s.push(i);else out.push({n,s:[i]})});return out.slice(0,-1)}
+/* achievements: one per cleared stage (its own art), a real surprise, the problem book without hints, coming back for a review, and the level */
+function stages(){const out=[];parts.forEach((n,i)=>{const l=out[out.length-1];if(l&&l.n===n)l.s.push(i);else out.push({n,s:[i]})});return out.slice(0,-1).filter(x=>x.n!=='Practice')}
 function quest(){try{return JSON.parse(localStorage.getItem('quest_v1')||'{}')}catch(_){return{}}}
-const allFirst=(items,key)=>items.length&&items.every((q,i)=>g('F'+key+i)===q.a);
-function achList(){const lv=D.win?D.win.lv:0,q=quest(),done=new Set(((q.steps||{})[lv])||[]),A=[];
-  stages().forEach((x,k)=>A.push({id:'s'+k,kind:'stage',en:'Stage: '+x.n,d:'Every step of this stage is done.',ok:x.s.every(i=>done.has(i))}));
-  const pk=Object.keys(D.pr||{});if(pk.length)A.push({id:'int',kind:'intuition',en:'Sharp intuition',d:'Every prediction on this level right the first time.',ok:pk.every(k=>g('v'+k)===1)});
-  const rc=[];Object.keys(D.recall||{}).forEach(k=>D.recall[k].forEach((q,i)=>rc.push([q,'r'+k+'_'+i])));
-  if(rc.length)A.push({id:'mem',kind:'memory',en:'Good memory',d:'Every warm-up answer right on the first try.',ok:rc.every(([q,k])=>g('F'+k)===q.a)});
-  if(D.end)A.push({id:'chk',kind:'check',en:'Clean check',d:'The end check without a single mistake.',ok:allFirst(D.end.items,'e_')});
-  A.push({id:'lv',kind:'level',en:'Level complete',d:'Every task on this level done.',ok:!!(q.done||{})[lv]});
+function revd(){try{return JSON.parse(localStorage.getItem('rev_v1')||'{}')}catch(_){return{}}}
+function achList(){const lv=D.win?D.win.lv:0,q=quest(),done=new Set(((q.steps||{})[lv])||[]),A=[],bk='l'+lv;
+  stages().forEach((x,k)=>A.push({id:'s'+k,kind:'stage',img:`/electronics/ach/l${lv}-s${k}.webp`,en:'Stage: '+x.n,d:'Every step of this stage is done.',lock:'Do every step of this stage.',ok:x.s.every(i=>done.has(i))}));
+  const pk=Object.keys(D.pr||{});if(pk.length)A.push({id:'sur',kind:'surprise',en:'A real surprise',d:'You were sure, the bench disagreed, and you saw why.',lock:'Make a prediction you’re sure of, and let the bench prove you wrong.',ok:pk.some(k=>g('sur'+k)===1)});
+  if(window.BOOK&&BOOK.stats){const b=BOOK.stats(bk);if(b.n)A.push({id:'solo',kind:'solo',en:'On your own',d:'Every problem in the book without a hint. Retries are fine.',lock:'Solve every problem in the book without opening a hint.',ok:b.nohint===b.n})}
+  A.push({id:'rev',kind:'review',en:'Came back',d:'Solved this level’s problems again in a review, days later.',lock:'Come back for a review on the map a day or more later.',ok:!!((revd().lv||{})[bk])});
+  A.push({id:'lv',kind:'level',img:`/electronics/levels/lv${lv}.webp`,en:'Level complete',d:'Every task on this level done.',lock:'Finish every task on this level.',ok:!!(q.done||{})[lv]});
   const got=new Set(g('ach')||[]);A.forEach(a=>{a.got=got.has(a.id)||a.ok});return A}
 function check(silent){if(!D.win)return;const A=achList(),had=new Set(g('ach')||[]),fresh=A.filter(a=>a.got&&!had.has(a.id));
-  const cs=st['ach:course']||[];let fc=[];if((st.streakMax||0)>=5&&!cs.includes('streak5')){cs.push('streak5');st['ach:course']=cs;fc.push({id:'streak5',kind:'streak',en:'Five in a row',d:'Five predictions in a row right.'})}
-  if(fresh.length||fc.length){s('ach',A.filter(a=>a.got).map(a=>a.id));if(!silent&&primed)fresh.concat(fc).filter(a=>a.kind!=='level').forEach(toast)}
+  if(fresh.length){s('ach',A.filter(a=>a.got).map(a=>a.id));if(!silent&&primed)fresh.filter(a=>a.kind!=='level').forEach(toast)}
   /* a summary for the map */
-  try{const S=JSON.parse(localStorage.getItem('ach_v1')||'{}'),sc=score();S[L]={lv:D.win.lv,list:A.map(a=>({kind:a.kind,en:a.en,d:a.d,got:a.got})),h:sc.h,n:sc.n};S.course=[{kind:'streak',en:'Five in a row',d:'Five predictions in a row right.',got:cs.includes('streak5')}];localStorage.setItem('ach_v1',JSON.stringify(S))}catch(_){}}
+  try{const S=JSON.parse(localStorage.getItem('ach_v1')||'{}');S[L]={lv:D.win.lv,list:A.map(a=>({kind:a.kind,img:a.img,en:a.en,d:a.d,lock:a.lock,got:a.got}))};delete S.course;localStorage.setItem('ach_v1',JSON.stringify(S))}catch(_){}}
 let tbox=null,tq2=[],tbusy=false;
 function toast(a){tq2.push(a);if(!tbusy)nextToast()}
 function nextToast(){const wd=document.getElementById('pedWin');if(wd&&wd.open){tq2=[];tbusy=false;return}const a=tq2.shift();if(!a){tbusy=false;return}tbusy=true;
   if(!tbox){tbox=document.createElement('div');tbox.className='ped-toast';tbox.setAttribute('role','status');tbox.setAttribute('aria-live','polite');document.body.appendChild(tbox);if(tbox.showPopover)tbox.popover='manual'}
   tbox.style.left=innerWidth>900?Math.round((innerWidth-(window.PW?PW():0))/2)+'px':'50%';
-  tbox.innerHTML=`<div class="pt-c">${MED(a.kind,true)}<span class="pt-t"><span class="pt-k">${T('Achievement')}</span><b>${T(a.en)}</b><span class="pt-d">${T(a.d)}</span></span></div>`;
+  tbox.innerHTML=`<div class="pt-c">${MED(a.kind,true,a.img)}<span class="pt-t"><span class="pt-k">${T('Achievement')}</span><b>${T(a.en)}</b><span class="pt-d">${T(a.d)}</span></span></div>`;
   if(tbox.showPopover){try{tbox.hidePopover()}catch(_){}try{tbox.showPopover()}catch(_){}}
   tbox.classList.remove('on');void tbox.offsetWidth;tbox.classList.add('on');
   setTimeout(()=>{tbox.classList.remove('on');setTimeout(nextToast,400)},4200)}
@@ -144,7 +145,7 @@ function celebrate(){const W=D.win;if(!W)return;tq2=[];if(tbox){tbox.classList.r
   d.querySelector('.pw-x').onclick=()=>d.close();
   if(!d.open)d.showModal();d.tabIndex=-1;d.focus();confetti()}
 function achStrip(){if(!window.ACH)return'';const A=achList(),n=A.filter(a=>a.got).length;
-  return `<div class="pw-ach"><p class="pw-ak">${T('Achievements: {0} of {1}',n,A.length)}</p><ul class="pw-row">${A.map(a=>`<li class="${a.got?'':'off'}" title="${T(a.en).replace(/"/g,'')}">${MED(a.kind,a.got)}<span class="sr">${T(a.en)}${a.got?'':' · '+T('not yet')}</span></li>`).join('')}</ul><p class="pw-an">${T('All achievements are on the map.')}</p></div>`}
+  return `<div class="pw-ach"><p class="pw-ak">${T('Achievements: {0} of {1}',n,A.length)}</p><ul class="pw-row">${A.map(a=>`<li class="${a.got?'':'off'}" title="${T(a.en).replace(/"/g,'')}">${MED(a.kind,a.got,a.img)}<span class="sr">${T(a.en)}${a.got?'':' · '+T('not yet')}</span></li>`).join('')}</ul><p class="pw-an">${T('All achievements are on the map.')}</p></div>`}
 function complete(ok,was){fin=ok;check(!primed);primed=true;if(ok&&!was)setTimeout(celebrate,350)}
 document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('#next');if(n&&n.dataset.fin==='1'){e.preventDefault();e.stopImmediatePropagation();celebrate()}},true);
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
@@ -222,14 +223,18 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .ped-toast{position:fixed;inset:auto;top:16px;left:50%;margin:0;padding:0;border:0;background:none;overflow:visible;transform:translate(-50%,-16px);opacity:0;pointer-events:none;transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1);z-index:1001}
 .ped-toast.on{opacity:1;transform:translate(-50%,0)}
 .pt-c{display:flex;align-items:center;gap:14px;min-width:260px;max-width:min(420px,calc(100vw - 32px));padding:12px 18px 12px 12px;border-radius:16px;background:rgba(10,15,40,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,178,107,.35);box-shadow:0 18px 50px rgba(0,0,0,.45)}
-.pt-c .am{width:48px;height:48px}.pt-c .am svg{width:24px;height:24px}
+.pt-c .am{width:64px;height:64px}.pt-c .am svg{width:28px;height:28px}
 .pt-t{display:flex;flex-direction:column;gap:2px;text-align:left}.pt-k{font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b}.pt-t b{font:600 15px/1.3 Manrope,sans-serif;color:#eef1ff}.pt-d{font-size:13px;line-height:1.35;color:#a3acd0}
-.pw-ach .am{width:36px;height:36px}.pw-ach .am svg{width:18px;height:18px}.ped-win:has(.pw-ach) .pw-art{width:140px;height:140px}.pw-row{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}.pw-row li{position:relative}.pw-an{margin:10px 0 0;font-size:13px;color:#8f9bc4}.pw-ach{margin:0 0 18px}.pw-ak{margin:0 0 10px;font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b}.pw-row .sr,.pw-g .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pw-ach .am{width:48px;height:48px}.pw-ach .am svg{width:22px;height:22px}.ped-win:has(.pw-ach) .pw-art{width:140px;height:140px}.pw-row{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}.pw-row li{position:relative}.pw-an{margin:10px 0 0;font-size:13px;color:#8f9bc4}.pw-ach{margin:0 0 18px}.pw-ak{margin:0 0 10px;font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b}.pw-row .sr,.pw-g .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .seg-goal .ped.recall{background:none!important;padding:14px 0 0!important;border-radius:0!important;border-top:1px solid rgba(140,160,255,.1)}
 body:has(.ped-toast.on) .tools .hint{opacity:0}.tools .hint{transition:opacity .3s}
 #prev svg{display:block;margin:auto}
 @media(prefers-reduced-motion:reduce){.ped-toast{transition:none}.pq-plus,.fresh .pv,.fresh .pick{animation:none!important}}
 .pq-f{margin:10px 0 0;font-size:14px;line-height:1.5;color:#8f9bc4}
+.pq-cf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 0}.pq-cf>span{margin-right:4px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
+.pq-cf button{min-height:44px;padding:6px 14px;border-radius:999px;border:1px solid rgba(140,160,255,.2);background:none;color:#c9d2f5;font:600 13px/1.2 Manrope,sans-serif;cursor:pointer}
+.pq-cf button:hover{background:rgba(91,156,255,.1)}.pq-cf button[aria-pressed=true]{border-color:#8a9bff;background:rgba(91,156,255,.16);color:#fff}
+.sur .ped-k>.pv{color:#ffc58f!important}.sur .pv::before{background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.25),0 0 14px rgba(255,178,107,.6)}
 .pq-f .wh{color:#eef1ff;font-weight:600}
 .ped.cando label{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:#c9d2f5;padding:5px 0;cursor:pointer}
 .ped.cando input,.hw input{appearance:none;-webkit-appearance:none;flex:none;width:18px;height:18px;margin:1px 0 0;border-radius:5px;border:1px solid rgba(143,155,196,.4);background:transparent;cursor:pointer;display:grid;place-items:center}
@@ -264,7 +269,7 @@ body:has(.ped-toast.on) .tools .hint{opacity:0}.tools .hint{transition:opacity .
 .pw-btn:hover{background:#fff}.pw-btn.ghost{color:#dfe4fb;background:rgba(91,156,255,.08);border:1px solid rgba(91,156,255,.3)}
 .pw-btn:focus-visible,.pw-x:focus-visible{outline:2px solid #8a9bff;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.ped-win[open]{animation:none}}
-@media(max-width:600px){.ped-win{padding:0 20px 0}.ped-win:has(.pw-ach) .pw-art{width:110px;height:110px}.ped-win h2{font-size:24px}.pw-row{flex-wrap:nowrap;gap:6px}.pw-ach .am{width:34px;height:34px}.pw-a{position:sticky;bottom:0;margin:0 -20px;padding:16px 20px 20px;background:linear-gradient(180deg,rgba(8,13,38,0),#080d26 30%)}}
+@media(max-width:600px){.ped-win{padding:0 20px 0}.ped-win:has(.pw-ach) .pw-art{width:110px;height:110px}.ped-win h2{font-size:24px}.pw-row{flex-wrap:wrap;gap:8px}.pw-ach .am{width:44px;height:44px}.pw-a{position:sticky;bottom:0;margin:0 -20px;padding:16px 20px 20px;background:linear-gradient(180deg,rgba(8,13,38,0),#080d26 30%)}}
 #dots button{position:relative}#dots button::after{content:'';position:absolute;inset:-14px 0}
 @media(prefers-reduced-motion:reduce){.card.ctl{transition:none}}
 @media(min-width:901px){

@@ -22,7 +22,7 @@ function solvedHook(k,i,first){if(k==='rv'){const p=SETS.rv[i];sched(p._id,first
   else if(SETS[k][i].kind!=='worked')sched(k+':'+i,true,false)}
 const st=(k,i)=>{S[k]=S[k]||{};S[k][i]=S[k][i]||{};return S[k][i]};
 function solved(k){const P=SETS[k];return!!P&&P.every((_,i)=>S[k]&&S[k][i]&&S[k][i].s)}
-function stats(k){const P=SETS[k]||[];let s=0,solo=0,n=0;P.forEach((p,i)=>{if(p.kind==='worked')return;n++;const x=S[k]&&S[k][i];if(x&&x.s){s++;if(!x.h&&x.f)solo++}});return{s,solo,n}}
+function stats(k){const P=SETS[k]||[];let s=0,solo=0,nohint=0,n=0;P.forEach((p,i)=>{if(p.kind==='worked')return;n++;const x=S[k]&&S[k][i];if(x&&x.s){s++;if(!x.h)nohint++;if(!x.h&&x.f)solo++}});return{s,solo,nohint,n}}
 function mount(el){const k=el.dataset.book,P=SETS[k];if(!P)return;el.dataset.on='1';if(cur[k]==null){const f=P.findIndex((_,i)=>!(S[k]&&S[k][i]&&S[k][i].s));cur[k]=f<0?0:f}draw(el)}
 function draw(el){const k=el.dataset.book,P=SETS[k],i=cur[k],p=P[i],x=st(k,i);
   const dots=P.map((_,j)=>`<button type="button" class="${j===i?'on ':''}${S[k]&&S[k][j]&&S[k][j].s?'ok':''}" data-j="${j}" aria-label="${T('Problem {0}',j+1)}"${j===i?' aria-current="step"':''}></button>`).join('');
@@ -47,7 +47,7 @@ function draw(el){const k=el.dataset.book,P=SETS[k],i=cur[k],p=P[i],x=st(k,i);
       if(r.kind==='empty'||r.kind==='unread'||r.kind==='unit'){x.msg=r.msg;draw(el);el.querySelector('.bk-fld input').focus();return}
       x.t=(x.t||0)+1;if(r.ok){x.s=1;x.f=x.t===1?1:0;x.val=v;x.msg='';solvedHook(k,i,x.f===1)}else{x.msg=r.msg;miss(k,i)}save();changed(el);const n=el.querySelector('.bk-fld input:not([readonly])');if(n){n.value=v;n.select()}};
     c.onclick=go;inpEl.onkeydown=e=>{if(e.key==='Enter')go()}}}
-function changed(el){draw(el);if(BOOK.onchange)try{BOOK.onchange()}catch(_){}}
+function changed(el){draw(el);const k=el.dataset.book;if(k==='rv'&&SETS.rv.every((_,j)=>S.rv&&S.rv[j]&&S.rv[j].s)){const n=nextDue(),d=n?Math.max(1,Math.round((n-Date.now())/DAY)):0;const p=document.createElement('p');p.className='bk-fb ok';p.innerHTML=`<span class="v">${T('Review done.')}</span> `+(n?T('The next one is due in {0} d.',d):'');el.querySelector('.bk-nav').before(p)}if(BOOK.onchange)try{BOOK.onchange()}catch(_){}}
 new MutationObserver(()=>{document.querySelectorAll('.book[data-book]:not([data-on])').forEach(mount)}).observe(document.documentElement,{childList:true,subtree:true});
 const css=`.book{display:flex;flex-direction:column;gap:10px;margin:4px 0 0}
 .bk-top{display:flex;flex-direction:column;gap:8px}
