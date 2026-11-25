@@ -130,5 +130,15 @@ I18N.add({
 "Pass the end check without a mistake.":"Пройди итоговую проверку без ошибок.",
 "Finish every task on this level.":"Выполни все задания уровня.",
 "Get five predictions right in a row.":"Угадай пять прогнозов подряд.",
-"“{0}”, right":"«{0}» — верно"
+"“{0}”, right":"«{0}» — верно",
+"Type a number first.":"Сначала впиши число.",
+"I can’t read that. Write a number, with a prefix if you like: 4700, 4.7k or 4k7.":"Не могу прочитать. Напиши число, можно с приставкой: 4700, 4,7к или 4к7.",
+"That’s a different unit. The answer is in {0}.":"Это другая единица. Ответ — в {0}.",
+"That’s {0} times too big. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.":"Это в {0} раз больше нужного. Сбилась приставка: переведи всё в базовые единицы (А, Ом, Ф, Гн, с), а потом дели и умножай.",
+"That’s {0} times too small. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.":"Это в {0} раз меньше нужного. Сбилась приставка: переведи всё в базовые единицы (А, Ом, Ф, Гн, с), а потом дели и умножай.",
+"Off by a factor of {0}: check where the decimal point went.":"Ошибка в {0} раз: проверь, куда ушла запятая.",
+"Not quite. Check each step, and the units at each step.":"Не совсем. Проверь каждый шаг и единицы на каждом шаге.",
+"in base units: {0} = {1}":"в базовых единицах: {0} = {1}",
+"The same value":"Одно и то же значение",
+"Each step is × 1000":"Каждая ступень — × 1000",
 });

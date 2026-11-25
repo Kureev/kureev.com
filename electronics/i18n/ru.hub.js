@@ -102,5 +102,9 @@ I18N.add({
 "Every task on this level done.":"Все задания уровня выполнены.",
 "Five predictions in a row right.":"Пять верных прогнозов подряд.",
 "On target: {0} of {1}":"В точку: {0} из {1}",
-"Earned: {0} of {1}":"Получено: {0} из {1}"
+"Earned: {0} of {1}":"Получено: {0} из {1}",
+"Level ½":"Уровень ½",
+"Prefixes":"Приставки",
+"Milli, micro, kilo: one value, many spellings. Five minutes, optional.":"Милли, микро, кило: одно значение, много записей. Пять минут, по желанию.",
+"Optional":"По желанию",
 });

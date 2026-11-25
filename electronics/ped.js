@@ -65,7 +65,7 @@ function render(step){
     c.querySelectorAll('input').forEach(b=>b.onchange=()=>s('c'+b.dataset.i,b.checked));box.appendChild(c)}
   if(!end){if(seg&&box.parentNode!==seg.think)seg.think.appendChild(box);else if(!seg){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}}
   if(seg)queue();setTimeout(syncNext,0);
-  const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
+  const lock=!!(pr&&g('p'+step)==null);document.body.classList.toggle('ped-hide',lock);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
   doneShown[step]=false;
   const tk=document.getElementById('task');if(tk&&tk.classList.contains('ok'))after(true);
 }
@@ -237,6 +237,7 @@ body:has(.ped-toast.on) .tools .hint{opacity:0}.tools .hint{transition:opacity .
 .ped.cando input:checked::after,.hw input:checked::after{content:'';width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-1px) rotate(-45deg)}
 .card.ctl{transition:opacity .3s}
 .card.ctl.ped-lock{opacity:.4;pointer-events:none}
+.ped-hide .hud .num b,.ped-hide .side .formula,.ped-hide #wF,.ped-hide #formula{color:transparent!important;text-shadow:0 0 9px rgba(201,210,245,.75);user-select:none;transition:color .3s,text-shadow .3s}.ped-hide .side .formula b,.ped-hide #wF b,.ped-hide #formula b,.ped-hide .bx{color:transparent!important}
 .ped-note{margin:-4px 0 10px;font-size:12px;color:#8f9bc4}
 
 .ped-confetti{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;overflow:visible;pointer-events:none;z-index:1000}

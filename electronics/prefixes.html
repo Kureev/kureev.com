@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Five minutes on milli, micro, kilo and mega: one value, many spellings. Part of a free interactive electronics course.">
+<meta property="og:title" content="Electronics for a robot arm">
+<meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<meta property="og:image" content="https://kureev.com/og-electronics.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Level ½: Prefixes</title>
+<script src="/electronics/i18n.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/electronics/theme.css">
+<style>
+/* Level ½: a five-minute drill on prefixes. No 3D: the page stays light.
+   One bold thing per view: the ladder. Then the rule, the trap, and a drill on numbers from the course. */
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;background:radial-gradient(90% 60% at 50% -10%,#17235a 0%,#0a1230 45%,#050817 100%) fixed;color:var(--ink);font:400 16px/1.55 var(--f-text)}
+[hidden]{display:none!important}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 64px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:12px;min-height:44px}
+.top a.back{display:inline-flex;align-items:center;min-height:44px;font:600 13px/1.3 var(--f-text);color:var(--mute);text-decoration:none}
+.top a.back:hover{color:var(--ink)}
+.blk{background:rgba(10,15,40,.84);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid rgba(140,160,255,.13);border-radius:16px;padding:20px 22px}
+.kick{margin:0 0 6px;font:600 13px/1.3 var(--f-text);color:var(--copper)}
+h1{margin:0 0 10px;font:600 24px/1.2 var(--f-display);letter-spacing:-.015em}
+.lead{margin:0;font-size:16px;line-height:1.55;color:#dfe4fb}
+h2{margin:0 0 4px;font:700 15px/1.3 var(--f-text);color:var(--ink)}
+.sub{margin:0 0 14px;font-size:15px;line-height:1.5;color:var(--soft)}
+p{margin:0}
+/* the ladder */
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.ex button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid rgba(91,156,255,.22);background:rgba(91,156,255,.06);color:#dfe4fb;font:600 15px/1.2 var(--f-text);cursor:pointer;font-variant-numeric:tabular-nums}
+.ex button[aria-pressed=true]{border-color:#8a9bff;background:rgba(91,156,255,.18);color:#fff}
+.ex button:hover{background:rgba(91,156,255,.14)}
+.rungs{margin:0;padding:0;list-style:none}
+.rungs li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;column-gap:14px;align-items:center;padding:9px 10px;border-top:1px solid rgba(140,160,255,.1)}
+.rungs li:first-child{border-top-color:transparent}
+.rungs li.on{background:rgba(91,156,255,.12);border-radius:12px;border-top-color:transparent}.rungs li.on+li{border-top-color:transparent}
+.rungs .p{font:700 20px/1.2 var(--f-text);color:var(--blue);text-align:center}
+.rungs .n{font-size:15px;line-height:1.35;color:var(--soft)}.rungs .n small{display:block;font-size:13px;color:var(--mute)}
+.rungs .v{font:600 16px/1.35 var(--f-text);color:var(--soft);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rungs li.on .v{color:var(--ink);font-weight:800}
+.rungs li.base .p{color:var(--mute)}
+.note{margin-top:14px;font-size:15px;line-height:1.55;color:var(--soft)}
+.note b{color:var(--ink)}
+.rule{display:grid;gap:10px;margin-top:4px}
+.rule p{font-size:15px;line-height:1.55;color:var(--soft)}.rule b{color:var(--ink)}
+.trap{margin-top:14px;padding-top:14px;border-top:1px solid rgba(140,160,255,.1)}
+/* the drill */
+.prog{display:flex;gap:4px;margin:0 0 16px}.prog i{flex:1;height:3px;border-radius:2px;background:#1d2752}.prog i.ok{background:#4b5fc8}.prog i.on{background:linear-gradient(90deg,#5b9cff,#8a6bff)}
+.qk{display:flex;justify-content:space-between;gap:12px;margin:0 0 8px;font:600 13px/1.3 var(--f-text);color:var(--mute)}
+.qq{margin:0 0 14px;font:700 22px/1.3 var(--f-text);color:var(--ink);font-variant-numeric:tabular-nums}
+.qq .ar{color:var(--mute);font-weight:600;margin:0 6px}
+.qx{margin:-8px 0 14px;font-size:15px;color:var(--soft)}
+.row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.fld{display:flex;align-items:center;flex:1 1 200px;min-height:48px;border-radius:12px;border:1px solid rgba(140,160,255,.3);background:rgba(5,8,23,.6);padding:0 14px}
+.fld:focus-within{border-color:#8a9bff;box-shadow:0 0 0 3px rgba(138,155,255,.25)}
+.fld input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:700 18px/1 var(--f-text);outline:none;padding:12px 0;font-variant-numeric:tabular-nums}
+.fld input::placeholder{color:var(--mute);font-weight:500;font-size:15px}
+.fld .u{font:600 16px/1 var(--f-text);color:var(--copper)}
+.btn{min-height:48px;padding:0 22px;border-radius:999px;border:0;background:var(--ink);color:#0a1030;font:700 16px/1 var(--f-text);cursor:pointer}
+.btn:hover{background:#fff}
+.btn.ghost{background:rgba(91,156,255,.08);border:1px solid rgba(91,156,255,.3);color:#dfe4fb}
+.fb{margin:14px 0 0;font-size:15px;line-height:1.55;color:var(--soft)}
+.fb,.fb.ok{background:none!important;border:0!important;padding:0!important;border-radius:0!important}.fb.ok{color:#dfe4fb!important}.fb .v{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.fb .v::before{content:'';width:10px;height:10px;border-radius:50%;background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}
+.fb.ok .v::before{background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
+.how{appearance:none;border:0;background:none;padding:0;margin:10px 0 0;min-height:44px;font:600 15px/1.3 var(--f-text);color:#8a9bff;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.hw{margin:6px 0 0;font-size:15px;color:var(--soft);font-variant-numeric:tabular-nums}
+.done h2{font:600 24px/1.2 var(--f-display);margin:0 0 8px}
+.done .act{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.done .act a{display:flex;align-items:center;justify-content:center;text-decoration:none}
+:focus-visible{outline:2px solid #8a9bff;outline-offset:3px}
+@media(max-width:520px){.blk{padding:18px 16px}.qq{font-size:20px}.rungs li{column-gap:10px;padding:9px 6px}.rungs .v{font-size:15px}}
+@media(prefers-contrast:more){.blk{background:#0a1230;border-color:#c9d2f5}}
+</style>
+</head>
+<body>
+<a class="skip" href="#ladder">Skip to the ladder</a>
+<main class="wrap">
+  <div class="top"><a class="back" href="/electronics">← Map</a><span id="lsw" style="margin-left:auto"></span></div>
+  <section class="blk">
+    <p class="kick">Level ½ · five minutes · optional</p>
+    <h1>Prefixes</h1>
+    <p class="lead">On one board you’ll meet 0.0101 A, 10.1 mA and 10 100 µA. It’s the same current. A prefix only moves the decimal point, three places at a time.</p>
+  </section>
+  <section class="blk" id="ladder" tabindex="-1" aria-labelledby="lh">
+    <h2 id="lh">One value, five spellings</h2>
+    <p class="sub">Pick a number from the course and see it on every rung.</p>
+    <div class="ex" role="group" aria-label="Examples" id="ex"></div>
+    <ul class="rungs" id="lad" aria-live="polite"></ul>
+    <div class="rule">
+      <p class="note" id="r1"></p>
+      <p id="r2"></p>
+    </div>
+    <div class="trap">
+      <h2>The trap: m, M and µ</h2>
+      <p class="note" id="trap"></p>
+    </div>
+  </section>
+  <section class="blk" id="drill" aria-labelledby="dh">
+    <h2 id="dh">Drill: twelve conversions</h2>
+    <p class="sub">Every number here comes from the course.</p>
+    <div class="prog" id="prog" aria-hidden="true"></div>
+    <div id="q"></div>
+  </section>
+</main>
+<script src="/electronics/units.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s),_t=I18N.t,ru=I18N.lang==='ru';
+I18N.apply(document.body);$('#lsw').appendChild(I18N.switcher());
+const dec=ru?',':'.';
+/* a number with up to 9 decimals, no trailing zeros, grouped like the rest of the course */
+function fmt(x){const a=Math.abs(x);let d=a===0?0:Math.min(9,Math.max(0,2-Math.floor(Math.log10(a)+1e-9)));if(a>=1)d=Math.min(d,3);
+  let t=I18N.nf(x,d);if(t.includes(dec))t=t.replace(new RegExp('\\'+dec+'?0+$'),'');return t}
+const sym=(u,e)=>UNITS.sym(u,e),q=(x,u,e)=>fmt(x/Math.pow(10,e))+' '+sym(u,e);
+/* ---- the ladder ---- */
+const RUNGS=[[6,'mega','a million','× 1 000 000'],[3,'kilo','a thousand','× 1000'],[0,'base unit','','× 1'],[-3,'milli','a thousandth','÷ 1000'],[-6,'micro','a millionth','÷ 1 000 000']];
+const EX=[[0.01,'A',-3],[4700,'Ω',3],[0.001,'F',-6],[0.0022,'H',-3],[0.0000042,'s',-6],[12,'V',0]];
+let ex=0;
+function drawLadder(){const [v,u,e]=EX[ex];
+  $('#ex').innerHTML=EX.map(([x,uu,ee],i)=>`<button type="button" aria-pressed="${i===ex}" data-i="${i}">${q(x,uu,ee)}</button>`).join('');
+  $('#ex').querySelectorAll('button').forEach(b=>b.onclick=()=>{ex=+b.dataset.i;drawLadder()});
+  $('#lad').innerHTML=RUNGS.map(([k,n,w,f])=>`<li class="${k===e?'on':''}${k===0?' base':''}"><span class="p">${k===0?'—':sym('',k)||'—'}</span><span class="n">${_t(n)}<small>${w?_t(w)+' · ':''}${f}</small></span><span class="v">${(x=>x>=0.001&&x<1e6?q(v,u,k):'—')(Math.abs(v/Math.pow(10,k)))}</span></li>`).join('')}
+drawLadder();
+$('#r1').innerHTML=_t('<b>Bigger prefix, smaller number.</b> Going up a rung (m → base → k), divide by 1000. Going down, multiply by 1000. The value itself never changes.');
+$('#r2').innerHTML=_t('<b>Before any formula, convert to base units:</b> A, V, Ω, F, H, s. Then multiply and divide, and put a prefix back only at the end.');
+$('#trap').innerHTML=_t('Lowercase <b>m</b> is a thousandth: 1 mA = 0.001 A. Capital <b>M</b> is a million: 1 MΩ = 1 000 000 Ω. And <b>µ</b> (micro) is a millionth: 1 µF = 0.000001 F. On keyboards µ is often typed as u: 100uF is 100 µF.');
+/* ---- the drill ---- */
+const IT=[
+ {v:0.01,u:'A',f:-3,t:0},{v:0.0101,u:'A',f:0,t:-3},{v:4700,u:'Ω',f:0,t:3},{v:4700,u:'Ω',rkm:'4k7',t:0},
+ {v:0.001,u:'F',f:-6,t:0},{v:0.00105,u:'F',f:0,t:-6},{v:0.0022,u:'H',f:-3,t:0},{v:0.00015,u:'s',f:-3,t:0},
+ {v:0.0000042,u:'s',f:-6,t:-3},{v:0.01,u:'A',t:-3,fx:'I = 10 V / 1 kΩ',how:'1 kΩ = 1000 Ω, so I = 10 / 1000 = 0.01 A = 10 mA.'},
+ {v:47000,u:'Ω',f:3,t:6},{v:5.2,u:'A',f:0,t:-3}];
+const KEY='pfx_v1';let st={};try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(_){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(_){}};
+st.a=st.a||{};let cur=Math.max(0,IT.findIndex((_,i)=>!st.a[i]));if(IT.every((_,i)=>st.a[i]))cur=IT.length;
+let tries=0;
+function steps(it){const d=(it.f||0)-it.t,n=Math.abs(d)/3,k=Math.pow(1000,n);
+  if(it.how)return _t(it.how);
+  if(it.rkm)return _t('k sits where the decimal point goes: 4k7 = 4.7 kΩ = 4.7 × 1000 = 4700 Ω.');
+  return d>0?_t('Down {0} to a smaller prefix: the number gets bigger. Multiply by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),I18N.nf(k,0),q(it.v,it.u,it.f),q(it.v,it.u,it.t))
+           :_t('Up {0} to a bigger prefix: the number gets smaller. Divide by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),I18N.nf(k,0),q(it.v,it.u,it.f),q(it.v,it.u,it.t))}
+function draw(){$('#prog').innerHTML=IT.map((_,i)=>`<i class="${i===cur?'on':st.a[i]?'ok':''}"></i>`).join('');
+  if(cur>=IT.length){const first=IT.filter((_,i)=>st.a[i]===1).length;
+    $('#q').innerHTML=`<div class="done"><h2>${_t('Prefixes, done')}</h2><p class="sub">${_t('{0} of {1} right on the first try.',first,IT.length)} ${first<IT.length?_t('The ones that slipped will come back in your reviews.'):''}</p><p class="note">${_t('From now on every formula in the course shows a line in base units, and hovering any number shows its ladder.')}</p>
+      <div class="act"><a class="btn" href="/electronics/lesson1">${_t('Next: Power input')}</a><a class="btn ghost" href="/electronics">${_t('Back to the map')}</a><button class="how" type="button" id="again">${_t('Start over')}</button></div></div>`;
+    $('#again').onclick=()=>{st.a={};save();cur=0;tries=0;draw();$('#ans')&&$('#ans').focus()};return}
+  const it=IT[cur],from=it.fx?it.fx:it.rkm?it.rkm:q(it.v,it.u,it.f),to=sym(it.u,it.t);
+  $('#q').innerHTML=`<p class="qk"><span>${_t('{0} of {1}',cur+1,IT.length)}</span></p>
+    <p class="qq" id="qq">${from}<span class="ar">=</span>? ${to}</p>
+    <div class="row"><label class="fld"><input id="ans" inputmode="decimal" autocomplete="off" aria-labelledby="qq" placeholder="${_t('Your answer')}"><span class="u">${to}</span></label><button class="btn" type="button" id="go">${_t('Check')}</button></div>
+    <p class="fb" id="fb" aria-live="polite"></p><div id="hw"></div>`;
+  const go=()=>check(it);$('#go').onclick=go;$('#ans').onkeydown=e=>{if(e.key==='Enter')go()}}
+function check(it){const raw=$('#ans').value,p=UNITS.parse(raw,{unit:it.u,e:it.t}),fb=$('#fb');
+  if(!p||(p.u&&p.u!==it.u)){fb.className='fb';fb.textContent=_t(raw.trim()?'I can’t read that. Write a number, with a prefix if you like: 4700, 4.7k or 4k7.':'Type a number first.');return}
+  const ok=Math.abs(p.v-it.v)<=Math.abs(it.v)*0.02;tries++;
+  if(ok){st.a[cur]=tries===1?1:2;save();$('#hw').innerHTML='';fb.className='fb ok';fb.innerHTML=`<span class="v">${_t('Right.')}</span> ${steps(it)}`;
+    $('#go').textContent=_t(cur===IT.length-1?'Finish':'Next');$('#go').onclick=()=>{cur++;tries=0;draw();const a=$('#ans');if(a)a.focus();else $('#again')&&$('#again').focus()};$('#ans').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};$('#ans').readOnly=true;$('#go').focus();return}
+  const r=p.v/it.v,near=(x,y)=>Math.abs(x-y)<=Math.abs(y)*0.05,d=Math.abs((it.f||0)-it.t);
+  let m;
+  const sd=it.t-(it.f||0);
+  if(sd&&!it.fx&&!it.rkm&&near(r,Math.pow(10,sd)))m=_t('That’s still the number you started with. Move the decimal point: three places per rung.');
+  else if(d&&(near(r,Math.pow(10,2*d))||near(r,Math.pow(10,-2*d))))m=_t('The point moved the wrong way. A bigger prefix means a smaller number, and the other way round.');
+  else if([3,6,9,-3,-6,-9].some(k=>near(r,Math.pow(10,k))))m=_t('Right direction, wrong number of places. Each rung is three places: × or ÷ 1000.');
+  else if([1,2,-1,-2].some(k=>near(r,Math.pow(10,k))))m=_t('Close: count the places again, three per rung.');
+  else m=_t('Not quite. Find the starting rung on the ladder, then count the rungs to the answer.');
+  fb.className='fb';fb.innerHTML=`<span class="v">${_t('Not yet.')}</span> ${m}`;
+  if(tries>=2&&!$('#hw').firstChild){const b=document.createElement('button');b.type='button';b.className='how';b.textContent=_t('Show how');b.onclick=()=>{b.replaceWith(Object.assign(document.createElement('p'),{className:'hw',textContent:steps(it).replace(/<[^>]+>/g,'')}))};$('#hw').appendChild(b)}
+  $('#ans').select()}
+draw();
+}
+</script>
+</body>
+</html>
