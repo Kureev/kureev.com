@@ -49,7 +49,7 @@ function switcher(){const w=document.createElement('div');w.className='langsw';w
     b.setAttribute('aria-label',l==='ru'?'Русский':'English');b.onclick=()=>{if(l!==lang)setLang(l)};w.appendChild(b)});return w}
 window.I18N={lang,locale,t,nf,u,pl,deep,apply,switcher,setLang,add:o=>Object.assign(D,o),miss};
 /* load the dictionaries for this page before the page scripts run */
-if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=14';
+if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=15';
   document.write('<script src="/electronics/i18n/'+lang+'.js'+v+'"><\/script><script src="/electronics/i18n/'+lang+'.'+page+'.js'+v+'"><\/script>')}
 /* alternate-language links for search engines */
 {const base=location.origin+location.pathname;Object.keys(SUP).forEach(l=>{const k=document.createElement('link');k.rel='alternate';k.hreflang=l;k.href=base+(l==='en'?'':'?lang='+l);document.head.appendChild(k)})}
