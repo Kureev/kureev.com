@@ -365,10 +365,10 @@ const mLead=M(0xc8cfd2,{metalness:.7,roughness:.3}),mCu=M(0xe39a52,{metalness:.5
 const K=0.25,mGlass=new THREE.MeshStandardMaterial({color:0x9fd0ff,transparent:true,opacity:.14,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
 const mWater=new THREE.MeshStandardMaterial({color:0x4aa3ff,transparent:true,opacity:.55,roughness:.2,depthWrite:false});
 const mNarrow=new THREE.MeshStandardMaterial({color:0xbfe0ff,transparent:true,opacity:.32,roughness:.15,side:THREE.DoubleSide,depthWrite:false});
-{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.3,0.08,2.6),M(0x030718));fl.position.set(-0.75,-0.04,0.2);scW.add(fl)}
+{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.3,0.08,2.6),M(0x030718));fl.position.set(-0.75,-0.052,0.2);scW.add(fl)}
 const TX=-3.6,TT=3.4,LX=0.6,LT=1.0,EX=3.2,PY=0.28,PR=0.18;
 /* the tall tank, kept full by a pump below */
-scW.add(cyl(0.55,TT,mGlass,TX,TT/2,0));const wTall=cyl(0.52,VS*K,mWater,TX,VS*K/2,0);scW.add(wTall);
+scW.add(cyl(0.55,TT,mGlass,TX,TT/2,0));const wTall=cyl(0.52,VS*K,mWater,TX,VS*K/2+0.012,0);scW.add(wTall);
 scW.add(box(1.0,0.5,1.0,L_(0x15171f),TX-1.15,0.25,0));
 const impW=new THREE.Group();impW.position.set(TX-1.15,0.25,0.51);scW.add(impW);for(let i=0;i<4;i++){const b=box(0.42,0.08,0.02,M(0xe8332a),0,0,0);b.rotation.z=i*Math.PI/4;impW.add(b)}
 scW.add(tube(V3(TX-0.65,0.25,0),V3(TX-0.55,0.25,0),0.12,mGlass));
@@ -663,7 +663,7 @@ function frame(){
   ctl.update();
   if(curSc==='w'){
     const W=S.step===0?divider():floatValve();wLvl+=(W.V-wLvl)*Math.min(1,dt*3);
-    wSmall.scale.y=Math.max(0.02,wLvl*K);wSmall.position.y=Math.max(0.02,wLvl*K)/2;
+    wSmall.scale.y=Math.max(0.02,wLvl*K);wSmall.position.y=Math.max(0.02,wLvl*K)/2+0.012;
     const i1=S.step===0?(VS-W.V)/W.R1:W.I,i2=S.step===0?W.V/W.R2:0,i3=W.I,sp=i=>i>0.0005?Math.min(5,0.4+16*i):0;
     wf1+=sp(i1)*dt*slow;wf2+=sp(i2)*dt*slow;wf3+=sp(i3)*dt*slow;impW.rotation.z-=2.5*dt*slow;espA+=sp(i3)*dt*slow*3;espW.rotation.z=-espA;
     [[WP1,wf1,i1],[WP2,wf2,i2],[WP3,wf3,i3]].forEach(([P,f,i],j)=>{for(let n=0;n<NDW;n++){pathAt(P,f+n*P.T/NDW,pv);dummy.position.copy(pv);dummy.scale.setScalar(sp(i)&&(S.step===0||j!==1)?1:0);dummy.updateMatrix();dropsW.setMatrixAt(j*NDW+n,dummy.matrix)}});dropsW.instanceMatrix.needsUpdate=true;

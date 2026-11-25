@@ -364,7 +364,7 @@ const K=0.3,Y0=0.3,HT=12*K+0.4;
 const mGlass=new THREE.MeshStandardMaterial({color:0x9fd0ff,transparent:true,opacity:.14,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
 const mWater=new THREE.MeshStandardMaterial({color:0x3f8cff,transparent:true,opacity:.7,roughness:.25,emissive:0x0b2a66,emissiveIntensity:.35});
 const SX=-2.6,SR=0.6,TL=1.6;
-{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.6,0.08,2.6),M(0x030718));fl.position.set(0.3,-0.04,0);scW.add(fl)}
+{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.6,0.08,2.6),M(0x030718));fl.position.set(0.3,-0.052,0);scW.add(fl)}
 for(let v=0;v<=12;v++){const t=new THREE.Mesh(new THREE.BoxGeometry(v%3?0.12:0.26,0.025,0.04),M(0x8f9bc4));t.position.set(SX-1.25,Y0+v*K,0);scW.add(t);if(v%3===0)lab('w',v+' '+_u('V'),V3(SX-1.4,Y0+v*K,0),'lvl',null,'left')}
 scW.add(tube(V3(SX-1.25,Y0,0),V3(SX-1.25,Y0+12*K,0),0.02,M(0x5a6699)));
 /* glass column on a base ring, open at the top */
@@ -676,12 +676,12 @@ function frame(){
     /* tank physics in real time */
     const R=WR[S.wr],Cc=WC[S.wc]*1e-6;
     {const sub=24,h=raw/sub,src=wSrc();for(let i=0;i<sub;i++)S.lvl+=h*(src-S.lvl)/(R*Cc);S.lvl=Math.max(0,Math.min(VS,S.lvl));if(Math.abs(src-S.lvl)>1e-3)dirty=true}
-    srcLvl+=(wSrc()-srcLvl)*Math.min(1,raw*12);srcWater.scale.y=Math.max(0.001,srcLvl*K);srcWater.position.y=Y0+srcLvl*K/2;
+    srcLvl+=(wSrc()-srcLvl)*Math.min(1,raw*12);srcWater.scale.y=Math.max(0.001,srcLvl*K);srcWater.position.y=Y0+0.012+srcLvl*K/2;
     S.wt+=raw;if(!S.wlog.length||S.wt-S.wlog[S.wlog.length-1][0]>0.02){S.wlog.push([S.wt,S.lvl]);if(S.wlog.length>3000)S.wlog.shift()}
     if(S.wm==='charge'&&S.lvl>VS*0.99){if(!S.fl.full){S.fl.full=true;S.need=true}}
     if(S.wm==='drain'&&S.fl.full&&S.lvl<VS*0.01&&!S.fl.empty){S.fl.empty=true;S.need=true}
     if(S.step===2&&S.run&&S.wm==='charge'&&Math.abs(S.run.tau-wTau())<1e-9&&S.lvl>VS*0.95&&wTau()>=0.95&&wTau()<=1.1&&!S.fl.tau){S.fl.tau=true;S.need=true}
-    const TX=TL+tankR;tankWater.scale.y=Math.max(0.001,S.lvl*K);tankWater.position.y=Y0+S.lvl*K/2;LwLvl.p.set(TX+tankR+0.1,Y0+S.lvl*K,0);
+    const TX=TL+tankR;tankWater.scale.y=Math.max(0.001,S.lvl*K);tankWater.position.y=Y0+0.012+S.lvl*K/2;LwLvl.p.set(TX+tankR+0.1,Y0+S.lvl*K,0);
     line63.visible=S.step===2;line63.scale.x=2*tankR+0.5;line63.position.set(TX,Y0+12*0.632*K,0);Lw63.p.set(TX+tankR+0.3,Y0+12*0.632*K,0);
     const I=wFlow(),A=Math.abs(I),sp=A>2e-5?Math.min(3,0.25+Math.sqrt(A/0.012)*2):0;wflow+=Math.sign(I)*sp*dt*slow;
     for(let i=0;i<NDW;i++){pathAt(WPATH,wflow+i*WPATH.T/NDW,pv);dummy.position.copy(pv);dummy.scale.setScalar(sp?1:0);dummy.updateMatrix();dropsW.setMatrixAt(i,dummy.matrix)}dropsW.instanceMatrix.needsUpdate=true;

@@ -371,7 +371,7 @@ const mLead=M(0xc8cfd2,{metalness:.7,roughness:.3}),mCu=M(0xe39a52,{metalness:.5
 const mGlass=new THREE.MeshStandardMaterial({color:0x9fd0ff,transparent:true,opacity:.14,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
 const mNarrow=new THREE.MeshStandardMaterial({color:0xbfe0ff,transparent:true,opacity:.32,roughness:.15,side:THREE.DoubleSide,depthWrite:false});
 const WY0=0.45,WY1=3.1,WX0=-3.8,WX1=3.6,PR=0.28;
-{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.4,0.08,2.4),M(0x030718));fl.position.set(-0.1,-0.04,0);scW.add(fl)}
+{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.4,0.08,2.4),M(0x030718));fl.position.set(-0.1,-0.052,0);scW.add(fl)}
 const WP=[V3(WX0,WY0,0),V3(WX0,WY1,0),V3(WX1,WY1,0),V3(WX1,WY0,0)];
 [[WP[0],WP[1]],[WP[1],WP[2]],[WP[3],WP[0]]].forEach(([a,b])=>scW.add(tube(a,b,PR,mGlass)));
 WP.forEach(p=>{const s=new THREE.Mesh(new THREE.SphereGeometry(PR,18,12),mGlass);s.position.copy(p);scW.add(s)});
