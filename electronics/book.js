@@ -61,6 +61,7 @@ const css=`.book{display:flex;flex-direction:column;gap:10px;margin:4px 0 0}
 .bk-fld{display:flex;align-items:center;flex:1 1 160px;min-height:44px;border-radius:12px;border:1px solid rgba(140,160,255,.3);background:rgba(5,8,23,.6);padding:0 12px}
 .bk-fld:focus-within{border-color:#8a9bff;box-shadow:0 0 0 3px rgba(138,155,255,.25)}
 .bk-fld input{flex:1;min-width:0;border:0!important;background:none!important;color:#eef1ff;font:700 16px/1 Manrope,sans-serif!important;outline:none;padding:10px 0!important;min-height:0!important;font-variant-numeric:tabular-nums}
+.bk-fld input,.bk-fld input:focus,.bk-fld input:focus-visible{outline:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
 .bk-fld input::placeholder{color:#8f9bc4;font-weight:500}
 .bk-fld .u{font:600 15px/1 Manrope,sans-serif;color:#ffb26b;white-space:nowrap}
 .bk-btn{min-height:44px;padding:0 20px;border-radius:999px;border:0;background:#eef1ff;color:#0a1030;font:700 15px/1 Manrope,sans-serif;cursor:pointer;align-self:flex-start}.bk-btn:hover{background:#fff}
