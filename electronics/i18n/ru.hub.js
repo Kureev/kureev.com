@@ -107,4 +107,8 @@ I18N.add({
 "Prefixes":"Приставки",
 "Milli, micro, kilo: one value, many spellings. Five minutes, optional.":"Милли, микро, кило: одно значение, много записей. Пять минут, по желанию.",
 "Optional":"По желанию",
+"Review":"Повторение",
+"Review: {0} due":"Повторение: {0} к сроку",
+"Two minutes on problems you met before. Spacing beats cramming.":"Пара минут на задачи, которые ты уже видел. Повторять с перерывами надёжнее, чем зубрить.",
+"Problems come back after 1, 3, 7 and 21 days. Right on the first try pushes one further; a miss brings it back tomorrow.":"Задачи возвращаются через 1, 3, 7 и 21 день. Верно с первой попытки — следующий раз позже, промах — завтра снова.",
 });
