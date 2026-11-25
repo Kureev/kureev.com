@@ -156,6 +156,21 @@ a.lv:hover .art img{transform:scale(1.26)}.lv.now .art img,.lv.final .art img{tr
 .app>.panel .grid{pointer-events:none}
 .info{right:488px!important}}
 @media(max-width:900px){.panel{background:#050817!important;padding:12px!important}}
+
+/* achievements dialog sits in the panel, which lets clicks through: take them back */
+.achdlg{pointer-events:auto}
+/* footer: one left edge, no boxes, the reset as a quiet link */
+.blk.more .invd{background:none;border-radius:0;border-bottom:1px solid var(--line)}
+.blk.more .invd summary{padding:0;min-height:48px}
+.blk.more .invd summary span{display:inline-flex;align-items:center;gap:12px}
+.blk.more .invd summary span::after{content:'';width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.blk.more .invd[open] summary span::after{transform:translateY(2px) rotate(-135deg)}
+.blk.more .invd .inv{padding:4px 0 16px}
+.blk.more .foot{margin-top:14px;line-height:1.5}
+.blk.more .foot button{display:inline;min-height:44px;margin:0;padding:0 2px;border:0;background:none;font:600 13px/1.5 Manrope,sans-serif;color:#8a9bff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(138,155,255,.4);cursor:pointer}
+.blk.more .foot button:hover{color:#b7c2ff}
+.blk.more .foot.cr{margin-top:4px}
+@media(prefers-reduced-motion:reduce){.blk.more .invd summary span::after{transition:none}}
 </style>
 <link rel="stylesheet" href="/electronics/theme.css">
 <script src="/electronics/ach.js"></script>
