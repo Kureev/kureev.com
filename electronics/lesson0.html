@@ -665,7 +665,7 @@ function update(){
   elec.visible=S.el;
   Lsrc.el.textContent=_t('Source · {0}',fV(C.V));Lsw.el.textContent=_t(S.closed?'Switch · closed':'Switch · open');
   Lres.el.textContent=_t('Resistor · {0}',fR(R))+(S.resDead?_t(' · burnt'):'');Lled.el.textContent=_t('LED')+(S.ledDead?_t(' · burnt'):'');
-  Object.keys(TPS).forEach(id=>(Ltp[id].el.textContent=stage.clientWidth<=640?id:id+' · '+fV(C.tp[id]),Ltp[id].tr=TR[stage.clientWidth<=640?{TP1:'up',TP2:'down',TP3:'left',TP4:'down'}[id]:TPM[id]]));
+  Object.keys(TPS).forEach(id=>(Ltp[id].el.textContent=stage.clientWidth<=640?id:id+' · '+fV(C.tp[id]),Ltp[id].tr=TR[stage.clientWidth<=640?{TP1:'up',TP2:'down',TP3:'left',TP4:'up'}[id]:TPM[id]]));
   const m=C.tp[S.red]-C.tp[S.black];$('#lcd').innerHTML=nf(Math.abs(m)<0.005?0:m,2)+'<small>'+_u('V')+'</small>';
   $('#pRed').textContent=S.red;$('#pBlk').textContent=S.black;$('#pNext').textContent=_t(S.next==='red'?'Click a TP to place the red probe':'Click a TP to place the black probe');
   /* board panel */

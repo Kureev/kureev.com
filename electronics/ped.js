@@ -50,7 +50,7 @@ function render(step){
     const u=items.findIndex((_,i)=>g(key+i)==null);
     items.forEach((q,i)=>{const p=g(key+i);
       if(p!=null){const d=document.createElement('p');d.className='pq-done'+(p===q.a?' ok':'');
-        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?T('“{0}”, right',q.o[q.a]).replace(/, right$/,',\u00a0right').replace(/— верно$/,'—\u00a0верно'):T('“{0}”, not right',q.o[p]).replace(/, not right$/,',\u00a0not\u00a0right').replace(/— неверно$/,'—\u00a0неверно')}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
+        d.innerHTML=`<span>${q.q}</span>${/[=≈]$/.test(q.q)?'&nbsp;':' '}<b>${p===q.a?T('“{0}”, right',q.o[q.a]).replace(/, right$/,',\u00a0right').replace(/— верно$/,'—\u00a0верно'):T('“{0}”, not right',q.o[p]).replace(/, not right$/,',\u00a0not\u00a0right').replace(/— неверно$/,'—\u00a0неверно')}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
         if(p!==q.a)d.appendChild(again(T('Try again'),()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
       if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);if(g('F'+key+i)==null)s('F'+key+i,v);render(cur);check()}))});
     c.querySelector('.ped-k span').textContent=u<0?T('{0} / {1} right',ok,items.length):T('{0} of {1}',u+1,items.length);

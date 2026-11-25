@@ -130,6 +130,7 @@ details.more summary{min-height:44px!important;display:flex;align-items:center}
 .hud .num b{font-size:16px!important}
 .hw label{min-height:44px;display:flex;align-items:center;cursor:pointer}
 .skip{min-height:44px;display:inline-flex;align-items:center}
+@media(max-width:420px){.ph .lesson{display:none}}
 /* in-scene actions: one style to run the experiment, one for the destructive try; the white pill is only Next */
 .ctl button.run{background:var(--copper)!important;border-color:var(--copper)!important;color:#1a0f05!important;border-radius:var(--r-pill)!important}
 .ctl button.run:hover{background:#ffc58f!important}.ctl button.run:disabled{background:transparent!important;color:var(--mute)!important;border-color:var(--line)!important}
