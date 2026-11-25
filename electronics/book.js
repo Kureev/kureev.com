@@ -26,11 +26,11 @@ function stats(k){const P=SETS[k]||[];let s=0,solo=0,nohint=0,n=0;P.forEach((p,i
 function mount(el){const k=el.dataset.book,P=SETS[k];if(!P)return;el.dataset.on='1';if(cur[k]==null){const f=P.findIndex((_,i)=>!(S[k]&&S[k][i]&&S[k][i].s));cur[k]=f<0?0:f}draw(el)}
 function draw(el){const k=el.dataset.book,P=SETS[k],i=cur[k],p=P[i],x=st(k,i);
   const dots=P.map((_,j)=>`<button type="button" class="${j===i?'on ':''}${S[k]&&S[k][j]&&S[k][j].s?'ok':''}" data-j="${j}" aria-label="${T('Problem {0}',j+1)}"${j===i?' aria-current="step"':''}></button>`).join('');
-  const given=p.given&&p.given.length?`<p class="bk-g"><b>${T('Given')}:</b> ${p.given.join(' · ')}</p>`:'',find=p.find?`<p class="bk-g"><b>${T('Find')}:</b> ${p.find}</p>`:'';
+  const given=p.given&&p.given.length?`<p class="bk-g"><b>${T('Given')}:</b> ${p.given.join(', ')}</p>`:'',find=p.find?`<p class="bk-g"><b>${T('Find')}:</b> ${p.find}</p>`:'';
   let body='';
   if(p.kind==='worked')body=`<ol class="bk-s">${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`+(x.s?`<p class="bk-fb ok"><span class="v">${T('Read through.')}</span> ${p.sol||''}</p>`:`<button type="button" class="bk-btn" data-act="got">${T('Got it')}</button>`);
   else{const fill=p.kind==='fill'&&p.steps?`<ol class="bk-s">${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:'';
-    const inp=p.choices?`<div class="bk-ch" role="group" aria-label="${T('Answers')}">${p.choices.map((c,j)=>`<button type="button" data-c="${j}"${x.s?' disabled':''} class="${x.s&&j===p.a?'right':x.last===j&&!x.s?'no':''}">${c}</button>`).join('')}</div>`
+    const inp=p.choices?`<div class="bk-ch" role="group" aria-label="${T('Answers')}">${p.choices.map((c,j)=>`<button type="button" data-c="${j}"${x.s?' disabled':''} class="${x.s&&j===p.a?'right':x.last===j&&!x.s?'no':''}">${x.s&&j===p.a?'<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="#59f3a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ':''}${c}</button>`).join('')}</div>`
       :`<div class="bk-row"><label class="bk-fld"><input inputmode="decimal" autocomplete="off" aria-label="${T('Your answer')}" placeholder="${T('Your answer')}"${x.s?` value="${x.val||''}" readonly`:''}><span class="u">${p.suffix||(window.UNITS?UNITS.sym(p.unit,p.e||0):'')}</span></label>${x.s?'':`<button type="button" class="bk-btn" data-act="check">${T('Check')}</button>`}</div>`;
     const hints=(p.hints||[]).slice(0,x.h||0).map((h,j)=>`<p class="bk-h"><b>${T('Hint {0}',j+1)}.</b> ${h}</p>`).join('');
     const more=!x.s&&p.hints&&(x.h||0)<p.hints.length?`<button type="button" class="bk-ln" data-act="hint">${(x.h||0)?T('Another hint'):T('A hint')}</button>`:'';
@@ -51,11 +51,11 @@ function changed(el){draw(el);const k=el.dataset.book;if(k==='rv'&&SETS.rv.every
 new MutationObserver(()=>{document.querySelectorAll('.book[data-book]:not([data-on])').forEach(mount)}).observe(document.documentElement,{childList:true,subtree:true});
 const css=`.book{display:flex;flex-direction:column;gap:10px;margin:4px 0 0}
 .bk-top{display:flex;flex-direction:column;gap:8px}
-.bk-k{margin:0;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}.bk-k span{color:#ffb26b}
-.bk-dots{display:flex;gap:4px}.bk-dots button{flex:1;min-height:0!important;height:24px;padding:0!important;border:0!important;border-radius:0!important;cursor:pointer;background:linear-gradient(#1d2752,#1d2752) center/100% 3px no-repeat!important}
+.book .bk-k{margin:0!important;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}.bk-k span{color:#ffb26b}
+.bk-dots{display:flex;gap:4px}.book .bk-dots button{flex:1;min-height:0!important;max-height:24px!important;height:24px;padding:0!important;border:0!important;border-radius:0!important;cursor:pointer;background:linear-gradient(#1d2752,#1d2752) center/100% 3px no-repeat!important}
 .bk-dots button.ok{background-image:linear-gradient(#4b5fc8,#4b5fc8)!important}.bk-dots button.on{background-image:linear-gradient(90deg,#5b9cff,#8a6bff)!important}
-.bk-q{margin:4px 0 0;font:600 16px/1.5 Manrope,sans-serif;color:#eef1ff}
-.bk-g{margin:0;font-size:15px;line-height:1.5;color:#c9d2f5;font-variant-numeric:tabular-nums}.bk-g b{color:#8f9bc4;font-weight:600}
+.book .bk-q{margin:4px 0 0!important;font:600 16px/1.5 Manrope,sans-serif;color:#eef1ff}
+.book .bk-g{margin:0!important;font-size:15px;line-height:1.5;color:#c9d2f5;font-variant-numeric:tabular-nums}.bk-g b{color:#8f9bc4;font-weight:600}
 .bk-s{margin:2px 0 0;padding-left:22px;display:grid;gap:4px;font-size:15px;line-height:1.5;color:#c9d2f5;font-variant-numeric:tabular-nums}.bk-s li::marker{color:#8f9bc4}
 .bk-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .bk-fld{display:flex;align-items:center;flex:1 1 160px;min-height:44px;border-radius:12px;border:1px solid rgba(140,160,255,.3);background:rgba(5,8,23,.6);padding:0 12px}
@@ -66,9 +66,9 @@ const css=`.book{display:flex;flex-direction:column;gap:10px;margin:4px 0 0}
 .bk-btn{min-height:44px;padding:0 20px;border-radius:999px;border:0;background:#eef1ff;color:#0a1030;font:700 15px/1 Manrope,sans-serif;cursor:pointer;align-self:flex-start}.bk-btn:hover{background:#fff}
 .bk-ch{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .bk-ch button{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid rgba(91,156,255,.22);background:rgba(91,156,255,.06);color:#dfe4fb;font:600 15px/1.3 Manrope,sans-serif;cursor:pointer;text-align:left}
-.bk-ch button:hover:not(:disabled){background:rgba(91,156,255,.14)}.bk-ch button.right{border-color:#59f3a8;background:rgba(89,243,168,.1);color:#eef1ff}.bk-ch button.no{border-color:#ffb26b}.bk-ch button:disabled:not(.right){opacity:.55;cursor:default}
-.bk-fb{margin:0;font-size:15px;line-height:1.55;color:#c9d2f5}.bk-fb:empty{display:none}
-.bk-fb .v{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#eef1ff}.bk-fb .v::before{content:'';width:10px;height:10px;border-radius:50%;background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}.bk-fb.ok .v::before{background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
+.bk-ch button:hover:not(:disabled){background:rgba(91,156,255,.14)}.bk-ch button.right{opacity:1!important;border-color:rgba(140,160,255,.35)!important;background:rgba(91,156,255,.1)!important;color:#eef1ff!important}.bk-ch button.no{border-color:#ffb26b}.bk-ch button:disabled:not(.right){opacity:.55;cursor:default}
+.bk-fb{position:relative;margin:0;padding-left:22px;font-size:15px;line-height:1.55;color:#c9d2f5}.bk-fb:empty{display:none}
+.bk-fb .v{font-weight:700;color:#eef1ff}.bk-fb .v::before{content:'';position:absolute;left:2px;top:.5em;width:10px;height:10px;border-radius:50%;background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}.bk-fb.ok .v::before{background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
 .bk-h{margin:0;font-size:15px;line-height:1.55;color:#c9d2f5}.bk-h b{color:#8a9bff}
 .bk-ln{appearance:none;border:0;background:none;padding:0;min-height:44px;font:600 15px/1.3 Manrope,sans-serif;color:#8a9bff;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(138,155,255,.4);align-self:flex-start}.bk-ln:hover{color:#b7c2ff}
 .bk-nav{display:flex;justify-content:space-between;gap:12px;margin-top:2px;padding-top:8px;border-top:1px solid rgba(140,160,255,.1)}`;

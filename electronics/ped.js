@@ -65,7 +65,7 @@ function render(step){
     c.querySelectorAll('input').forEach(b=>b.onchange=()=>s('c'+b.dataset.i,b.checked));box.appendChild(c)}
   if(!end){if(seg&&box.parentNode!==seg.think)seg.think.appendChild(box);else if(!seg){const lead=document.getElementById('stepS');if(box.previousElementSibling!==lead)lead.insertAdjacentElement('afterend',box)}}
   if(seg)queue();setTimeout(syncNext,0);
-  const lock=!!(pr&&g('p'+step)==null);document.body.classList.toggle('ped-hide',lock);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
+  const lock=!!(pr&&g('p'+step)==null);document.body.classList.toggle('ped-hide',lock);document.querySelectorAll('.hud .num b,#formula,#wF').forEach(e=>{if(lock)e.setAttribute('aria-hidden','true');else e.removeAttribute('aria-hidden')});if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
   doneShown[step]=false;
   const tk=document.getElementById('task');if(tk&&tk.classList.contains('ok'))after(true);
 }
@@ -76,7 +76,7 @@ function predSec(step){const pr=D.pr[step],p=g('p'+step),rev=p!=null&&doneShown[
   c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):rev?`<span class="pv">${hit?T('Intuition on target'):sur?T('A real surprise'):T('Intuition missed')}</span>`:T('Your prediction')}</p>`;
   c.appendChild(chips('p'+step,pr.q,pr.o,rev?pr.a:null,p,v=>{s('p'+step,v);render(cur)}));
   if(p!=null&&!rev){const w=document.createElement('div');w.className='pq-cf';w.setAttribute('role','group');w.setAttribute('aria-label',T('How sure are you?'));
-    w.innerHTML=`<span>${T('How sure?')}</span>`+CONF.map((x,i)=>`<button type="button" aria-pressed="${cf===i}" data-i="${i}">${T(x)}</button>`).join('');
+    w.innerHTML=`<span>${T('How sure?')}</span><span class="pq-cfs">`+CONF.map((x,i)=>`<button type="button" aria-pressed="${cf===i}" data-i="${i}">${T(x)}</button>`).join('')+'</span>';
     w.querySelectorAll('button').forEach(b=>b.onclick=()=>{s('c'+step,+b.dataset.i);render(cur)});c.appendChild(w)}
   if(p!=null){const f=document.createElement('p');f.className='pq-f'+(rev&&hit?' ok':'');f.id='pedEx';
     f.innerHTML=rev?'<b class="wh">'+(hit?T('Your prediction held.'):sur?T('You were sure, and the bench disagreed: “{0}”. That’s the moment it sticks.',pr.o[pr.a]):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex:T('Now try it and see.');c.appendChild(f);
@@ -145,15 +145,15 @@ function celebrate(){const W=D.win;if(!W)return;tq2=[];if(tbox){tbox.classList.r
   d.querySelector('.pw-x').onclick=()=>d.close();
   if(!d.open)d.showModal();d.tabIndex=-1;d.focus();confetti()}
 function achStrip(){if(!window.ACH)return'';const A=achList(),n=A.filter(a=>a.got).length;
-  return `<div class="pw-ach"><p class="pw-ak">${T('Achievements: {0} of {1}',n,A.length)}</p><ul class="pw-row">${A.map(a=>`<li class="${a.got?'':'off'}" title="${T(a.en).replace(/"/g,'')}">${MED(a.kind,a.got,a.img)}<span class="sr">${T(a.en)}${a.got?'':' · '+T('not yet')}</span></li>`).join('')}</ul><p class="pw-an">${T('All achievements are on the map.')}</p></div>`}
+  return `<div class="pw-ach"><p class="pw-ak">${T('Achievements on this level: {0} of {1}',n,A.length)}</p><ul class="pw-row">${A.map(a=>`<li class="${a.got?'':'off'}" title="${T(a.en).replace(/"/g,'')}">${MED(a.kind,a.got,a.img)}<span class="sr">${T(a.en)}${a.got?'':' · '+T('not yet')}</span></li>`).join('')}</ul><p class="pw-an">${T('All achievements are on the map.')}</p></div>`}
 function complete(ok,was){fin=ok;check(!primed);primed=true;if(ok&&!was)setTimeout(celebrate,350)}
 document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('#next');if(n&&n.dataset.fin==='1'){e.preventDefault();e.stopImmediatePropagation();celebrate()}},true);
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
   if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent=T('Finish')}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent=T('Next')}}
 /* 3D labels: never overlap each other, the HUD or the screen edge; the first (or a warning) wins */
-function declutter(){const st=document.getElementById('stage');if(!st)return;const sr=st.getBoundingClientRect(),pw=innerWidth>900&&window.PW?PW():0,chips=[...document.querySelectorAll('#hud .num,#hud .pill')].filter(e=>e.offsetHeight).map(e=>e.getBoundingClientRect()),keep=[];
+function declutter(){const st=document.getElementById('stage');if(!st)return;const sr=st.getBoundingClientRect(),pw=innerWidth>900&&window.PW?PW():0,chips=[...document.querySelectorAll('#hud .num,#hud .pill,.sc-box:not([hidden]),#info:not([hidden])')].filter(e=>e.offsetHeight).map(e=>e.getBoundingClientRect()),keep=[];
   [...document.querySelectorAll('#labels .lb')].filter(e=>e.style.display!=='none').sort((a,b)=>(b.classList.contains('bad')*2+(+b.dataset.pri||0))-(a.classList.contains('bad')*2+(+a.dataset.pri||0))).forEach(e=>{const r=e.getBoundingClientRect();if(!r.width)return;
-    const ov=k=>!(r.right<=k.left+2||r.left>=k.right-2||r.bottom<=k.top+2||r.top>=k.bottom-2);
+    const ov=k=>!(r.right+4<=k.left||r.left>=k.right+4||r.bottom+4<=k.top||r.top>=k.bottom+4);
     const hide=r.left<sr.left-1||r.right>sr.right-pw+1||chips.some(ov)||keep.some(ov);
     const v=hide?'hidden':'';if(e.style.visibility!==v)e.style.visibility=v;if(!hide)keep.push(r)})}
 setInterval(declutter,200);
@@ -209,7 +209,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .pq-o button:disabled{cursor:default;opacity:.5}
 .pq-o button.pick{opacity:1;border-color:#8a9bff;background:rgba(91,156,255,.18);color:#fff}
 .pq-o button.pick.yes,.pq-o button.right{opacity:1;border-color:#59f3a8;background:rgba(89,243,168,.1);color:#eef1ff}
-.pq-o button.right{border-style:dashed;background:none}
+.pq-o button.right{border-color:rgba(140,160,255,.3)!important;border-style:solid!important;background:none!important}
 .pq-o button.pick.no{opacity:1;border-color:#ffb26b;background:rgba(255,178,107,.1);color:#eef1ff}
 .pq-o button{display:inline-flex;align-items:flex-start;gap:6px}.pq-i{flex:none;margin:3px 0 0 -3px}.pick.yes .pq-i,.right .pq-i{color:#59f3a8}.pick.no .pq-i{color:#ffb26b}
 .ped-k>.pv{margin-left:0;display:inline-flex;align-items:center;gap:9px;font:700 16px/1.3 Manrope,sans-serif!important;color:#9fe8c4!important}.miss .ped-k>.pv{color:#ffc58f!important}.ped-k .pq-sc{white-space:nowrap}.ped-k:has(.pv){align-items:center;margin-bottom:12px}.pv::before{content:'';flex:none;width:10px;height:10px;border-radius:50%;background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
@@ -229,11 +229,13 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .seg-goal .ped.recall{background:none!important;padding:14px 0 0!important;border-radius:0!important;border-top:1px solid rgba(140,160,255,.1)}
 body:has(.ped-toast.on) .tools .hint{opacity:0}.tools .hint{transition:opacity .3s}
 #prev svg{display:block;margin:auto}
+@media(max-width:900px){.ped-toast{top:68px}}
 @media(prefers-reduced-motion:reduce){.ped-toast{transition:none}.pq-plus,.fresh .pv,.fresh .pick{animation:none!important}}
-.pq-f{margin:10px 0 0;font-size:14px;line-height:1.5;color:#8f9bc4}
-.pq-cf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 0}.pq-cf>span{margin-right:4px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
-.pq-cf button{min-height:44px;padding:6px 14px;border-radius:999px;border:1px solid rgba(140,160,255,.2);background:none;color:#c9d2f5;font:600 13px/1.2 Manrope,sans-serif;cursor:pointer}
-.pq-cf button:hover{background:rgba(91,156,255,.1)}.pq-cf button[aria-pressed=true]{border-color:#8a9bff;background:rgba(91,156,255,.16);color:#fff}
+.pq-f{margin:10px 0 0;font-size:14px;line-height:1.5;color:#8f9bc4;text-wrap:wrap;max-width:none}
+.pq-cf{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 0}.pq-cf>span{font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
+.pq-cfs{display:inline-flex;gap:2px;padding:2px;border-radius:999px;background:rgba(140,160,255,.08);border:1px solid rgba(140,160,255,.16)}
+.pq-cf button{position:relative;min-height:44px!important;padding:0 14px!important;border:0!important;border-radius:999px!important;background:transparent!important;color:#a3acd0!important;font:600 15px/1 Manrope,sans-serif!important;cursor:pointer}
+.pq-cf button:hover{color:#eef1ff!important}.pq-cf button[aria-pressed=true]{background:rgba(91,156,255,.22)!important;color:#eef1ff!important}
 .sur .ped-k>.pv{color:#ffc58f!important}.sur .pv::before{background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.25),0 0 14px rgba(255,178,107,.6)}
 .pq-f .wh{color:#eef1ff;font-weight:600}
 .ped.cando label{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:#c9d2f5;padding:5px 0;cursor:pointer}

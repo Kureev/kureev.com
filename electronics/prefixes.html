@@ -46,7 +46,7 @@ p{margin:0}
 .rungs .p{font:700 20px/1.2 var(--f-text);color:var(--blue);text-align:center}
 .rungs .n{font-size:15px;line-height:1.35;color:var(--soft)}.rungs .n small{display:block;font-size:13px;color:var(--mute)}
 .rungs .v{font:600 16px/1.35 var(--f-text);color:var(--soft);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.rungs li.on .v{color:var(--ink);font-weight:800}
+.rungs li.on .v{color:var(--ink);font-weight:800}.rungs .v.nu{font:500 13px/1.35 var(--f-text);color:var(--mute)}
 .rungs li.base .p{color:var(--mute)}
 .note{margin-top:14px;font-size:15px;line-height:1.55;color:var(--soft)}
 .note b{color:var(--ink)}
@@ -69,8 +69,8 @@ p{margin:0}
 .btn:hover{background:#fff}
 .btn.ghost{background:rgba(91,156,255,.08);border:1px solid rgba(91,156,255,.3);color:#dfe4fb}
 .fb{margin:14px 0 0;font-size:15px;line-height:1.55;color:var(--soft)}
-.fb,.fb.ok{background:none!important;border:0!important;padding:0!important;border-radius:0!important}.fb.ok{color:#dfe4fb!important}.fb .v{display:inline-flex;align-items:center;gap:8px;font-weight:700}
-.fb .v::before{content:'';width:10px;height:10px;border-radius:50%;background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}
+.fb:empty{display:none}#hw:empty{display:none}#go{margin-top:14px}.fb,.fb.ok{background:none!important;border:0!important;padding:0!important;border-radius:0!important}.fb.ok{color:#dfe4fb!important}.fb{position:relative;padding-left:22px!important}.fb .v{font-weight:700}
+.fb .v::before{content:'';position:absolute;left:2px;top:.5em;width:10px;height:10px;border-radius:50%;background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}
 .fb.ok .v::before{background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
 .how{appearance:none;border:0;background:none;padding:0;margin:10px 0 0;min-height:44px;font:600 15px/1.3 var(--f-text);color:#8a9bff;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .hw{margin:6px 0 0;font-size:15px;color:var(--soft);font-variant-numeric:tabular-nums}
@@ -89,10 +89,10 @@ p{margin:0}
   <section class="blk">
     <p class="kick">Level ½ · five minutes · optional</p>
     <h1>Prefixes</h1>
-    <p class="lead">On one board you’ll meet 0.0101 A, 10.1 mA and 10 100 µA. It’s the same current. A prefix only moves the decimal point, three places at a time.</p>
+    <p class="lead" id="lead"></p>
   </section>
   <section class="blk" id="ladder" tabindex="-1" aria-labelledby="lh">
-    <h2 id="lh">One value, five spellings</h2>
+    <h2 id="lh">One value, many spellings</h2>
     <p class="sub">Pick a number from the course and see it on every rung.</p>
     <div class="ex" role="group" aria-label="Examples" id="ex"></div>
     <ul class="rungs" id="lad" aria-live="polite"></ul>
@@ -129,8 +129,9 @@ let ex=0;
 function drawLadder(){const [v,u,e]=EX[ex];
   $('#ex').innerHTML=EX.map(([x,uu,ee],i)=>`<button type="button" aria-pressed="${i===ex}" data-i="${i}">${q(x,uu,ee)}</button>`).join('');
   $('#ex').querySelectorAll('button').forEach(b=>b.onclick=()=>{ex=+b.dataset.i;drawLadder()});
-  $('#lad').innerHTML=RUNGS.map(([k,n,w,f])=>`<li class="${k===e?'on':''}${k===0?' base':''}"><span class="p">${k===0?'—':sym('',k)||'—'}</span><span class="n">${_t(n)}<small>${w?_t(w)+' · ':''}${f}</small></span><span class="v">${(x=>x>=0.001&&x<1e6?q(v,u,k):'—')(Math.abs(v/Math.pow(10,k)))}</span></li>`).join('')}
+  $('#lad').innerHTML=RUNGS.map(([k,n,w,f])=>`<li class="${k===e?'on':''}${k===0?' base':''}"><span class="p">${k===0?'':sym('',k)}</span><span class="n">${_t(n)}<small>${w?_t(w)+' · ':''}${f}</small></span><span class="v${(x=>x>=0.001&&x<1e6?'':' nu')(Math.abs(v/Math.pow(10,k)))}">${(x=>x>=0.001&&x<1e6?q(v,u,k):_t('not used'))(Math.abs(v/Math.pow(10,k)))}</span></li>`).join('')}
 drawLadder();
+$('#lead').innerHTML=_t('On one board you’ll meet 0.0101&nbsp;A, 10.1&nbsp;mA and 10&nbsp;100&nbsp;µA. It’s the same current. A prefix only moves the decimal point, three places at a time.');
 $('#r1').innerHTML=_t('<b>Bigger prefix, smaller number.</b> Going up a rung (m → base → k), divide by 1000. Going down, multiply by 1000. The value itself never changes.');
 $('#r2').innerHTML=_t('<b>Before any formula, convert to base units:</b> A, V, Ω, F, H, s. Then multiply and divide, and put a prefix back only at the end.');
 $('#trap').innerHTML=_t('Lowercase <b>m</b> is a thousandth: 1 mA = 0.001 A. Capital <b>M</b> is a million: 1 MΩ = 1 000 000 Ω. And <b>µ</b> (micro) is a millionth: 1 µF = 0.000001 F. On keyboards µ is often typed as u: 100uF is 100 µF.');
@@ -147,8 +148,8 @@ let tries=0;
 function steps(it){const d=(it.f||0)-it.t,n=Math.abs(d)/3,k=Math.pow(1000,n);
   if(it.how)return _t(it.how);
   if(it.rkm)return _t('k sits where the decimal point goes: 4k7 = 4.7 kΩ = 4.7 × 1000 = 4700 Ω.');
-  return d>0?_t('Down {0} to a smaller prefix: the number gets bigger. Multiply by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),I18N.nf(k,0),q(it.v,it.u,it.f),q(it.v,it.u,it.t))
-           :_t('Up {0} to a bigger prefix: the number gets smaller. Divide by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),I18N.nf(k,0),q(it.v,it.u,it.f),q(it.v,it.u,it.t))}
+  return d>0?_t('Down {0} to a smaller prefix: the number gets bigger. Multiply by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),(k===1000?'1000':'1\u00a0000\u00a0000'),q(it.v,it.u,it.f),q(it.v,it.u,it.t))
+           :_t('Up {0} to a bigger prefix: the number gets smaller. Divide by {1}: {2} = {3}.',n===1?_t('one rung'):_t('two rungs'),(k===1000?'1000':'1\u00a0000\u00a0000'),q(it.v,it.u,it.f),q(it.v,it.u,it.t))}
 function draw(){$('#prog').innerHTML=IT.map((_,i)=>`<i class="${i===cur?'on':st.a[i]?'ok':''}"></i>`).join('');
   if(cur>=IT.length){const first=IT.filter((_,i)=>st.a[i]===1).length;
     $('#q').innerHTML=`<div class="done"><h2>${_t('Prefixes, done')}</h2><p class="sub">${_t('{0} of {1} right on the first try.',first,IT.length)} ${first<IT.length?_t('The ones that slipped will come back in your reviews.'):''}</p><p class="note">${_t('From now on every formula in the course shows a line in base units, and hovering any number shows its ladder.')}</p>
@@ -157,8 +158,8 @@ function draw(){$('#prog').innerHTML=IT.map((_,i)=>`<i class="${i===cur?'on':st.
   const it=IT[cur],from=it.fx?it.fx:it.rkm?it.rkm:q(it.v,it.u,it.f),to=sym(it.u,it.t);
   $('#q').innerHTML=`<p class="qk"><span>${_t('{0} of {1}',cur+1,IT.length)}</span></p>
     <p class="qq" id="qq">${from}<span class="ar">=</span>? ${to}</p>
-    <div class="row"><label class="fld"><input id="ans" inputmode="decimal" autocomplete="off" aria-labelledby="qq" placeholder="${_t('Your answer')}"><span class="u">${to}</span></label><button class="btn" type="button" id="go">${_t('Check')}</button></div>
-    <p class="fb" id="fb" aria-live="polite"></p><div id="hw"></div>`;
+    <label class="fld"><input id="ans" inputmode="decimal" autocomplete="off" aria-labelledby="qq" placeholder="${_t('Your answer')}"><span class="u">${to}</span></label>
+    <p class="fb" id="fb" aria-live="polite"></p><div id="hw"></div><button class="btn" type="button" id="go">${_t('Check')}</button>`;
   const go=()=>check(it);$('#go').onclick=go;$('#ans').onkeydown=e=>{if(e.key==='Enter')go()}}
 function check(it){const raw=$('#ans').value,p=UNITS.parse(raw,{unit:it.u,e:it.t}),fb=$('#fb');
   if(!p||(p.u&&p.u!==it.u)){fb.className='fb';fb.textContent=_t(raw.trim()?'I can’t read that. Write a number, with a prefix if you like: 4700, 4.7k or 4k7.':'Type a number first.');return}

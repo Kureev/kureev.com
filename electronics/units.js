@@ -59,8 +59,8 @@ function grade(input,spec){const p=parse(input,{unit:spec.unit,e:spec.e||0});
   const r=v/a;
   for(const k of [3,6,9,-3,-6,-9]){if(near(r,Math.pow(10,k),tol*1.2)){
     const f=Math.pow(10,Math.abs(k)),big=k>0;
-    return{ok:false,kind:'scale',v,msg:T(big?'That’s {0} times too big. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.':'That’s {0} times too small. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.',nfx(f,0))}}}
-  for(const k of [1,2,-1,-2]){if(near(r,Math.pow(10,k),tol*1.2))return{ok:false,kind:'scale',v,msg:T('Off by a factor of {0}: check where the decimal point went.',nfx(Math.pow(10,Math.abs(k)),0))}}
+    return{ok:false,kind:'scale',v,msg:T(big?'That’s {0} times too big. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.':'That’s {0} times too small. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.',{1000:'1000',1000000:'1\u00a0000\u00a0000',1000000000:'1\u00a0000\u00a0000\u00a0000'}[f])}}}
+  for(const k of [1,2,-1,-2]){if(near(r,Math.pow(10,k),tol*1.2))return{ok:false,kind:'scale',v,msg:T('Off by a factor of {0}: check where the decimal point went.',String(Math.pow(10,Math.abs(k))))}}
   return{ok:false,kind:'off',v,msg:T(spec.off||'Not quite. Check each step, and the units at each step.')}}
 
 /* ---------- the "in base units" line under a formula ---------- */
@@ -88,7 +88,7 @@ function ladder(el){const p=parse(el.textContent);if(!p||!p.u||!SYM[p.u]||p.v===
   const rungs=[e+3,e,e-3].filter(k=>k>=-9&&k<=9);if(!rungs.includes(0)&&Math.abs(e)<=6){/* keep the base unit in view */rungs.push(0);rungs.sort((a,b)=>b-a)}
   return{u,rows:rungs.map(k=>{const x=v/Math.pow(10,k);const a=Math.abs(x);const d=a>=1000?0:a>=100?1:a>=1?2:Math.min(9,2-Math.floor(Math.log10(a)));
     let t=nfx(x,Math.max(0,d));const dec=ru()?',':'.';if(t.includes(dec))t=t.replace(new RegExp('\\'+dec+'?0+$'),'');return{k,t:t+'\u00a0'+sym(u,k),on:k===e}})}}
-function show(el){const L=ladder(el);if(!L){hide();return}cur=el;
+function show(el){if(document.body.classList.contains('ped-hide')&&el.closest('.hud,#wF,#formula'))return;const L=ladder(el);if(!L){hide();return}cur=el;
   if(!pop){pop=document.createElement('div');pop.className='lad';pop.setAttribute('aria-hidden','true');document.body.appendChild(pop)}
   pop.innerHTML=`<p class="lad-k">${T('The same value')}</p>`+L.rows.map(r=>`<span class="lad-r${r.on?' on':''}">${r.t}</span>`).join('')+`<p class="lad-n">${T('Each step is × 1000')}</p>`;
   pop.hidden=false;const r=el.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
@@ -101,6 +101,7 @@ addEventListener('scroll',hide,true);addEventListener('keydown',e=>{if(e.key==='
 
 const css=`.bx{display:block;margin-top:2px;font-size:var(--t-meta,13px);line-height:1.45;color:var(--mute,#8f9bc4);font-variant-numeric:tabular-nums}
 .hud .num b,#wF b,#formula b,.lad-t{cursor:help;text-decoration:underline dotted rgba(143,155,196,.45);text-underline-offset:3px;text-decoration-thickness:1px}
+.ped-hide .hud .num b,.ped-hide #wF b,.ped-hide #formula b{text-decoration:none!important;cursor:default}
 .lad{position:fixed;z-index:1002;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:150px;padding:10px 14px 12px;border-radius:14px;background:rgba(10,15,40,.96);border:1px solid rgba(140,160,255,.25);box-shadow:0 14px 40px rgba(0,0,0,.45);pointer-events:none;font-variant-numeric:tabular-nums}
 .lad[hidden]{display:none}
 .lad-k{margin:0 0 6px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}

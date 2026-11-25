@@ -44,4 +44,7 @@ I18N.add({
 "Back to the map":"Вернуться к карте",
 "Start over":"Начать заново",
 "That’s still the number you started with. Move the decimal point: three places per rung.":"Это всё ещё исходное число. Подвинь запятую: по три знака на ступень.",
+"One value, many spellings":"Одно значение, разные записи",
+"not used":"так не пишут",
+"On one board you’ll meet 0.0101&nbsp;A, 10.1&nbsp;mA and 10&nbsp;100&nbsp;µA. It’s the same current. A prefix only moves the decimal point, three places at a time.":"На одной плате встретятся 0,0101&nbsp;А, 10,1&nbsp;мА и 10&nbsp;100&nbsp;мкА. Это один и тот же ток. Приставка только двигает запятую, по три знака за раз.",
 });

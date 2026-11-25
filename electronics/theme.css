@@ -120,7 +120,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 /* the chosen answer keeps its state colour even though the buttons are disabled */
 .pq-o button.pick{color:var(--ink)!important;border-color:#8a9bff!important;background:rgba(91,156,255,.18)!important}
 .pq-o button.pick.yes,.pq-o button.right{color:var(--ink)!important;border-color:var(--ok)!important;background:rgba(89,243,168,.08)!important}
-.pq-o button.right{border-style:dashed!important;background:none!important}
+.pq-o button.right{border-style:solid!important;border-color:rgba(140,160,255,.3)!important;background:none!important}
 .pq-o button.pick.no{color:var(--ink)!important;border-color:var(--copper)!important;background:rgba(255,178,107,.1)!important}
 .ph .back{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;margin-left:-8px}
 .langsw button{min-width:44px!important;min-height:44px!important}
