@@ -81,3 +81,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 .info .x:hover{background:rgba(140,160,255,.12);color:var(--ink)}
 .info p,.info #infoP{grid-column:1/-1;margin:0!important;font-size:15px!important;line-height:1.5!important;color:var(--soft)}
 .info .go{grid-column:1/-1;justify-self:start;margin-top:8px!important;min-height:36px!important;padding:0 16px!important;display:inline-flex;align-items:center;border-radius:10px!important;font:600 14px/1 var(--f-text)!important}
+
+/* quiz feedback: a separate block under the answer, tinted by verdict */
+.fb:empty{display:none}
+.fb:not(:empty){margin:12px 0 4px!important;padding:10px 14px;border-radius:12px;border-left:3px solid var(--copper);background:rgba(255,178,107,.08);color:var(--ink)!important}
+.fb.ok{border-left-color:var(--ok);background:rgba(89,243,168,.08)}
+.fb button{margin-top:10px}

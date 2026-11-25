@@ -603,7 +603,7 @@ function renderStep(){
   $('#stepN').innerHTML=`<span class="part">${st.part}</span>`;$('#stepC').textContent=`${S.step+1} / ${STEPS.length}`;$('#stepT').textContent=st.t;renderBody(st);
   $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1;
   if(S.step===4){const go=()=>{const v=parseFloat(($('#q1a').value||'').replace(',','.'));
-      if(v===4700){S.q1=true;$('#q1f').textContent=_t('Correct: 4k7 = 4.7 kΩ = 4700 Ω.')}else $('#q1f').textContent=_t(v===4.7?'That’s in kilohms. And in ohms?':'Not quite. k means “thousand”, and the letter sits where the decimal point goes: 4.7 × 1000.');update()};
+      $('#q1f').className='fb'+(v===4700?' ok':'');if(v===4700){S.q1=true;$('#q1f').textContent=_t('Correct: 4k7 = 4.7 kΩ = 4700 Ω.')}else $('#q1f').textContent=_t(v===4.7?'That’s in kilohms. And in ohms?':'Not quite. k means “thousand”, and the letter sits where the decimal point goes: 4.7 × 1000.');update()};
     $('#q1b').onclick=go;$('#q1a').onkeydown=e=>{if(e.key==='Enter')go()}}
   if(S.step===12){const go=()=>{const v=parseFloat(($('#qa').value||'').replace(',','.'));let m;
       if(v>=180&&v<=240){S.quiz=true;m='Correct: (5 − 1.9) / 0.015 ≈ 207 Ω. That value doesn’t exist, so take the nearest standard one: 220 Ω. <button id="qs">Put it on the board</button>'}
@@ -612,7 +612,7 @@ function renderStep(){
       else if(v>0&&v<0.05)m='You divided the wrong way round: current by voltage. You need R = U / I. Unit check: volts / amps = ohms.';
       else if(v>0&&v<1)m='That resistance is too small, it’s almost a wire and the LED will burn. R = U / I = (5 − 1.9) / 0.015.';
       else m='Not quite. How many volts are left for the resistor? Divide that by 0.015 A.';
-      $('#qf').innerHTML=_t(m);const qs=$('#qs');if(qs)qs.onclick=()=>{S.V=5;S.ri=5;S.closed=true;update()};update()};
+      $('#qf').innerHTML=_t(m);$('#qf').className='fb'+(v>=180&&v<=240?' ok':'');const qs=$('#qs');if(qs)qs.onclick=()=>{S.V=5;S.ri=5;S.closed=true;update()};update()};
     $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
   if(S.step===13)[0,1,2,3].forEach(i=>$('#hw'+i).onchange=e=>{hw[i]=e.target.checked;try{localStorage.setItem('l0hw',JSON.stringify(hw))}catch(_){}update()});
   buildWater();place();update();

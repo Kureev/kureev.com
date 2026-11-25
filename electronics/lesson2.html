@@ -220,6 +220,7 @@ input[type=range]{accent-color:#7d8cff}
 .scope .sr{margin-left:auto;font:700 15px/1.2 Manrope,sans-serif;color:#eef1ff;font-variant-numeric:tabular-nums;white-space:nowrap}
 .scope .sr.bad{color:#ff8a70}
 .scope canvas{display:block;width:100%;height:170px;border-radius:8px;background:#060a1e}
+.stepx .qq{margin:0 0 10px!important;color:#eef1ff!important;font-weight:600}
 .scope .sk{display:flex;justify-content:space-between;gap:8px;margin:6px 0 0;font:500 13px/1.3 Manrope,sans-serif;color:#8f9bc4;font-variant-numeric:tabular-nums}
 @media(min-width:901px){.app{--pw:calc(clamp(420px,31vw,500px) + 24px)}}
 @media(max-width:900px){.stage{height:60svh!important;min-height:440px!important}.scope{left:8px;right:8px;top:56px;bottom:auto;width:auto;padding:8px 10px}.scope canvas{height:88px}.scope .sh{margin-bottom:6px}.scope .sk{display:none}}
@@ -547,9 +548,9 @@ STEPS=[
  after:'<p>1000 µF keeps the dip to about 0.8 V. 470 µF lets it reach about 1.1 V, and with nothing it’s almost 7 V. Notice the size of the jump at the end shrank too: the tank also soaks up the extra current when the servos let go.</p>',
  task:'Find the smallest capacitor that keeps the dip under 1 V',ok:()=>S.last&&S.last.dip<1&&S.last.C<=1.001e-3},
 {sc:'b',part:'On the board',t:'Size it on paper',s:"The tank gives away <b>C × ΔU</b>; the servos take <b>I × Δt</b>. Set them equal: <b>C = I × Δt / ΔU</b>. Example: a 3 A jump, 0.2 ms to catch up, 0.5 V allowed: 3 × 0.0002 / 0.5 = 0.0012 F = 1200 µF.",bt:["Where it comes from","How exact is it"],ui:['capC','cap2','jerk','scope','nV','pills','bF'],build:B(true,5,1),enter:()=>{fresh();S.plugged=S.servos=true;S.ri=3},
- b:'<p>The tank gives away its width times the drop in level: <b>C × ΔU</b>. The load takes current times time: <b>I × Δt</b>. Until the supply catches up, all of it comes from the tank, so C × ΔU = I × Δt.</p><p>The supply isn’t idle for all of Δt; it ramps up. So this is an estimate, but a good one, and it errs on the safe side.</p><div class="quiz"><input id="qa" inputmode="decimal" placeholder="Answer in µF" aria-label="Answer in microfarads"><button id="qb">Check</button></div><p class="fb" id="qf"></p>',
+ b:'<p>The tank gives away its width times the drop in level: <b>C × ΔU</b>. The load takes current times time: <b>I × Δt</b>. Until the supply catches up, all of it comes from the tank, so C × ΔU = I × Δt.</p><p>The supply isn’t idle for all of Δt; it ramps up. So this is an estimate, but a good one, and it errs on the safe side.</p><p class="qq">Your arm: the servos jump by <b>7 A</b>, the supply needs <b>0.15 ms</b> to catch up, the dip must stay under <b>1 V</b>. How many µF do you need?</p><div class="quiz"><input id="qa" inputmode="decimal" placeholder="C, in µF" aria-label="Answer in microfarads"><button id="qb">Check</button></div><p class="fb" id="qf"></p>',
  after:'<p>Paper and bench agree: about 1000 µF. We fit two in parallel. Capacitances in parallel add, like two tanks side by side: 2000 µF. The dip drops to about 0.65 V, and there’s margin for the day the cans age: electrolytics lose capacitance over the years.</p>',
- task:'Your arm: +7 A, the supply needs 0.15 ms, the dip must stay under 1 V. Size it, then fit two 1000 µF in parallel and make the arm lunge',ok:()=>S.quiz&&S.last&&S.last.C>1.99e-3&&S.last.C<2.01e-3},
+ task:'Work out C for your arm (below), then fit two 1000 µF in parallel and make the arm lunge',ok:()=>S.quiz&&S.last&&S.last.C>1.99e-3&&S.last.C<2.01e-3},
 {sc:'b',part:'Choosing',t:'Backwards, it pops',s:"An electrolytic has a <b>minus leg</b>, marked by the stripe on the can. It goes to ground.",bt:["Which leg is minus","Why it dies","Ceramics don’t care"],ui:['flip','nV','pills','bF'],build:B(true,5,2),enter:()=>{fresh();S.plugged=S.servos=true;S.ri=3;S.fl.popRev=false},
  b:'<p>The light stripe with minus signs marks the minus leg. On a new part the minus leg is also the shorter one. On the board, the footprint marks the + pad.</p><p>The insulator inside an electrolytic is a thin oxide layer, and it only holds with the right polarity. Backwards, current leaks through, the electrolyte boils, pressure builds, and the vent on top splits open. Sometimes with a bang.</p><p class="note">In real life it can take seconds or minutes. Here it’s quick.</p><p>Small ceramic capacitors have no polarity. Electrolytic and tantalum ones do.</p>',
  after:'<p>The vent split and it let out its smoke. Its tank is gone: the rail now has one 1000 µF can left. A capacitor fitted backwards is one of the classic first-board mistakes. Check the stripe before you solder.</p>',
@@ -573,7 +574,7 @@ function renderBody(st){
   $('#stepS').innerHTML=st.s||'';
   const t=document.createElement('template');t.innerHTML=st.b||'';const X=$('#stepX'),Bk=$('#stepB');X.innerHTML='';Bk.innerHTML='';
   const els=[...t.content.children],groups=[];
-  for(const el of els){if(el.matches('.quiz,.fb,.hw,.warnbox')){X.appendChild(el);continue}
+  for(const el of els){if(el.matches('.qq,.quiz,.fb,.hw,.warnbox')){X.appendChild(el);continue}
     const prev=groups[groups.length-1];
     if(prev&&/^(UL|OL)$/.test(el.tagName)&&prev.els.length===1&&/:\s*$/.test(prev.els[0].textContent))prev.els.push(el);else groups.push({els:[el]})}
   const bt=st.bt||[];let n=0;
@@ -583,14 +584,14 @@ function renderBody(st){
     g.els.forEach(e=>{e.classList.remove('note');d.appendChild(e)});Bk.appendChild(d);n++});
   $('#more').hidden=!n;$('#moreN').textContent=n;
 }
-function quiz(){const go=()=>{const raw=($('#qa').value||'').replace(/[,\s]/g,''),v=parseFloat(raw);let m;
+function quiz(){const go=()=>{const raw=($('#qa').value||'').replace(/[\s\u00a0\u202f]/g,'').replace(/,/g,I18N.lang==='ru'?'.':''),v=parseFloat(raw);let m;
     if(v>=950&&v<=1150){S.quiz=true;m='Right: 7 × 0.00015 / 1 = 0.00105 F ≈ 1050 µF. The nearest standard value is 1000 µF, and that’s what the bench found. Now fit two of them in parallel for margin and make the arm lunge.'}
     else if(v>=0.00095&&v<=0.00115)m='That’s in farads. A microfarad is a millionth of a farad: multiply by 1 000 000.';
     else if(v>=1.0&&v<=1.1||v>=9.5e5&&v<=1.15e6)m='Convert the time first: 0.15 ms = 0.00015 s.';
     else if(v>=40&&v<=50||v>=4e4&&v<=5e4)m='Flipped: C = I × Δt / ΔU. Current times time on top, the allowed dip below.';
     else if(isNaN(v))m='Type a number of microfarads.';
     else m='Not quite. Multiply 7 A by 0.00015 s, divide by 1 V, and you get farads. Then convert to µF.';
-    $('#qf').textContent=_t(m);update()};
+    $('#qf').textContent=_t(m);$('#qf').className='fb'+(v>=950&&v<=1150?' ok':'');update()};
   $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
 function renderStep(){
   const st=STEPS[S.step];if(st.enter)st.enter();
