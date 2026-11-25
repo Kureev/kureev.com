@@ -292,7 +292,7 @@ input[type=range]{accent-color:#7d8cff}
  "7":{"q":"You unplug the supply with the servos still connected. The rail…","o":["keeps going for seconds","dies in about ten milliseconds"],"a":1,"ex":"2000 µF at 12 V holds about 0.14 J. Idle servos draw 1.8 A and drain that in roughly 10 ms. A capacitor is a buffer for milliseconds, not a battery."}},
 "recall":{
  "0":[{"q":"Parts connected in parallel share…","o":["one current","one voltage"],"a":1},{"q":"Four servos moving (0.3 A each) and two stalled (2 A each) draw…","o":["2.3 A","5.2 A","12 A"],"a":1,"ex":"0.3 × 4 + 2 × 2 = 5.2 A."},{"q":"A multimeter on volts shows…","o":["the voltage at one point","the difference between its two probes"],"a":1}],
- "5":[{"q":"1 kΩ and 1000 µF give τ =","o":["1 ms","1 s","1000 s"],"a":1,"ex":"1000 Ω × 0.001 F = 1 s."},{"q":"Two capacitors in parallel…","o":["add up","halve"],"a":0}]},
+ "5":[{"q":"1 kΩ and 1000 µF give τ =","o":["1 ms","1 s","1000 s"],"a":1,"ex":"1000 Ω × 0.001 F = 1 s."},{"q":"Two capacitors in parallel. Their total capacitance…","o":["adds up: C1 + C2","stays the same as one","halves"],"a":0,"ex":"Two tanks side by side are one tank twice as wide: 1000 + 1000 = 2000 µF. On the same load they drain twice as slowly, not twice as fast. Each can gives half the current, so a jump sags the rail less."}]},
 "end":{"step":8,"items":[
  {"q":"2.2 kΩ and 470 µF give τ of about…","o":["1 ms","1 s","1 minute"],"a":1,"ex":"2200 × 0.00047 ≈ 1.03 s."},
  {"q":"Two 470 µF capacitors in parallel make…","o":["235 µF","470 µF","940 µF"],"a":2},
