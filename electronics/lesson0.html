@@ -85,7 +85,7 @@ input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--cu);cursor:
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .row button{flex:1 1 140px}
 .row button[aria-pressed=true]{border-color:var(--ok);color:var(--ok)}
-.power{width:100%;background:#3a1b14;border-color:#a33d22;color:#ffd1c4;font-size:16px}
+.power{width:100%}
 .fix{width:100%;margin-top:4px;background:#3a1b14;border-color:#6b2a1c;color:#ffb39f}
 .nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
 .num span{display:block;font-size:13px;color:var(--mute)}
@@ -272,7 +272,7 @@ input[type=range]{accent-color:#7d8cff}
       <section class="card ctl" data-grp>
         <div data-ui="tU"><label for="tu">Pump, voltage <output id="tuO"></output></label><input type="range" id="tu" min="0" max="12" step="0.5" value="12"></div>
         <div data-ui="tR"><label for="tr">Narrow section, resistance <output id="trO"></output></label><input type="range" id="tr" min="0" max="6" step="1" value="3"></div>
-        <div data-ui="bPower"><button id="power" class="power">Power on</button></div>
+        <div data-ui="bPower"><button id="power" class="power danger">Power on</button></div>
         <div data-ui="bV"><label for="v">Source <output id="vO"></output></label><input type="range" id="v" min="0" max="12" step="0.1" value="12">
           <div class="row"><button data-v="3.3">3.3 V</button><button data-v="5">5 V</button><button data-v="12">12 V</button></div></div>
         <div data-ui="bR"><label for="r">Resistor <output id="rO"></output></label><input type="range" id="r" min="0" max="12" step="1" value="9"></div>

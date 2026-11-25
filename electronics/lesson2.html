@@ -217,6 +217,7 @@ input[type=range]{accent-color:#7d8cff}
 .scope{position:absolute;left:16px;bottom:16px;width:min(400px,calc(100% - var(--pw,0px) - 40px));padding:12px 14px 12px;border-radius:16px;background:rgba(10,15,40,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(140,160,255,.16);pointer-events:none}
 .scope .sh{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
 .scope .sh b{color:#eef1ff;font-weight:600}
+.scope{margin:0}.scope .sh b,.scope .rd{flex:none}.scope #scS{flex:1 1 auto;min-width:0}
 .scope .rd{margin-left:auto;font:700 15px/1.2 Manrope,sans-serif;color:#eef1ff;font-variant-numeric:tabular-nums;white-space:nowrap}
 .scope .rd.bad{color:#ff8a70}
 .scope canvas{display:block;width:100%;height:170px;border-radius:8px;background:#060a1e}
@@ -515,7 +516,7 @@ function drawScope(){const fig=$('#scope');if(fig.hidden)return;
   const hl=(v,c,dash)=>{x.strokeStyle=c;x.setLineDash(dash||[]);x.lineWidth=1.2;x.beginPath();x.moveTo(0,Y(v));x.lineTo(W,Y(v));x.stroke();x.setLineDash([])};
   const trace=(pts,c)=>{x.strokeStyle=c;x.lineWidth=2;x.lineJoin='round';x.beginPath();pts.forEach(([px,v],i)=>i?x.lineTo(px,Y(v)):x.moveTo(px,Y(v)));x.stroke()};
   let sub='',rd='',bad=false,xs='',ys='';
-  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub=_t('rail · single shot');xs=_t('{0} / square',nf(0.5,1)+' '+_u('ms'));ys=_t('{0} / square · red: 7 V line',5+' '+_u('V'));
+  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub=_t('rail · single shot');xs=_t('{0} / square',nf(0.5,1)+' '+_u('ms'));ys=_t('{0} / square · red line: 7 V',5+' '+_u('V'));
     if(S.tr){const n=S.tr.V.length,m=Math.max(1,Math.floor(S.rp*(n-1))),pts=[];for(let i=0;i<=m;i++)pts.push([i/(n-1)*W,S.tr.V[i]]);trace(pts,'#8fd0ff');
       if(S.rp>=1){rd=_t('lowest {0}',fV(S.tr.min));bad=S.tr.min<LINE}else rd=_t('capturing…')}
     else{trace([[0,VS-BASE*RPATH],[W,VS-BASE*RPATH]],'#8fd0ff');rd=_t('waiting for a lunge')}}

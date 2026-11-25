@@ -37,7 +37,7 @@ I18N.add({
 "Now try it and see.":"Теперь попробуй и посмотри.",
 "Change":"Изменить",
 "Your prediction held.":"Прогноз подтвердился.",
-"What happened: {0}.":"Правильный ответ: {0}.",
+"What happened: {0}.":"Правильный ответ: «{0}».",
 "Check yourself":"Проверь себя",
 "Mixed, from the whole level":"Вперемешку, по всему уровню",
 "I can":"Я умею",

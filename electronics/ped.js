@@ -106,7 +106,7 @@ function check(silent){if(!D.win)return;const A=achList(),had=new Set(g('ach')||
   try{const S=JSON.parse(localStorage.getItem('ach_v1')||'{}'),sc=score();S[L]={lv:D.win.lv,list:A.map(a=>({kind:a.kind,en:a.en,d:a.d,got:a.got})),h:sc.h,n:sc.n};S.course=[{kind:'streak',en:'Five in a row',d:'Five predictions in a row right.',got:cs.includes('streak5')}];localStorage.setItem('ach_v1',JSON.stringify(S))}catch(_){}}
 let tbox=null,tq2=[],tbusy=false;
 function toast(a){tq2.push(a);if(!tbusy)nextToast()}
-function nextToast(){const a=tq2.shift();if(!a){tbusy=false;return}tbusy=true;
+function nextToast(){const wd=document.getElementById('pedWin');if(wd&&wd.open){tq2=[];tbusy=false;return}const a=tq2.shift();if(!a){tbusy=false;return}tbusy=true;
   if(!tbox){tbox=document.createElement('div');tbox.className='ped-toast';tbox.setAttribute('role','status');tbox.setAttribute('aria-live','polite');document.body.appendChild(tbox);if(tbox.showPopover)tbox.popover='manual'}
   tbox.style.left=innerWidth>900?Math.round((innerWidth-(window.PW?PW():0))/2)+'px':'50%';
   tbox.innerHTML=`<div class="pt-c">${MED(a.kind,true)}<span class="pt-t"><span class="pt-k">${T('Achievement')}</span><b>${T(a.en)}</b><span class="pt-d">${T(a.d)}</span></span></div>`;
@@ -129,7 +129,7 @@ function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)re
       x.save();x.globalAlpha=Math.max(0,Math.min(1,4.2-k));x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;
       if(p.round){x.beginPath();x.arc(0,0,p.h*.7,0,6.28);x.fill()}else{x.scale(1,Math.cos(p.t+k*6));x.fillRect(-p.w/2,-p.h/2,p.w,p.h)}x.restore()});
     if(k<4.4)requestAnimationFrame(f);else c.remove()})(t0)}
-function celebrate(){const W=D.win;if(!W)return;let d=document.getElementById('pedWin');
+function celebrate(){const W=D.win;if(!W)return;tq2=[];if(tbox){tbox.classList.remove('on');try{tbox.hidePopover()}catch(_){}}let d=document.getElementById('pedWin');
   if(!d){d=document.createElement('dialog');d.id='pedWin';d.className='ped-win';d.setAttribute('aria-labelledby','pedWinT');document.body.appendChild(d);
     d.addEventListener('click',e=>{if(e.target===d)d.close()})}
   const ei=D.end?D.end.items:[],ea=ei.filter((_,i)=>g('e_'+i)!=null).length,eo=ei.filter((q,i)=>g('e_'+i)===q.a).length;
@@ -149,6 +149,13 @@ function complete(ok,was){fin=ok;check(!primed);primed=true;if(ok&&!was)setTimeo
 document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('#next');if(n&&n.dataset.fin==='1'){e.preventDefault();e.stopImmediatePropagation();celebrate()}},true);
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
   if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent=T('Finish')}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent=T('Next')}}
+/* 3D labels: never overlap each other, the HUD or the screen edge; the first (or a warning) wins */
+function declutter(){const st=document.getElementById('stage');if(!st)return;const sr=st.getBoundingClientRect(),pw=innerWidth>900&&window.PW?PW():0,hud=document.getElementById('hud'),hr=hud&&!hud.hidden&&hud.offsetHeight?hud.getBoundingClientRect():null,keep=[];
+  [...document.querySelectorAll('#labels .lb')].filter(e=>e.style.display!=='none').sort((a,b)=>(b.classList.contains('bad')*2+(+b.dataset.pri||0))-(a.classList.contains('bad')*2+(+a.dataset.pri||0))).forEach(e=>{const r=e.getBoundingClientRect();if(!r.width)return;
+    const ov=k=>!(r.right<=k.left+2||r.left>=k.right-2||r.bottom<=k.top+2||r.top>=k.bottom-2);
+    const hide=r.left<sr.left-1||r.right>sr.right-pw+1||(hr&&ov(hr))||keep.some(ov);
+    const v=hide?'hidden':'';if(e.style.visibility!==v)e.style.visibility=v;if(!hide)keep.push(r)})}
+setInterval(declutter,200);
 window.PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
 window.PED={init(k,data){L=k;D=window.I18N?I18N.deep(data):data;load();try{fin=!!(D.win&&(JSON.parse(localStorage.getItem('quest_v1')||'{}').done||{})[D.win.lv])}catch(_){}
   const mount=()=>{const lead=document.getElementById('stepS');ctl=document.querySelector('.card.ctl');
@@ -192,7 +199,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .ped.brief li::before{content:'';position:absolute;left:2px;top:.55em;width:5px;height:5px;border-radius:50%;background:#7d8cff}
 .pq-again{appearance:none;border:0;background:none;padding:0 0 0 10px;font:600 13px/1.3 Manrope,sans-serif;color:#8a9bff;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(138,155,255,.4)}
 .pq-done .pq-again{display:block;padding:0;margin:3px 0 0}.pq-again:hover{color:#b7c2ff}.pq-again.k{padding:0;margin-left:0}
-.pq-again{position:relative}.pq-again::after{content:'';position:absolute;inset:-13px -6px}
+.pq-again{position:relative}.pq-again::after{content:'';position:absolute;inset:-14px -6px}
 .pq-done{margin:0 0 12px;font-size:13px;line-height:1.45;color:#8f9bc4}.pq-done b{font-weight:600;color:#ffb08a}.pq-done.ok b{color:#9fe8c4}.pq-done em{display:block;font-style:normal;color:#a3acd0;margin-top:2px}
 .pq-q{margin:0 0 8px;font-size:15px;line-height:1.45;color:#eef1ff;font-weight:600}
 .pq-o{display:flex;flex-wrap:wrap;gap:6px}

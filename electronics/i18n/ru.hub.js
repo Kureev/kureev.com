@@ -100,5 +100,6 @@ I18N.add({
 "Every warm-up answer right on the first try.":"Все ответы разминки верны с первой попытки.",
 "The end check without a single mistake.":"Итоговая проверка без единой ошибки.",
 "Every task on this level done.":"Все задания уровня выполнены.",
-"Five predictions in a row right.":"Пять верных прогнозов подряд."
+"Five predictions in a row right.":"Пять верных прогнозов подряд.",
+"On target: {0} of {1}":"В точку: {0} из {1}"
 });

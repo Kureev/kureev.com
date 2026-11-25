@@ -126,7 +126,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 .langsw button{min-width:44px!important;min-height:44px!important}
 .reset{min-height:44px!important}
 details.more summary{min-height:44px!important;display:flex;align-items:center}
-.hw label,.ped.cando label{min-height:44px;align-items:center}
+.hw li{min-height:44px;align-items:center!important}.ped.cando label{min-height:44px;align-items:center!important;padding:0!important}
 /* in-scene actions: one style to run the experiment, one for the destructive try; the white pill is only Next */
 .ctl button.run{background:var(--copper)!important;border-color:var(--copper)!important;color:#1a0f05!important;border-radius:var(--r-pill)!important}
 .ctl button.run:hover{background:#ffc58f!important}.ctl button.run:disabled{background:transparent!important;color:var(--mute)!important;border-color:var(--line)!important}

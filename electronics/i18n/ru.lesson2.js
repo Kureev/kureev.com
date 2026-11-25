@@ -106,7 +106,7 @@ I18N.add({
 "rail · rolling":"шина · самописец",
 "tank level":"уровень в баке",
 "{0} / square":"{0} / клетка",
-"{0} / square · red: 7 V line":"{0} / клетка · красная: линия 7 В",
+"{0} / square · red line: 7 V":"{0} / клетка · красная линия — 7 В",
 "lowest {0}":"минимум {0}",
 "capturing…":"захват…",
 "waiting for a lunge":"ждёт рывка",
