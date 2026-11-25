@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm. Learn by breaking things on a virtual bench.">
+<meta property="og:title" content="Electronics for a robot arm">
+<meta property="og:description" content="A free interactive 3D course: from Ohm’s law to the power board of a robot arm.">
+<meta property="og:image" content="https://kureev.com/og-electronics.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>Level 3: Inductor</title>
+<script src="/electronics/i18n.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning, a workbench lesson for a software engineer
+   IDEA the rail of his own robot-arm board sags when the servos lunge; a capacitor is a tank that covers the gap
+   PICTURE live 3D board from level 1 plus bulk capacitors and an oscilloscope; a water tank fed through a narrow pipe for charge, τ = R × C and discharge
+   COLOUR night bench #050817, solder-mask green, copper, water blue, red for + and danger
+   TYPE Manrope 800 + Manrope
+   LAYOUT laptop: 3D stage left, lesson column 410px right; phone: stage on top, lesson below; only the controls a step needs are shown */
+:root{color-scheme:dark;--bg:#050817;--panel:#0a1230;--card:#0e1840;--line:#1e2a5c;--ink:#eef1ff;--mute:#8f9bc4;--cu:#e39a52;--hot:#ff5a3c;--ok:#5fd38d;--warn:#ffc14d}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;overflow:hidden;background:var(--bg)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;font:600 13px/1.2 Manrope,sans-serif;padding:3px 8px;border-radius:6px;background:rgba(5,8,23,.82);border:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+.lb.big{font-size:15px;color:#ffd1c4;border-color:#6b2a1c}
+.lb.flow{color:#bfe3ff;border-color:#24496b}
+.lb.lvl{background:none;border:0;color:var(--mute);font-size:12px;padding:0}
+.lb.bad{color:#ffb39f;border-color:#6b2a1c}
+.lb.good{color:#9ff0c0;border-color:#2f4a9e}
+.lb.dim{color:var(--mute);border-style:dashed;font-weight:400}
+.tools{position:absolute;left:16px;top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.reset{min-height:36px;font-size:14px;background:rgba(14,22,60,.9)}
+.hint{font-size:13px;color:var(--mute);background:rgba(5,8,23,.7);padding:4px 10px;border-radius:8px}
+.info{position:absolute;right:16px;top:14px;width:min(300px,calc(100% - 32px));background:rgba(14,22,60,.96);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.info b{display:block;font-size:15px;margin:0 28px 4px 0}
+.info p{margin:0;color:#c9d2f5}
+.x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}
+.panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
+h1{font:800 31px/1.06 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+.sub{margin:0 0 16px;color:var(--mute);font-size:15px}
+.card,.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.stephead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--mute);font-size:13px;font-weight:600;flex-wrap:wrap}
+.part{color:var(--cu)}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots button{width:13px;height:13px;min-height:0;padding:0;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer}
+.dots button.on{background:var(--ink);border-color:var(--ink)}
+.dots button.done{border-color:var(--ok)}
+.dots button.on.done{background:var(--ok)}
+h2{font:800 22px/1.15 Manrope,sans-serif;margin:8px 0 8px;letter-spacing:-.01em}
+.stepb p,.stepb ol,.stepb ul{margin:0 0 10px}
+.stepb ol,.stepb ul{padding-left:20px}
+.stepb li{margin-bottom:4px}
+.stepb .note{font-size:14px;color:var(--mute)}
+.stepb b{color:#fff}
+.after{border-left:3px solid var(--ok);padding:2px 0 2px 12px;margin:0 0 10px}
+.after p{margin:0 0 8px}
+.task{border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;background:#151d45;border:1px solid #2e3a78;color:var(--warn)}
+.task.ok{color:var(--ok);border-color:#2f4a9e;background:#0f1d4a}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+button{font:600 15px Manrope,sans-serif;color:var(--ink);background:#141f4d;border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer}
+button:hover{border-color:#33407a}
+button:focus-visible,input:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+button.pri{background:var(--ink);color:#050817;border-color:var(--ink)}
+button:disabled{opacity:.35;cursor:default}
+.ctl label{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:15px;margin-top:4px}
+output{color:var(--warn);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--cu);cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.row>*{flex:1 1 140px}
+.row button[aria-pressed=true]{border-color:var(--ok);color:var(--ok)}
+.danger{background:#3a1b14;border-color:#a33d22;color:#ffd1c4}
+.fix{width:100%;margin-top:4px;background:#3a1b14;border-color:#6b2a1c;color:#ffb39f}
+.nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.num span{display:block;font-size:13px;color:var(--mute)}
+.num b{font:800 22px/1.2 Manrope,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.num.u b{color:#ff8a70}.num.i b{color:#8fd0ff}.num.p b{color:#ff6a4d}.num.g b{color:#9ff0c0}
+.st{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 0}
+.pill{font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid var(--line)}
+.pill.g{color:var(--ok);border-color:#2f4a9e}.pill.y{color:var(--warn);border-color:#5a4a1f}.pill.r{color:#ff8a70;border-color:#6b2a1c}.pill.m{color:var(--mute)}
+.formula{grid-column:1/-1;margin:0;padding-top:10px;border-top:1px solid var(--line);font-size:14px;line-height:1.6;color:#c9d2f5}
+.hw{list-style:none;padding:0!important;margin:0 0 10px}
+.hw li{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:14px}
+.hw input{width:20px;height:20px;margin-top:2px;accent-color:var(--ok);flex:none}
+.err{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
+@media(max-width:900px){
+html,body{height:auto}
+.app{grid-template-columns:minmax(0,1fr);height:auto}
+.stage{height:62svh;min-height:360px}
+.panel{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}
+.hint{display:none}
+.info{right:10px;top:10px}
+.lb{font-size:11px;padding:2px 5px}
+.lb.part{display:none!important}
+}
+
+.lead{font-size:16px;line-height:1.5;margin:0 0 12px}.lead b{color:#fff}
+.step .card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 0 4px;margin:0 0 10px}
+.step .after{margin:10px 0 0}
+.stepx:empty{display:none}.stepx{margin-top:12px}.stepx p{margin:0 0 10px}
+.stepx table{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 10px}
+.more{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.more summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px;font-weight:700;font-size:15px;color:var(--mute)}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:'';width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.more[open] summary::before{transform:rotate(45deg)}
+.more summary:hover{color:var(--ink)}
+.blocks{display:grid;gap:8px;margin-top:4px}
+.blk{background:#131c46;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px}
+.blk h3{margin:0 0 4px;font:800 12px/1.3 Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cu)}
+.blk p,.blk ul,.blk ol{margin:0 0 6px}.blk>:last-child{margin-bottom:0}
+.blk ul,.blk ol{padding-left:20px}
+.blk b{color:#fff}
+.blk.note{background:none;border-style:dashed;color:var(--mute);font-size:14px}
+.blk.note h3{color:var(--mute)}
+.blk table{width:100%;border-collapse:collapse;font-size:14px}
+.blk th{text-align:left;color:var(--mute);font-weight:600;font-size:13px;border-bottom:1px solid var(--line);padding:4px 6px 4px 0}
+.blk td{border-bottom:1px solid var(--line);padding:5px 6px 5px 0;vertical-align:top}
+.hud{position:absolute;right:12px;bottom:12px;display:flex;flex-flow:row wrap;justify-content:flex-end;align-content:flex-end;gap:6px;max-width:min(460px,calc(100% - 24px));pointer-events:none;background:none;border:0;padding:0;margin:0}
+.hud .num{display:flex;align-items:baseline;gap:10px;background:rgba(5,8,23,.86);border:1px solid var(--line);border-radius:10px;padding:4px 10px}
+.hud .num span{display:inline;font-size:12px}
+.hud .num b{font-size:18px}
+.hud .st{margin:0;justify-content:flex-end;flex:1 0 100%}.hud .pill{background:rgba(5,8,23,.86)}
+.hud .formula{border:1px solid var(--line);border-radius:10px;background:rgba(5,8,23,.86);padding:7px 10px;font-size:13px;line-height:1.5;text-align:right}
+.hud .formula:empty{display:none}
+@media(max-width:900px){.hud{right:8px;bottom:8px;gap:4px;max-width:calc(100% - 16px)}.hud .num{padding:2px 8px}.hud .num span{font-size:11px}.hud .num b{font-size:15px}.hud .formula{font-size:11px;padding:5px 8px;max-width:100%}}
+
+/* panel v2: one header line, segmented progress, goal row, sticky footer */
+.app{grid-template-columns:minmax(0,1fr) 384px}
+.panel{display:flex;flex-direction:column;padding:0}
+.ph{display:flex;align-items:baseline;gap:10px;padding:16px 20px 0;font-size:13px;color:var(--mute);flex-wrap:wrap}
+.ph .ltitle{color:var(--ink);font-weight:700;font-size:14px}
+.ph .back{margin:0;font-size:13px}
+.step{background:none;border:0;border-radius:0;padding:14px 20px 10px;margin:0;flex:1 0 auto}
+.prog{margin:0 0 2px}
+.ptop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:6px}
+.ptop .part{color:var(--cu)}
+#stepC{font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:3px;flex-wrap:nowrap}
+.dots button{flex:1 1 0;height:16px;min-height:0;padding:0;border:0;border-radius:0;cursor:pointer;background:linear-gradient(var(--line),var(--line)) center/100% 5px no-repeat}
+.dots button.pb{margin-left:7px}
+.dots button.done{background-image:linear-gradient(#3b5bd9,#3b5bd9)}
+.dots button.on{background-image:linear-gradient(var(--ink),var(--ink));background-size:100% 7px}
+.dots button.on.done{background-image:linear-gradient(var(--ok),var(--ok))}
+.dots button:hover{background-size:100% 7px}
+h2{font-size:23px;margin:10px 0 6px}
+.lead{margin:0 0 6px}
+.step .card{border-top:0;padding:6px 0 0;margin:0 0 6px}
+.task{display:flex;gap:10px;align-items:flex-start;background:#121b48;border:1px solid #2e3a78;border-radius:12px;padding:10px 12px;color:var(--ink);font-size:15px;font-weight:600;line-height:1.4}
+.task .tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--warn);margin-top:0;position:relative}
+.task.ok{background:#0d1a45;border-color:#2f4a9e;color:#dbe2ff}
+.task.ok .tick{background:var(--ok);border-color:var(--ok)}
+.task.ok .tick::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #050817;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.more summary .cnt{font-weight:600;font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:0 7px;margin-left:2px}
+.nav{position:sticky;bottom:0;z-index:3;margin:0;padding:12px 20px;background:var(--panel);border-top:1px solid var(--line);display:flex;gap:10px}
+.nav #prev{flex:none;width:48px;padding:0;font-size:22px;line-height:1}
+.nav #next{flex:1}
+.lvl-done{margin:0 20px 12px!important}
+@media(max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.ph{padding:14px 16px 0}.step{padding:12px 16px 8px}.nav{padding:10px 16px calc(10px + env(safe-area-inset-bottom))}}
+/* polish v2 */
+.lb{font-weight:500;font-size:12px;line-height:16px;padding:2px 7px;color:#dfe4fb;background:rgba(6,10,30,.86);border-color:rgba(255,255,255,.08)}
+.lb.tp{color:#e3b27a;border-color:rgba(255,255,255,.08)}
+.lb.big{font-size:13px;border-color:rgba(255,120,90,.35)}
+.lb.flow{border-color:rgba(120,180,255,.25)}
+.lb.bad{border-color:rgba(255,120,90,.35)}.lb.good{border-color:rgba(95,211,141,.3)}
+.meter{background:#0b1333;color:#dfe4fb;border:1px solid #6b4a2a;width:208px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.lcd{background:#c7d1b0;font-size:30px}.next{color:#8f9bc4}
+.reset{min-height:32px;font-size:13px;padding:4px 12px;background:rgba(10,16,44,.8)}
+.hint{transition:opacity .6s}.stage.touched .hint{opacity:0;pointer-events:none}
+.row button[aria-pressed=true]{background:rgba(95,211,141,.1)}
+.dots button,.dots button:hover,.dots button.on{background-size:100% 4px}
+.dots button.done{background-image:linear-gradient(#34479a,#34479a)}
+.dots button.on,.dots button.on.done{background-image:linear-gradient(var(--ok),var(--ok))}
+.side{display:flex;flex-direction:column;gap:6px;margin:4px 0 14px}
+.side:empty{display:none}
+.side .formula{margin:0;padding:0;border:0;background:none;font-size:13px;line-height:18px;color:#a3acd0;text-align:left;font-variant-numeric:tabular-nums}
+.side .formula:empty{display:none}
+.side .st{margin:0;justify-content:flex-start}
+@media(max-width:900px){
+ .stage{height:46svh;min-height:300px}
+ .meter{left:auto;right:8px;top:8px;bottom:auto;width:150px;padding:7px 9px 8px}
+ .meter .lcd{font-size:20px;margin:4px 0 5px}.meter .next{display:none}
+ .hud .num:nth-child(n+3){display:none}
+}
+/* brand v1 */
+:root{--blue:#5b9cff;--violet:#8a6bff;--grad:linear-gradient(100deg,#5b9cff,#8a6bff 60%,#c77dff);--ok:#59f3a8;--warn:#ffb26b}
+body{background:radial-gradient(60% 50% at 20% 0%,rgba(40,70,190,.18),transparent 70%),var(--bg)}
+.panel{background:linear-gradient(180deg,#0a1230,#070c24 60%)}
+h1,h2,.ltitle{font-family:Unbounded,Manrope,sans-serif;font-weight:600;letter-spacing:-.02em}
+h2#stepT{font-size:clamp(19px,1.7vw,23px);line-height:1.2}
+button.pri,a.go{background:#E8ECFF;color:#0A0F2E;border-color:#E8ECFF;border-radius:999px}
+button.pri:hover,a.go:hover{background:#fff}
+a.go.ghost{background:rgba(140,160,255,.08);color:var(--ink);border-color:rgba(140,160,255,.25)}
+.dots button.on,.dots button.on.done{background-image:var(--grad)}
+.dots button.done{background-image:linear-gradient(#34479a,#34479a)}
+.bar i{background:var(--grad)}
+.lb.tp{color:#ffc58f}
+input[type=range]{accent-color:#7d8cff}
+.row button,#prev{border-radius:999px;background:rgba(91,156,255,.08);border:1px solid rgba(91,156,255,.35)}
+.formula,.side .formula{font-size:13px;line-height:1.5;color:#b4bde0}
+.row button[aria-pressed=true]{border-color:rgba(91,156,255,.8);color:#dbe4ff;background:rgba(91,156,255,.18)}
+.task .tick{border-color:#8a9bff}
+.meter{border-color:rgba(140,160,255,.25);box-shadow:0 12px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(140,160,255,.12)}
+.back{display:inline-block;color:var(--mute);text-decoration:none;font-size:14px;font-weight:600;margin:0 0 10px}.lvl-done{display:block;text-align:center;background:#15281d;border:1px solid #2c5a3d;color:#9ff0c0;border-radius:12px;padding:12px;font-weight:700;text-decoration:none;margin:0 0 14px}.lvl-done[hidden]{display:none}</style>
+<link rel="stylesheet" href="/electronics/theme.css">
+<style>
+/* level 3: the scope with two traces, the coil */
+.scope{position:absolute;left:16px;bottom:16px;width:min(420px,calc(100% - var(--pw,0px) - 40px));padding:12px 14px 12px;border-radius:16px;background:rgba(10,15,40,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(140,160,255,.16);pointer-events:none}
+.scope .sh{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;font:600 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
+.scope .sh b{color:#eef1ff;font-weight:600}
+.scope .sr{margin-left:auto;font:700 15px/1.2 Manrope,sans-serif;color:#eef1ff;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scope .sr.bad{color:#ff8a70}
+.scope #scS{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scope canvas{display:block;width:100%;height:170px;border-radius:8px;background:#060a1e}
+.scope .sk{display:flex;justify-content:space-between;gap:8px;margin:6px 0 0;font:500 13px/1.3 Manrope,sans-serif;color:#8f9bc4;font-variant-numeric:tabular-nums}
+.scope .lg{display:flex;gap:14px;margin:6px 0 0;font:500 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
+.scope .lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.stepx .qq{margin:0 0 10px!important;color:#eef1ff!important;font-weight:600}
+.row button[aria-pressed=true].danger{border-color:#ff8a70}
+@media(min-width:901px){.app{--pw:calc(clamp(420px,31vw,500px) + 24px)}}
+@media(max-width:900px){.stage{height:60svh!important;min-height:440px!important}.scope{left:8px;right:8px;top:56px;bottom:auto;width:auto;padding:8px 10px}.scope canvas{height:88px}.scope .sh{margin-bottom:6px}.scope .sk,.scope .lg{display:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#stepT">Skip to the lesson</a>
+<div class="app">
+  <section class="stage" id="stage">
+    <canvas id="gl" aria-label="3D model of the lesson"></canvas>
+    <div class="labels" id="labels"></div>
+    <figure class="scope" id="scope" data-ui="scope" aria-label="Oscilloscope">
+      <figcaption class="sh"><b id="scT">Oscilloscope</b><span id="scS"></span><span class="sr" id="scR" aria-live="polite"></span></figcaption>
+      <canvas id="scv" role="img" aria-label="Voltage and current over time"></canvas>
+      <p class="lg" id="scL"></p>
+      <p class="sk"><span id="scX"></span><span id="scY"></span></p>
+    </figure>
+    <section class="hud" id="hud" data-grp aria-live="polite">
+      <div class="num i" data-ui="wnI"><span>Flow (current)</span><b id="wnI"></b></div>
+      <div class="num u" data-ui="wnU"><span>Wheel’s push-back</span><b id="wnU"></b></div>
+      <div class="num g" data-ui="wnTau"><span>τ = L / R</span><b id="wnTau"></b></div>
+      <div class="num p" data-ui="wnKick"><span>Kick at the valve</span><b id="wnKick"></b></div>
+      <p class="formula" data-ui="wF" id="wF"></p>
+      <div class="num i" data-ui="nI"><span>Coil current</span><b id="nI"></b></div>
+      <div class="num u" data-ui="nSW"><span>Switch node, SW</span><b id="nSW"></b></div>
+      <div class="num u" data-ui="nAvg"><span>Lamp, average</span><b id="nAvg"></b></div>
+      <div class="num g" data-ui="nRip"><span>Current ripple</span><b id="nRip"></b></div>
+      <p class="st" data-ui="pills" id="pills"></p>
+      <p class="formula" data-ui="bF" id="formula"></p>
+    </section>
+    <div class="tools" id="tools"><button id="reset" class="reset">Reset view</button><span class="hint">Drag to rotate · scroll or pinch to zoom · click a part to see what it is</span></div>
+    <aside class="info" id="info" hidden>
+      <button class="x" id="infoX" aria-label="Close"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <b id="infoT"></b><p id="infoP"></p>
+    </aside>
+  </section>
+  <main class="panel">
+    <header class="ph"><a class="back" href="/electronics">← Map</a><span class="lesson">Lesson 3</span><span class="ltitle">Inductor</span></header>
+    <article class="step">
+      <div class="prog"><div class="ptop"><span id="stepN"></span><span id="stepC"></span></div><div class="dots" id="dots" role="group" aria-label="Steps"></div></div>
+      <h2 id="stepT"></h2>
+      <div class="lead" id="stepS"></div>
+      <section class="card ctl" data-grp>
+        <div data-ui="wL"><label for="wl">Wheel weight, L <output id="wlO"></output></label><input type="range" id="wl" min="0" max="4" step="1" value="2"></div>
+        <div data-ui="wR"><label for="wr">Narrow pipe, R <output id="wrO"></output></label><input type="range" id="wr" min="0" max="3" step="1" value="1"></div>
+        <div class="row" data-ui="wValve"><button id="wv">Open the valve</button></div>
+        <div class="row" data-ui="wValve2"><button id="wvO">Open the valve</button><button id="wvS">Close slowly</button><button id="wvH" class="danger">Slam shut</button></div>
+        <div class="row" data-ui="bDiode"><button id="dN" aria-pressed="true">No diode</button><button id="dOk" aria-pressed="false">Fit the diode</button><button id="dRev" class="danger" aria-pressed="false">Fit it backwards</button></div>
+        <div data-ui="bDuty"><label for="du">Duty cycle, D <output id="duO"></output></label><input type="range" id="du" min="0" max="100" step="5" value="30"></div>
+        <div data-ui="bL"><label for="bl">Coil, L <output id="blO"></output></label><input type="range" id="bl" min="0" max="4" step="1" value="1"></div>
+        <button id="bsw" class="pri" data-ui="bSw" style="width:100%">Close the switch</button>
+        <button id="fix" class="fix" hidden>Replace the fuse</button>
+      </section>
+      <div class="task" id="task"></div>
+      <div class="after" id="after" hidden></div>
+      <div class="stepx" id="stepX"></div>
+      <details class="more" id="more"><summary>Details <span class="cnt" id="moreN"></span></summary><div class="blocks stepb" id="stepB"></div></details>
+    </article>
+    <div class="nav"><button id="prev" aria-label="Back">‹</button><button id="next" class="pri">Next</button></div>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l3",{
+"win":{"lv":3,"title":"Inductor, done","line":"You know why current hates sudden stops, and how a diode tames the kick.","next":{"t":"Regulator","soon":true}},
+"brief":{"short":"Switch off a coil and it bites back with hundreds of volts. Learn its inertia and tame it.","problem":"In level 2 the supply couldn’t keep up because current has inertia. A coil is made of that inertia: it smooths current, stores energy, and kicks back with hundreds of volts when you cut it off. The regulator in level 4 is built around one. Here you learn how a coil behaves and how to stop its kick from killing the switch.","goals":["Explain a coil as a heavy wheel: U = L × ΔI / Δt and τ = L / R","Protect a switch from a coil’s kick with a flyback diode","Get a steady lower voltage by switching 12 V fast into a coil"]},
+"pr":{
+ "0":{"q":"You open the valve. The flow…","o":["jumps to full at once","grows gradually, then levels off","never starts"],"a":1,"ex":"The heavy wheel has to spin up first. The flow grows and settles at I = U / R, where the wheel no longer resists."},
+ "1":{"q":"You make the wheel twice as heavy (double L). Reaching full flow takes…","o":["half as long","the same time","twice as long"],"a":2,"ex":"τ = L / R: double L, double τ."},
+ "2":{"q":"The flow is steady and you slam the valve shut. The pressure at the valve…","o":["drops to zero","stays at the pump’s level","spikes far above the pump"],"a":2,"ex":"The wheel can’t stop at once, so it keeps shoving water into a shut valve. U = L × ΔI / Δt: a tiny Δt makes a huge U."},
+ "3":{"q":"Current flows through the coil and you open the switch. Across the open switch you get…","o":["0 V","12 V","hundreds of volts"],"a":2,"ex":"The coil keeps its current going and drives the switch node as far as it takes. With nowhere to go, that’s hundreds of volts and a spark."},
+ "4":{"q":"With the diode fitted, when the switch opens the coil’s current…","o":["stops at once","keeps circling through the diode and fades","flows back into the supply"],"a":1,"ex":"The diode gives the current a loop: coil → lamp → ground → diode → coil. It fades with τ = L / R instead of spiking."},
+ "5":{"q":"You flip the switch on and off fast, closed half the time. The lamp gets…","o":["12 V flashes, 20 000 a second","a steady voltage of about 6 V","nothing"],"a":1,"ex":"The coil won’t let the current change fast, so the lamp sees the average: about half of 12 V. That’s how a switching regulator works."}},
+"recall":{
+ "0":[{"q":"1 kΩ and 1000 µF give τ =","o":["1 ms","1 s","1000 s"],"a":1,"ex":"τ = R × C = 1000 × 0.001 = 1 s."},{"q":"A capacitor won’t let this jump instantly:","o":["its voltage","its current"],"a":0,"ex":"Its level can only change as charge flows in or out."},{"q":"A Schottky diode passes current…","o":["both ways","towards the stripe, dropping about 0.45 V","only above 12 V"],"a":1}],
+ "3":[{"q":"τ = L / R for 10 mH and 10 Ω is…","o":["1 µs","1 ms","1 s"],"a":1,"ex":"0.01 / 10 = 0.001 s."},{"q":"Shutting the valve faster makes the kick…","o":["smaller","bigger"],"a":1}]},
+"end":{"step":7,"items":[
+ {"q":"A coil won’t let this jump instantly:","o":["its voltage","its current"],"a":1},
+ {"q":"1 mH, and the current changes by 1 A in 1 µs. U =","o":["1 mV","1 V","1000 V"],"a":2,"ex":"0.001 × 1 / 0.000001 = 1000 V."},
+ {"q":"Where does the flyback diode go?","o":["in series with the coil","across the coil, stripe to the + side","across the coil, stripe to ground"],"a":1,"ex":"Like on a relay: across the coil, stripe to +, so it stays shut while the coil is powered. On our board the lamp is in series with the coil, so the diode sits across both."},
+ {"q":"12 V switched at 25% duty into a coil and a lamp gives the lamp about…","o":["3 V","6 V","9 V"],"a":0,"ex":"12 × 0.25 = 3 V, a little less after the diode."}]}})</script><!-- /ped -->
+<script>
+{
+const $=s=>document.querySelector(s);
+I18N.apply(document.body);$('.ph').appendChild(I18N.switcher());const _t=I18N.t,_u=I18N.u;
+const nf=(x,d)=>I18N.nf(x,d);
+const fV=v=>(Math.abs(v)<0.005?(v=0):0,nf(v,Math.abs(v)<10?2:Math.abs(v)<1000?1:0)+' '+_u('V'));
+const fI=i=>Math.abs(i)>=1?nf(i,2)+' '+_u('A'):nf(i*1000,Math.abs(i)<0.01?1:0)+' '+_u('mA');
+const fR=r=>r>=1000?nf(r/1000,r%1000?1:0)+' '+_u('kΩ'):nf(r,r%1?1:0)+' '+_u('Ω');
+const fL=l=>l<1e-3?nf(l*1e6,0)+' '+_u('µH'):nf(l*1000,(l*1000)%1?1:0)+' '+_u('mH');
+const fT=t=>t<1e-3?nf(t*1e6,t<1e-5?1:0)+' '+_u('µs'):t<1?nf(t*1000,(t*1000)%1?2:0)+' '+_u('ms'):nf(t,2)+' '+_u('s');
+const fE=e=>e<1e-3?nf(e*1e6,0)+' '+_u('µJ'):nf(e*1000,2)+' '+_u('mJ');
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+/* ---------- state & physics ---------- */
+const WL=[2.2e-3,4.7e-3,10e-3,22e-3,47e-3],WR=[4.7,10,22,47],BL=[0.47e-3,1e-3,2.2e-3,4.7e-3,10e-3];
+const VS=12,RL=24,VD=0.45,ROFF=1000,TPWM=50e-6,TCLOSE=0.5e-3,TSLAM=1e-6,SLOW=1000;
+let hw=[];try{hw=JSON.parse(localStorage.getItem('l3hw')||'[]')}catch(e){}
+const S={step:0,done:new Set(),seen:new Set(),fl:{},
+  wl:2,wr:1,wv:'closed',wI:0,wt:0,wlog:[],I0:0,tc:0,kick:null,run:null,
+  sw:false,diode:'none',fuse:false,bl:2,Ib:0,cap:null,rp:1,last:null,
+  pwm:false,duty:0.3,pw:null,ph:0,quiz:false};
+let STEPS=[];
+const wLH=()=>WL[S.wl],wRo=()=>WR[S.wr],wTau=()=>wLH()/wRo(),wMax=()=>VS/wRo();
+/* the board circuit: 12 V → switch → SW node → coil → lamp (24 Ω) → ground; optional diode ground → SW */
+function swNode(closed,I,diode){if(closed)return VS;if(diode==='ok')return I>0?-VD:0;return -I*ROFF}
+function capture(closed){const L=BL[S.bl],dt=0.02e-6,T=1e-3,t0=0.1e-3,N=1000,V=new Float32Array(N+1),I=new Float32Array(N+1);
+  let i=S.Ib,k=0,mn=99,mx=-1e9;const was=S.sw;
+  for(let n=0,t=0;t<=T+1e-12;n++,t=n*dt){const c=t<t0?was:closed;let v=swNode(c,i,S.diode);i+=dt*(v-RL*i)/L;if(!c&&i<0)i=0;v=swNode(c,i,S.diode);
+    if(t>=t0){mn=Math.min(mn,v);mx=Math.max(mx,v)}if(n%50===0&&k<=N){V[k]=v;I[k]=i;k++}}
+  return{V,I,T,t0,min:mn,max:mx,end:i,closed}}
+function pwmWave(){const L=BL[S.bl],D=S.duty,dt=0.02e-6,steps=Math.round(TPWM/dt),P=60,N=400,V=new Float32Array(N),I=new Float32Array(N);
+  let i=VS*D/RL,lo=1e9,hi=-1e9,sum=0,vs=0,k=0;
+  for(let p=0;p<P;p++)for(let n=0;n<steps;n++){const c=n<D*steps;let v=swNode(c,i,'ok');i+=dt*(v-RL*i)/L;if(i<0)i=0;
+    if(p===P-1){lo=Math.min(lo,i);hi=Math.max(hi,i);sum+=i;vs+=c?VS:(i>0?-VD:0);if(n%Math.round(steps/N)===0&&k<N){V[k]=c?VS:(i>0?-VD:0);I[k]=i;k++}}}
+  const avg=sum/steps;return{V,I,avg,lo,hi,rip:hi-lo,vsw:vs/steps,vl:avg*RL}}
+function solve(){
+  let I=S.Ib,V=swNode(S.sw,I,S.diode);
+  if(S.fuse){I=0;V=0}
+  if(S.cap&&S.rp<1){const k=Math.min(S.cap.V.length-1,Math.floor(S.rp*(S.cap.V.length-1)));I=S.cap.I[k];V=S.cap.V[k]}
+  if(S.pwm&&S.pw){const n=S.pw.I.length,k=Math.min(n-1,Math.floor(S.ph*n));I=S.pw.I[k];V=S.pw.V[k]}
+  return{I,V};
+}
+
+if(!window.THREE||!THREE.OrbitControls){$('#stage').insertAdjacentHTML('beforeend','<div class="err">'+_t('3D failed to load. Check your connection and reload the page.')+'</div>')}
+else{
+const stage=$('#stage'),cv=$('#gl');
+const gl=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+gl.setPixelRatio(Math.min(devicePixelRatio,2));gl.outputEncoding=THREE.sRGBEncoding;
+const cam=new THREE.PerspectiveCamera(42,1,0.1,120);
+const ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.enablePan=false;ctl.maxPolarAngle=1.5;ctl.minDistance=3;ctl.maxDistance=40;
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{}));
+function mkScene(grid){const s=new THREE.Scene();s.background=new THREE.Color(0x050817);s.fog=new THREE.Fog(0x050817,26,60);
+  s.add(new THREE.HemisphereLight(0xe6ebff,0x050817,0.6));const d=new THREE.DirectionalLight(0xffffff,0.85);d.position.set(-4,10,6);s.add(d);
+  if(grid){const g=new THREE.GridHelper(60,60,0x5b9cff,0x5b9cff);g.material.transparent=true;g.material.opacity=.08;g.position.y=-0.17;s.add(g)}return s}
+const scB=mkScene(true),scW=mkScene(true);
+let curSc=null,lastW=0;
+const FR={b:{c:V3(-1.0,0.3,0.2),w:14.4,h:6.8,d:1.2,dir:V3(-0.05,1,1)},w:{c:V3(0.1,1.6,0),w:10.6,h:4.8,d:1.0,dir:V3(0.25,0.38,1)}};
+function topInset(){const sc=$('#scope');return stage.clientWidth<=900&&!sc.hidden?sc.offsetTop+sc.offsetHeight-20:0}
+function fit(){const f=FR[curSc];if(!f)return;const th=curSc!=='b';
+  ctl.minAzimuthAngle=th?-0.6:-Infinity;ctl.maxAzimuthAngle=th?0.9:Infinity;ctl.minPolarAngle=th?0.55:0;ctl.maxPolarAngle=th?1.45:1.5;
+  const ti=topInset(),vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*((stage.clientWidth-(window.PW?PW():0))/stage.clientHeight)),fw=curSc==='b'&&cam.aspect<1?14:f.w,dist=Math.max((fw/2)/Math.tan(hf/2),(f.h/2)/Math.tan(vf/2)*(stage.clientHeight/(stage.clientHeight-ti)))*(stage.clientWidth<=640?1.12:1.04)+f.d;
+  const cc=curSc==='b'&&cam.aspect<1?f.c.clone().setX(-1.9):f.c;cam.position.copy(cc).add(f.dir.clone().normalize().multiplyScalar(dist));ctl.target.copy(cc);ctl.update()}
+function useScene(k){if(k===curSc)return;curSc=k;fit()}
+function tube(a,b,r,mat){const d=b.clone().sub(a),L=Math.max(d.length(),0.001);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,22,1,true),mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(V3(0,1,0),d.normalize());return m}
+function cyl(r,h,mat,x,y,z,rx,rz){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat);m.position.set(x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m}
+const labels=[],TR={up:'translate(-50%,calc(-100% - 4px))',down:'translate(-50%,6px)',right:'translate(10px,-50%)',left:'translate(calc(-100% - 10px),-50%)'};
+const lab=(sc,txt,p,cls,vis,mode)=>{const el=document.createElement('div');el.className='lb'+(cls?' '+cls:'');el.textContent=_t(txt);$('#labels').appendChild(el);const o={sc,el,p,vis:vis||(()=>true),tr:TR[mode||'up']};labels.push(o);return o};
+function polyPath(pts,closed){const L=[];for(let i=0;i<pts.length-(closed?0:1);i++)L.push(pts[i].distanceTo(pts[(i+1)%pts.length]));return{pts,L,T:L.reduce((a,b)=>a+b,0)||1,closed}}
+function pathAt(P,s,out){s=((s%P.T)+P.T)%P.T;for(let i=0;i<P.L.length;i++){if(s<=P.L[i])return out.copy(P.pts[i]).lerp(P.pts[(i+1)%P.pts.length],P.L[i]?s/P.L[i]:0);s-=P.L[i]}return out.copy(P.pts[0])}
+const dummy=new THREE.Object3D(),pv=V3();
+const mLead=M(0xc8cfd2,{metalness:.7,roughness:.3}),mCu=M(0xe39a52,{metalness:.5,roughness:.35}),mGold=M(0xd9b45a,{metalness:.6,roughness:.3});
+
+/* ---------- water scene: a loop with a pump, a valve, a heavy wheel and a narrow pipe ---------- */
+const mGlass=new THREE.MeshStandardMaterial({color:0x9fd0ff,transparent:true,opacity:.14,roughness:.1,side:THREE.DoubleSide,depthWrite:false});
+const mNarrow=new THREE.MeshStandardMaterial({color:0xbfe0ff,transparent:true,opacity:.32,roughness:.15,side:THREE.DoubleSide,depthWrite:false});
+const WY0=0.45,WY1=3.1,WX0=-3.8,WX1=3.6,PR=0.28;
+{const fl=new THREE.Mesh(new THREE.BoxGeometry(9.4,0.08,2.4),M(0x030718));fl.position.set(-0.1,-0.04,0);scW.add(fl)}
+const WP=[V3(WX0,WY0,0),V3(WX0,WY1,0),V3(WX1,WY1,0),V3(WX1,WY0,0)];
+[[WP[0],WP[1]],[WP[1],WP[2]],[WP[3],WP[0]]].forEach(([a,b])=>scW.add(tube(a,b,PR,mGlass)));
+WP.forEach(p=>{const s=new THREE.Mesh(new THREE.SphereGeometry(PR,18,12),mGlass);s.position.copy(p);scW.add(s)});
+const narrowG=new THREE.Group();scW.add(narrowG);
+function buildNarrow(){while(narrowG.children.length){const c=narrowG.children.pop();c.geometry.dispose()}const r=[0.22,0.16,0.11,0.075][S.wr];narrowG.add(tube(WP[2],WP[3],r,mNarrow))}
+/* pump */
+{const pb=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.95,0.95),M(0x15171f));pb.position.set(WX0,1.4,0);scW.add(pb)}
+const impW=new THREE.Group();impW.position.set(WX0,1.4,0.5);scW.add(impW);
+for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.66,0.11,0.03),M(0xe8332a));b.rotation.z=i*Math.PI/4;impW.add(b)}
+/* valve: a gate that drops into the pipe */
+const VX=-2.3;
+scW.add(cyl(0.36,0.5,M(0xb9c2d6,{metalness:.7,roughness:.3}),VX,WY1,0,0,Math.PI/2));
+const gate=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.62,0.62),M(0xe8332a));scW.add(gate);
+const stem=cyl(0.04,0.8,mLead,VX,WY1+0.75,0);scW.add(stem);
+const wheelTop=new THREE.Mesh(new THREE.TorusGeometry(0.2,0.035,8,24),M(0xffb26b));wheelTop.rotation.x=Math.PI/2;scW.add(wheelTop);
+/* the heavy wheel (L): a steel flywheel in a housing on the top pipe */
+const HX=0.6,hous=cyl(1,0.7,mGlass,HX,WY1,0,Math.PI/2);scW.add(hous);
+const fly=new THREE.Group();fly.position.set(HX,WY1,0);scW.add(fly);
+const mSteel=M(0x5b6170,{metalness:.8,roughness:.35}),mPaddle=M(0x8f9bc4,{metalness:.6,roughness:.4});
+let flyR=0.8;function buildFly(){while(fly.children.length){const c=fly.children.pop();if(c.geometry)c.geometry.dispose()}
+  flyR=[0.5,0.6,0.72,0.84,0.95][S.wl];const th=[0.12,0.16,0.22,0.3,0.4][S.wl];
+  const disc=new THREE.Mesh(new THREE.CylinderGeometry(flyR,flyR,th,40),mSteel);disc.rotation.x=Math.PI/2;fly.add(disc);
+  for(let k=0;k<8;k++){const p=new THREE.Mesh(new THREE.BoxGeometry(0.06,flyR*0.9,th+0.12),mPaddle);p.position.set(Math.cos(k*Math.PI/4)*flyR*0.5,Math.sin(k*Math.PI/4)*flyR*0.5,0);p.rotation.z=k*Math.PI/4-Math.PI/2;fly.add(p)}
+  fly.add(cyl(0.08,th+0.3,mLead,0,0,0,Math.PI/2));
+  hous.scale.set(flyR+0.12,1,flyR+0.12)}
+/* a pressure gauge before the valve */
+const gaugeG=new THREE.Group();gaugeG.position.set(VX-0.75,WY1,0);scW.add(gaugeG);gaugeG.add(cyl(0.04,0.6,mLead,0,0.45,0));
+{const d=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.07,30),M(0xf2f2ee));d.rotation.x=Math.PI/2;d.position.set(0,1.05,0);gaugeG.add(d);
+ const r=new THREE.Mesh(new THREE.TorusGeometry(0.34,0.035,8,30),M(0x30363a));r.position.set(0,1.05,0.03);gaugeG.add(r)}
+const needle=new THREE.Group();needle.position.set(0,1.05,0.06);gaugeG.add(needle);{const n=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.26,0.02),M(0xe8332a));n.position.y=0.12;needle.add(n)}
+/* flowing drops and the hammer splash */
+const NDW=56,dropsW=new THREE.InstancedMesh(new THREE.SphereGeometry(0.075,10,8),new THREE.MeshBasicMaterial({color:0x9fd3ff}),NDW);scW.add(dropsW);
+const WPATH=polyPath(WP,true);
+const splash=[...Array(24)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6),new THREE.MeshBasicMaterial({color:0xcfe9ff,transparent:true,opacity:0}));scW.add(m);return{m,v:V3(),life:0}});
+const LwPump=lab('w','Pump = source, 12 V',V3(WX0,0.85,0.55),'part',null,'down'),LwValve=lab('w','',V3(VX,WY1+1.25,0),'',null,'up'),
+  LwFly=lab('w','',V3(HX,WY1+1.15,0),'part',null,'up'),LwN=lab('w','',V3(WX1-0.35,1.75,0),'part',null,'left'),
+  LwHam=lab('w','',V3(VX-0.2,WY1-0.6,0.4),'bad',()=>S.kick&&S.kick.show>0,'down');
+let wflow=0,flyA=0,needleA=0;
+function buildW(){buildNarrow();buildFly();LwFly.el.textContent=_t('Heavy wheel = coil · {0}',fL(wLH()));LwN.el.textContent=_t('Narrow pipe = resistance · {0}',fR(wRo()))}
+function wValve(){return S.wv==='open'?1:S.wv==='closing'?Math.max(0,1-S.tc/TCLOSE):0}
+
+/* ---------- board scene: 12 V → fuse → switch → SW → coil → lamp → ground, diode ground → SW ---------- */
+const hits=[],add=(par,m,part)=>{par.add(m);if(part){m.userData.part=part;hits.push(m)}return m};
+const P=(x,z)=>V3(x,0,z);
+function bar(a,b,w,h,y,mat,ext){const d=b.clone().sub(a);const m=new THREE.Mesh(new THREE.BoxGeometry(d.length()+(ext||0),h,w),mat);m.position.set((a.x+b.x)/2,y,(a.z+b.z)/2);m.rotation.y=-Math.atan2(d.z,d.x);return m}
+const trace=(par,a,b,w)=>add(par,bar(a,b,w||0.24,0.03,0.015,mCu,w||0.24),'cu');
+{const brd=new THREE.Mesh(new THREE.BoxGeometry(10.8,0.16,6.2),M(0x01030e,{roughness:.85}));brd.position.set(-0.6,-0.08,0);scB.add(brd)}
+const KP=P(-5,-0.3),KM=P(-5,0.3),F1=P(-4.5,-1.8),F2=P(-3.5,-1.8),S1=P(-3.0,-1.8),S2=P(-1.7,-1.8),SWN=P(-1.0,-1.8),L1=P(-0.3,-1.8),L2=P(1.7,-1.8),LT=P(3.6,-1.8),LA=P(3.6,-0.7),LB=P(3.6,0.7),GR=P(3.6,1.8),GL=P(-5,1.8),DA=P(-1.0,-1.1),DB=P(-1.0,0.6);
+[[KP,P(-5,-1.8)],[P(-5,-1.8),F1],[F2,S1],[S2,SWN],[SWN,L1],[L2,LT],[LT,LA],[LB,GR],[GR,GL],[GL,KM]].forEach(([a,b])=>trace(scB,a,b));
+[[SWN,DA],[DB,P(-1.0,1.8)]].forEach(([a,b])=>trace(scB,a,b,0.16));
+[F1,F2,S1,S2,L1,L2,LA,LB,DA,DB].forEach(p=>add(scB,cyl(0.16,0.05,mGold,p.x,0.025,p.z)));
+lab('b','+12 V',V3(2.7,0.05,-2.25),'part');lab('b','GND (ground, 0 V)',V3(0.7,0.05,2.25),'part',null,'down');
+/* supply and terminal, as in levels 1–2 */
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(1.6,1.0,2.6),M(0x232826)),'psu').position.set(-7.4,0.5,0);
+add(scB,bar(P(-6.6,-0.3),P(-5.4,-0.3),0.1,0.08,0.12,M(0xe8332a)));add(scB,bar(P(-6.6,0.3),P(-5.4,0.3),0.1,0.08,0.12,M(0x1c1c1c)));
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.42,0.4,1.1),M(0x2b6b3a,{roughness:.5})),'conn').position.set(-5.4,0.22,0);
+add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.4,0.42,1.2),M(0x1f7a3c,{roughness:.5})),'conn').position.set(-5.0,0.21,0);
+lab('b','12 V supply · 10 A',V3(-7.4,1.1,0),'part');
+function slotGroup(a,b){const g=new THREE.Group(),d=b.clone().sub(a);g.position.copy(a).add(b).multiplyScalar(0.5);g.rotation.y=-Math.atan2(d.z,d.x);scB.add(g);return g}
+function leads(g,h,x){[-1,1].forEach(s=>{add(g,cyl(0.025,h,mLead,s*x,h/2,0));add(g,cyl(0.025,0.16,mLead,s*(x-0.08),h,0,0,Math.PI/2))})}
+/* fuse */
+const gF=slotGroup(F1,F2);leads(gF,0.28,0.5);add(gF,cyl(0.15,0.6,new THREE.MeshStandardMaterial({color:0xddeeff,transparent:true,opacity:.35,roughness:.1,depthWrite:false}),0,0.28,0,0,Math.PI/2),'fuse');
+[-0.32,0.32].forEach(x=>add(gF,cyl(0.16,0.12,mLead,x,0.28,0,0,Math.PI/2),'fuse'));
+const fWire=add(gF,cyl(0.015,0.52,M(0xd0d6da),0,0.28,0,0,Math.PI/2)),fSoot=add(gF,cyl(0.14,0.26,M(0x222222),0,0.28,0,0,Math.PI/2));
+/* switch: a lever, as in level 0 */
+const gSw=new THREE.Group();scB.add(gSw);add(gSw,bar(S1,S2,0.5,0.16,0.08,M(0x30363a)),'sw');
+const lever=new THREE.Group();lever.position.set(S1.x+0.05,0.22,-1.8);gSw.add(lever);
+{const lm=new THREE.Mesh(new THREE.BoxGeometry(1.25,0.07,0.18),mLead);lm.position.x=0.625;add(lever,lm,'sw')}
+add(gSw,cyl(0.09,0.1,mGold,S2.x-0.05,0.2,-1.8),'sw');
+/* the coil: a toroid with copper windings, size grows with L */
+const gL=new THREE.Group();gL.position.set((L1.x+L2.x)/2,0,-1.8);scB.add(gL);
+const mFer=M(0x1b1d24,{roughness:.75});let coilS=1;
+function buildCoil(){while(gL.children.length){const c=gL.children.pop();if(c.geometry)c.geometry.dispose()}
+  const R=0.52,r=0.2,t=new THREE.Mesh(new THREE.TorusGeometry(R,r,18,48),mFer);t.position.y=0.75;add(gL,t,'coil');
+  const pts=[],turns=18;for(let k=0;k<=720;k++){const a=k/720*Math.PI*2,w=a*turns;pts.push(V3(Math.cos(a)*(R+Math.cos(w)*(r+0.03)),0.75+Math.sin(a)*0+Math.sin(w)*(r+0.03),0).applyAxisAngle(V3(1,0,0),0))}
+  const wind=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>V3(p.x,p.y,0).add(V3(0,0,0))),true),720,0.028,6,true),mCu);
+  /* windings wrap the ring standing upright in the x–y plane */
+  const pts2=[];for(let k=0;k<=960;k++){const a=k/960*Math.PI*2,w=a*24,rr=R+Math.cos(w)*(r+0.025);pts2.push(V3(Math.cos(a)*rr,0.75+Math.sin(a)*rr,Math.sin(w)*(r+0.025)))}
+  wind.geometry.dispose();add(gL,new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts2,true),960,0.026,6,true),mCu),'coil');
+  t.position.set(0,0.75,0);t.rotation.x=0;
+  [-1,1].forEach(s=>{add(gL,cyl(0.028,0.5,mCu,s*1.0,0.25,0));add(gL,tube(V3(s*1.0,0.5,0),V3(s*0.55,0.45,0),0.028,mCu))});
+  coilS=[0.7,0.8,0.9,1.0,1.12][S.bl];gL.scale.set(coilS,coilS,coilS);gL.position.y=0}
+/* the lamp: socket, glass bulb, filament */
+const gLamp=new THREE.Group();gLamp.position.set(3.6,0,0);scB.add(gLamp);
+add(gLamp,cyl(0.32,0.5,M(0x8a8f99,{metalness:.7,roughness:.35}),0,0.25,0),'lamp');
+const mBulb=new THREE.MeshStandardMaterial({color:0xfff3d6,transparent:true,opacity:.35,roughness:.05,emissive:0xffb050,emissiveIntensity:0,depthWrite:false});
+[-0.7,0.7].forEach(z=>add(gLamp,tube(V3(0,0.02,z),V3(0,0.12,z*0.4),0.03,mLead)));
+const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.5,28,18),mBulb);bulb.position.y=0.95;add(gLamp,bulb,'lamp');
+const mFil=M(0x6b5a40,{emissive:0xffa030,emissiveIntensity:0});const fil=new THREE.Mesh(new THREE.TorusGeometry(0.12,0.02,6,20,Math.PI),mFil);fil.position.y=0.95;gLamp.add(fil);
+const lampLight=new THREE.PointLight(0xffb060,0,7);lampLight.position.set(3.6,1.6,0.3);scB.add(lampLight);
+/* the flyback diode slot (ground → SW), stripe towards SW */
+const gD=slotGroup(DA,DB);leads(gD,0.22,0.78);add(gD,cyl(0.14,0.6,M(0x161616),0,0.22,0,0,Math.PI/2),'diode');
+const stripe=add(gD,cyl(0.146,0.09,M(0xbfc5c8),-0.2,0.22,0,0,Math.PI/2),'diode');
+/* test point and scope probe on SW */
+trace(scB,SWN,P(-1.0,-2.6),0.12);add(scB,cyl(0.2,0.08,mGold,-1.0,0.04,-2.6));
+const probe=new THREE.Mesh(new THREE.ConeGeometry(0.13,0.5,18),M(0x5b9cff,{emissive:0x5b9cff,emissiveIntensity:.3}));probe.rotation.x=Math.PI;probe.position.set(-1.0,0.5,-2.6);scB.add(probe);
+/* labels */
+const Lfuse=lab('b','',V3(-4,0.55,-1.8),'part'),Lsw=lab('b','',V3(-2.35,0.45,-1.45),'part',null,'down'),Lsn=lab('b','SW · scope probe',V3(-1.0,0.6,-2.6),'',null,'up'),
+  Lcoil=lab('b','',V3(0.7,1.6,-1.8),'part'),Llamp=lab('b','',V3(3.6,1.7,0),'part',null,'up'),Ld=lab('b','',V3(-1.25,0.3,-0.25),'part',()=>S.diode!=='none','left'),
+  Lspark=lab('b','Spark!',V3(-2.35,0.7,-1.8),'bad',()=>sparkT>0,'up');
+/* current dots: the supply loop, and the freewheel loop through the diode */
+const PON=polyPath([KP,P(-5,-1.8),SWN,LT,GR,GL,KM],true),PFW=polyPath([SWN,LT,GR,P(-1.0,1.8),SWN],true);
+const NP=70,parts=new THREE.InstancedMesh(new THREE.SphereGeometry(0.07,10,8),new THREE.MeshBasicMaterial({color:0xffe7a0}),NP);scB.add(parts);
+let flow=0,flashT=0,sparkT=0;const flashAt=V3(),flashL=new THREE.PointLight(0xbfe0ff,0,8);scB.add(flashL);
+const sparks=[...Array(30)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,4),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:0}));scB.add(m);return{m,v:V3(),life:0}});
+const smoke=[...Array(14)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,10,8),new THREE.MeshBasicMaterial({color:0x9aa39e,transparent:true,opacity:0,depthWrite:false}));scB.add(m);return{m,life:0}});
+
+const INFO={
+psu:['12 V · 10 A power supply','The same supply as in levels 1 and 2.'],
+conn:['Screw terminal','Plus and minus from the supply come in here.'],
+fuse:['Fuse','From level 1. If something shorts the rail, it blows first.'],
+sw:['Switch','Closed, it connects the coil to 12 V. Open, it cuts the path. Later a transistor does this job (level 5).'],
+coil:['Coil (inductor)','Copper wire wound around a ferrite ring. Current through it builds a magnetic field that stores energy, so the current can’t change suddenly. Values are in µH or mH.'],
+lamp:['Lamp','A 12 V bulb, about 24 Ω hot. Its brightness shows how much power it gets.'],
+diode:['Schottky diode','From level 1. Here it sits from ground to the switch node, stripe towards the node, so the coil’s current always has a way round.'],
+cu:['Copper trace','A wire on the board.']};
+const showInfo=k=>{$('#infoT').textContent=_t(INFO[k][0]);$('#infoP').textContent=_t(INFO[k][1]);$('#info').hidden=false};
+$('#infoX').onclick=()=>$('#info').hidden=true;
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let down=null;
+const shown=o=>{while(o){if(!o.visible)return false;o=o.parent}return true};
+cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+cv.addEventListener('pointerup',e=>{if(!down||curSc!=='b')return;const dx=e.clientX-down[0],dy=e.clientY-down[1];down=null;if(dx*dx+dy*dy>49)return;
+  const r=cv.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,cam);
+  const h=ray.intersectObjects(hits.filter(shown),false)[0];if(!h||!INFO[h.object.userData.part])return;S.seen.add(h.object.userData.part);showInfo(h.object.userData.part)});
+
+/* ---------- oscilloscope: voltage (blue) and current (copper) ---------- */
+const scv=$('#scv'),sx=scv.getContext('2d'),CV_='#8fd0ff',CI_='#ffb26b';
+function plot(o){const dpr=Math.min(devicePixelRatio||1,2),W=scv.clientWidth,H=scv.clientHeight;if(!W||!H)return;
+  if(scv.width!==Math.round(W*dpr)||scv.height!==Math.round(H*dpr)){scv.width=Math.round(W*dpr);scv.height=Math.round(H*dpr)}
+  const x=sx;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);x.strokeStyle='rgba(143,155,196,.13)';x.lineWidth=1;
+  for(let i=0;i<=10;i++){const px=Math.round(i*W/10)+.5;x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke()}
+  for(let j=0;j<=6;j++){const py=Math.round(j*H/6)+.5;x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke()}
+  const draw=(arr,lo,hi,c,n)=>{if(!arr||n<2)return;x.strokeStyle=c;x.lineWidth=2;x.lineJoin='round';x.beginPath();for(let i=0;i<n;i++){const px=arr[i][0]*W,v=Math.max(lo,Math.min(hi,arr[i][1])),py=H-3-(v-lo)/(hi-lo)*(H-6);i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke()};
+  if(o.zeroV!=null){const py=H-3-(0-o.vlo)/(o.vhi-o.vlo)*(H-6);x.strokeStyle='rgba(201,210,245,.35)';x.setLineDash([4,4]);x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();x.setLineDash([])}
+  if(o.mark!=null){const px=o.mark*W;x.strokeStyle='rgba(255,178,107,.8)';x.setLineDash([5,4]);x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke();x.setLineDash([]);x.fillStyle='#ffb26b';x.font='600 13px Manrope,sans-serif';x.fillText('τ',Math.min(W-12,px+4),14)}
+  if(o.hline!=null){const py=H-3-(o.hline-o.ilo)/(o.ihi-o.ilo)*(H-6);x.strokeStyle='rgba(255,178,107,.6)';x.setLineDash([5,4]);x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();x.setLineDash([])}
+  draw(o.I,o.ilo,o.ihi,CI_,o.I?o.I.length:0);draw(o.V,o.vlo,o.vhi,CV_,o.V?o.V.length:0);
+  if(o.clip){x.fillStyle='#ff8a70';x.font='700 13px Manrope,sans-serif';x.fillText(o.clip,Math.min(W-160,Math.max(6,o.clipX*W+6)),H-10)}}
+function drawScope(){const fig=$('#scope');if(fig.hidden)return;const st=STEPS[S.step];let sub='',rd='',xs='',ys='',lg='',bad=false;
+  if(st.sc==='w'){const L=S.wlog,ws=S.step===1?6*wTau():S.step===2?3e-3:5e-3,imax=wMax()*1.15,o=S.step===2?Math.max(0,S.wt-0.8*ws):0;
+    const pts=L.filter(p=>p[0]>=o&&p[0]<=o+ws).map(p=>[(p[0]-o)/ws,p[1]]);
+    if(S.step<2){plot({I:pts,ilo:0,ihi:imax,mark:S.step===1?1/6:null,hline:S.step===1?0.632*wMax():null});sub=_t('flow');ys=_t('{0} / square',fI(imax/6))}
+    else{const vp=L.filter(p=>p[0]>=o&&p[0]<=o+ws).map(p=>[(p[0]-o)/ws,p[2]]);const k=S.kick;
+      plot({I:pts,ilo:0,ihi:imax,V:vp,vlo:0,vhi:48,clip:k&&k.slam?_t('↑ {0}, off the scale',fV(k.peak)):'',clipX:k?(k.at-o)/ws:0});sub=_t('flow and pressure at the valve');ys=_t('{0} / square',fV(8))}
+    xs=_t('{0} / square',fT(ws/10));rd=fI(S.wI);lg=`<span><i style="background:${CI_}"></i>${_t('flow (current)')}</span>`+(S.step===2?`<span><i style="background:${CV_}"></i>${_t('pressure at the valve (voltage)')}</span>`:'')}
+  else if(S.pwm&&S.pw){const n=S.pw.I.length,ih=Math.max(0.6,S.pw.hi*1.2),I=[],V=[];for(let r=0;r<4;r++)for(let i=0;i<n;i++){I.push([(r*n+i)/(4*n),S.pw.I[i]]);V.push([(r*n+i)/(4*n),S.pw.V[i]])}
+    plot({I,ilo:0,ihi:ih,V,vlo:-2,vhi:14,zeroV:1});sub=_t('SW and coil current · 4 cycles');xs=_t('{0} / square',fT(4*TPWM/10));ys=_t('{0} / square',fV(16/6));rd=_t('{0} average',fV(S.pw.vl));
+    lg=`<span><i style="background:${CV_}"></i>${_t('SW voltage')}</span><span><i style="background:${CI_}"></i>${_t('coil current')}</span>`}
+  else{const c=S.cap;sub=_t('SW and coil current · single shot');xs=_t('{0} / square',fT(1e-4));ys=_t('{0} / square',fV(8));
+    lg=`<span><i style="background:${CV_}"></i>${_t('SW voltage')}</span><span><i style="background:${CI_}"></i>${_t('coil current')}</span>`;
+    if(c){const n=c.V.length,m=Math.max(1,Math.floor(S.rp*(n-1))),I=[],V=[];for(let i=0;i<=m;i++){I.push([i/(n-1),c.I[i]]);V.push([i/(n-1),c.V[i]])}
+      const off=!c.closed&&c.min<-40;plot({I,ilo:0,ihi:0.6,V,vlo:-34,vhi:14,zeroV:1,clip:off&&S.rp>=1?_t('↓ {0}, off the scale',fV(c.min)):'',clipX:c.t0/c.T});
+      rd=S.rp<1?_t('capturing…'):c.closed?_t('switched on'):_t('lowest {0}',fV(c.min));bad=S.rp>=1&&c.min<-40}
+    else{plot({I:[[0,S.Ib],[1,S.Ib]],ilo:0,ihi:0.6,V:[[0,swNode(S.sw,S.Ib,S.diode)],[1,swNode(S.sw,S.Ib,S.diode)]],vlo:-34,vhi:14,zeroV:1});rd=_t('waiting for a switch')}}
+  $('#scS').textContent=sub;$('#scR').textContent=rd;$('#scR').className='sr'+(bad?' bad':'');$('#scX').textContent=xs;$('#scY').textContent=ys;$('#scL').innerHTML=lg}
+
+/* ---------- lesson ---------- */
+STEPS=[
+{sc:'w',part:'Inertia',t:'A coil is a heavy wheel',s:"A <b>coil</b> (inductor) is wire wound in loops. In water it’s a <b>heavy wheel</b> in the pipe: steady flow passes freely, but every change has to spin the wheel up or down.",bt:["What it is","The heavy wheel","Not resistance, inertia","Units, and the slow motion"],ui:['wValve','wnI','wnU','scope','wF'],enter:()=>{S.wl=2;S.wr=1;S.wv='closed';S.wI=0;S.wt=0;S.wlog=[];S.kick=null;S.fl.full=false},
+ b:'<p>A <b>coil</b>, or inductor, is wire wound in loops, often around a ferrite or iron core. Current through it builds a magnetic field, and the field stores energy.</p><p>In water it’s a heavy paddle wheel in the pipe. To get the water moving you also have to spin up the wheel, and that takes time. Once it spins, it costs nothing: steady flow passes as if it weren’t there.</p><p>So a coil doesn’t resist current; it resists <b>changes</b> in current. A capacitor (level 2) holds its voltage. A coil holds its current.</p><p class="note">Inductance L is in henries (H); real coils are microhenries (µH) to millihenries (mH). This scene runs 1000 times slower than real life: 1 ms on the scope takes a second.</p>',
+ after:'<p>The flow climbed and settled at I = U / R = 12 V / 10 Ω = 1.2 A. At the start the whole 12 V went into spinning up the wheel; at the end the wheel took nothing.</p>',
+ task:'Open the valve and wait until the flow levels off',ok:()=>S.fl.full},
+{sc:'w',part:'Inertia',t:'How fast: τ = L / R',s:"A heavier wheel starts slower. The time scale is <b>τ = L / R</b>: after one τ the flow reaches 63% of its final value.",bt:["τ, tau","The same curve as the capacitor","Less resistance, slower","The push-back"],ui:['wL','wR','wValve','wnTau','scope'],enter:()=>{S.wl=0;S.wr=1;S.wv='closed';S.wI=0;S.wt=0;S.wlog=[];S.run=null;S.kick=null;S.fl.tau=false},
+ b:'<p>τ = L / R. Henries divided by ohms come out in seconds: 10 mH / 10 Ω = 0.001 s = 1 ms.</p><p>It’s the 63% curve from the capacitor in level 2. There the voltage crept up; here the current does.</p><p>Less resistance makes τ longer, not shorter: the final current U / R is bigger, and the wheel needs longer to get there.</p><p>The wheel pushes back with <b>U = L × ΔI / Δt</b>. At the start the whole 12 V goes into spinning it up; as the flow settles, the push-back fades to zero.</p>',
+ after:'<p>At one τ the flow crossed the orange 63% line. Any pair with L / R = 1 ms does the same: 10 mH with 10 Ω, 22 mH with 22 Ω, 4.7 mH with 4.7 Ω.</p>',
+ task:'Set τ to about 1 ms, then open the valve from rest',ok:()=>S.fl.tau},
+{sc:'w',part:'Inertia',t:'Stop it suddenly: the kick',s:"The wheel can’t stop instantly. Shut the valve and it slams the water into it: <b>U = L × ΔI / Δt</b>. The faster you stop it, the bigger the kick.",bt:["Water hammer","The coil’s kick","The numbers","Where the energy goes"],ui:['wValve2','wnI','wnKick','scope','wF'],enter:()=>{S.wl=2;S.wr=1;S.wv='closed';S.wI=0;S.wt=0;S.wlog=[];S.kick=null;S.fl.slow=S.fl.slam=false},
+ b:'<p>Plumbers call it <b>water hammer</b>: shut a tap fast and the pipes bang. The moving water can’t stop at once, so the pressure spikes at the valve.</p><p>A coil does the same. Its current wants to keep going; cut the path and the coil raises the voltage as high as it takes to keep it flowing: U = L × ΔI / Δt.</p><p>Close over 0.5 ms: 10 mH × 1.2 A / 0.5 ms = 24 V on top of the pump. Slam it in 1 µs: 12 000 V. Long before that, something breaks down: air sparks, a transistor dies.</p><p>The spinning wheel holds energy, E = ½ × L × I². When you stop it, that energy has to go somewhere.</p>',
+ after:'<p>Closing slowly gave a modest bump. Slamming gave a spike far beyond the pump. On a board the same spike lands on whatever cut the circuit: a switch contact or a transistor.</p>',
+ task:'Open the valve and close it slowly, then open it again and slam it shut',ok:()=>S.fl.slow&&S.fl.slam},
+{sc:'b',part:'On the board',t:'Switching off a coil',s:"A test circuit on the arm board: 12 V → switch → <b>coil</b> → lamp → ground. Open the switch while current flows and the coil kicks back with hundreds of volts.",bt:["The test circuit","The kick","Who dies","-"],ui:['bSw','scope','nI','nSW','pills','bF'],build:{diode:'none'},enter:()=>{S.bl=2;S.sw=false;S.Ib=0;S.fuse=false;S.pwm=false;S.fl.spike=S.fl.on=false},
+ b:'<p>The 12 V rail, a switch, a 2.2 mH coil and a 12 V lamp of about 24 Ω. The scope probe sits on <b>SW</b>, the switch node between the switch and the coil. Close the switch and the current climbs with τ = 2.2 mH / 24 Ω ≈ 0.09 ms, up to 0.5 A.</p><p>Open it and the 0.5 A has nowhere to go. The coil drives SW far below ground, until the gap breaks down and sparks. Across the switch: hundreds of volts.</p><p>A mechanical switch survives a spark; its contacts just wear. A transistor, which switches loads on a real board (level 5), is rated for 30–60 V and dies on the first kick.</p><p class="note">The spike here is limited by an arc of about 1 kΩ. In real life its height depends on what breaks down first.</p>',
+ after:'<p>SW dived to about −500 V: over 500 V across the open switch, and a spark. Motors, relays and solenoids are coils too, and every one of them does this when you switch it off.</p>',
+ task:'Close the switch, then open it and watch the scope',ok:()=>S.fl.spike},
+{sc:'b',part:'On the board',t:'Flyback diode',s:"A diode from ground to SW, stripe towards SW, gives the coil’s current a way round. When the switch opens, SW stops at −0.45 V and the current fades.",bt:["Where it goes","What it does","Backwards","Everywhere"],ui:['bDiode','bSw','scope','nI','nSW','pills','bF'],build:{diode:'none'},enter:()=>{S.bl=2;S.sw=false;S.Ib=0;S.fuse=false;S.pwm=false;S.fl.calm=false},
+ b:'<p>A Schottky diode (level 1) between ground and SW, stripe towards SW. While the switch is closed, SW is at 12 V and the diode is shut: it does nothing.</p><p>Open the switch and the coil pulls SW below ground. At −0.45 V the diode opens, and the current keeps circling coil → lamp → ground → diode, fading with τ = L / R. No spike, no spark.</p><p>Fit it backwards and it’s a short from 12 V to ground the moment the switch closes. The fuse from level 1 blows and saves the board.</p><p>On relays and motors this part is called a <b>flyback</b> or freewheeling diode. Every relay module has one next to the coil.</p>',
+ after:'<p>SW stopped at −0.45 V and the lamp faded out in about a tenth of a millisecond. The diode turned a destructive spike into a gentle fade.</p>',
+ task:'Fit the diode, close the switch, then open it',ok:()=>S.fl.calm},
+{sc:'b',part:'Towards the regulator',t:'Switching fast: the coil smooths',s:"Now the switch flips 20 000 times a second. The coil won’t let the current jump, so the lamp gets the <b>average</b>: about D × 12 V, where D is the share of time the switch is closed.",bt:["The duty cycle","Ramp up, ramp down","The average","Ripple","Next"],ui:['bDuty','bL','scope','nAvg','nRip','pills','bF'],build:{diode:'ok'},enter:()=>{S.bl=1;S.duty=0.3;S.fuse=false;S.pwm=true;S.pw=pwmWave();S.ph=0},
+ b:'<p>The switch now opens and closes 20 000 times a second; a transistor does it (level 5). The share of time it’s closed is the <b>duty cycle</b>, D.</p><p>While it’s closed, the current ramps up. While it’s open, it keeps flowing through the diode and ramps down. The coil keeps those ramps shallow.</p><p>The lamp gets the average: about D × 12 V. At 50% that’s about 6 V, and the other 6 V aren’t burnt as heat in a resistor.</p><p>The leftover wobble is the <b>ripple</b>. A heavier coil, smaller ripple. Too light, and the current swings by more than its average every cycle, and the lamp flickers.</p><p class="note">Add the capacitor from level 2 at the output to smooth the voltage too, and you have a <b>buck converter</b>: 12 V in, 5 V out, almost no heat. That’s level 4.</p>',
+ after:'<p>About 6 V on the lamp from a 12 V rail, and the current barely wobbles. You just built the heart of a switching regulator.</p>',
+ task:'Get about 6 V on the lamp with the ripple under 20% of the current',ok:()=>S.pw&&S.pw.vl>=5.5&&S.pw.vl<=6.5&&S.pw.rip/S.pw.avg<0.2},
+{sc:'b',part:'Towards the regulator',t:'Size it on paper',s:"<b>U = L × ΔI / Δt</b>. Example: a 1 mH coil with 5 V across it; in 1 ms its current grows by 5 × 0.001 / 0.001 = 5 A.",bt:["Rearranged","Units"],ui:['scope'],build:{diode:'ok'},enter:()=>{S.bl=3;S.duty=0.5;S.pwm=true;S.pw=pwmWave()},
+ b:'<p>Rearranged: <b>Δt = L × ΔI / U</b> (how long a change takes) and <b>ΔI = U × Δt / L</b> (how much it changes).</p><p>Henries × amps / volts = seconds. Microhenries give microseconds.</p><p class="qq">A 100 µH coil has 12 V across it. How long until its current grows by 0.5 A?</p><div class="quiz"><input id="qa" inputmode="decimal" placeholder="Δt, in µs" aria-label="Time in microseconds"><button id="qb">Check</button></div><p class="fb" id="qf"></p>',
+ after:'<p>About 4 µs. Coils in switching regulators are sized exactly like this: decide how much ripple you allow, then L = U × Δt / ΔI.</p>',
+ task:'Work out the time (below)',ok:()=>S.quiz},
+{sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"A coil holds its current, kicks back when you cut it, and smooths it when you switch fast.",bt:["-","Next"],ui:[],build:{diode:'ok'},enter:()=>{S.bl=3;S.duty=0.5;S.pwm=true;S.pw=pwmWave()},
+ b:_t('<p>The test circuit: 12 V → switch → coil → lamp, with a flyback diode from ground to SW. Switched fast, it gives the lamp a steady share of 12 V. That’s a buck converter without its output capacitor.</p>')+'<ul class="hw">'+['Find the coils on any DC-DC module or charger board: toroids, or square black blocks printed 100, 220 or 4R7. 100 means 10 µH, 220 is 22 µH, 4R7 is 4.7 µH.','Find a relay module and spot the flyback diode next to the relay.','A 47 µH coil has 7 V across it. How many microseconds until its current rises by 1 A?','Measure the coil resistance of a 12 V relay or motor you own (Ω range). That R and its L set τ = L / R.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="note">Next up, level 4: the regulator. Linear and buck: why one heats up and the other doesn’t.</p>'),
+ task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
+STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
+
+function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
+  document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}
+function renderBody(st){
+  $('#stepS').innerHTML=st.s||'';
+  const t=document.createElement('template');t.innerHTML=st.b||'';const X=$('#stepX'),Bk=$('#stepB');X.innerHTML='';Bk.innerHTML='';
+  const els=[...t.content.children],groups=[];
+  for(const el of els){if(el.matches('.qq,.quiz,.fb,.hw,.warnbox')){X.appendChild(el);continue}
+    const prev=groups[groups.length-1];
+    if(prev&&/^(UL|OL)$/.test(el.tagName)&&prev.els.length===1&&/:\s*$/.test(prev.els[0].textContent))prev.els.push(el);else groups.push({els:[el]})}
+  const bt=st.bt||[];let n=0;
+  groups.forEach((g,i)=>{const title=bt[i];if(title==='-')return;
+    const d=document.createElement('div');d.className='blk'+(g.els[0].classList.contains('note')?' note':'');
+    if(title){const h=document.createElement('h3');h.textContent=title;d.appendChild(h)}
+    g.els.forEach(e=>{e.classList.remove('note');d.appendChild(e)});Bk.appendChild(d);n++});
+  $('#more').hidden=!n;$('#moreN').textContent=n;
+}
+function quiz(){const go=()=>{const raw=($('#qa').value||'').replace(/[\s  ]/g,'').replace(/,/g,I18N.lang==='ru'?'.':''),v=parseFloat(raw);let m,ok=false;
+    if(v>=3.9&&v<=4.4){ok=true;S.quiz=true;m='Right: 0.0001 × 0.5 / 12 = 0.0000042 s ≈ 4.2 µs. Quick: that’s why switching regulators can flip hundreds of thousands of times a second.'}
+    else if(v>=3.9e-6&&v<=4.4e-6)m='That’s in seconds. A microsecond is a millionth: multiply by 1 000 000.';
+    else if(v>=0.0039&&v<=0.0044)m='That’s in milliseconds. In µs, multiply by 1000.';
+    else if(v>=230&&v<=250||v>=2.3e5&&v<=2.5e5)m='Flipped: Δt = L × ΔI / U. Coil times current on top, the voltage below.';
+    else if(v>=0.39&&v<=0.44||v>=39&&v<=44)m='Check the units: 100 µH = 0.0001 H.';
+    else if(isNaN(v))m='Type a number of microseconds.';
+    else m='Not quite. Multiply 0.0001 H by 0.5 A, divide by 12 V, and you get seconds. Then convert to µs.';
+    $('#qf').textContent=_t(m);$('#qf').className='fb'+(ok?' ok':'');update()};
+  $('#qb').onclick=go;$('#qa').onkeydown=e=>{if(e.key==='Enter')go()}}
+function renderStep(){
+  const st=STEPS[S.step];S.cap=null;S.rp=1;sparkT=0;if(st.enter)st.enter();
+  if(st.build)S.diode=st.build.diode;
+  setUI(st.ui);if(stage.clientWidth<=900){curSc=null;size()}useScene(st.sc);$('#info').hidden=true;$('#after').dataset.s='';
+  $('#stepN').innerHTML=`<span class="part">${st.part}</span>`;$('#stepC').textContent=`${S.step+1} / ${STEPS.length}`;$('#stepT').textContent=st.t;renderBody(st);
+  $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1;
+  if(S.step===6)quiz();
+  if(S.step===STEPS.length-1)[0,1,2,3].forEach(i=>$('#hw'+i).onchange=e=>{hw[i]=e.target.checked;try{localStorage.setItem('l3hw',JSON.stringify(hw))}catch(_){}update()});
+  buildW();buildCoil();update();
+}
+$('#prev').onclick=()=>{S.step--;renderStep()};$('#next').onclick=()=>{S.step++;renderStep()};
+$('#dots').innerHTML=STEPS.map((st,i)=>`<button aria-label="${_t('Step {0}: {1}',i+1,st.t)}"${i&&st.part!==STEPS[i-1].part?' class="pb"':''}></button>`).join('');
+[...$('#dots').children].forEach((b,i)=>b.onclick=()=>{S.step=i;renderStep()});
+/* water controls */
+const wLog=()=>{if(S.step===2&&S.wlog.length)return;S.wlog=[[0,S.wI,0]];S.wt=0;S.tEv=0};
+const wOpen=()=>{if(S.wv==='open')return;S.wv='open';S.run=S.step===1&&S.wI<0.02*wMax()?{tau:wTau()}:null;wLog();update()};
+$('#wv').onclick=()=>{if(S.wv==='open'){S.wv='closing';S.I0=S.wI;S.tc=0;wLog()}else wOpen();update()};
+$('#wvO').onclick=wOpen;
+$('#wvS').onclick=()=>{if(S.wv!=='open')return;S.wv='closing';S.I0=S.wI;S.tc=0;wLog();update()};
+$('#wvH').onclick=()=>{if(S.wv!=='open')return;const I0=S.wI,pk=wLH()*I0/TSLAM;S.wv='closed';S.kick={slam:true,peak:pk,I0,at:S.wt,show:2};if(I0>0.8*wMax())S.fl.slam=true;
+  S.wlog.push([S.wt,I0,0],[S.wt,I0,48],[S.wt+1e-6,0,48],[S.wt+2e-6,0,0]);S.wI=0;S.tEv=S.wt;splashGo();update()};
+$('#wl').oninput=e=>{S.wl=+e.target.value;S.run=null;buildW();update()};$('#wr').oninput=e=>{S.wr=+e.target.value;S.run=null;buildW();update()};
+/* board controls */
+$('#bsw').onclick=()=>{if(S.cap&&S.rp<1)return;const to=!S.sw;
+  if(to&&S.diode==='rev'){S.sw=true;S.fuse=true;S.Ib=0;boomAt(V3(-4,0.5,-1.8));S.need=true;update();return}
+  if(S.fuse){S.sw=to;update();return}
+  S.cap=capture(to);S.sw=to;S.rp=matchMedia('(prefers-reduced-motion: reduce)').matches?1:0;if(S.rp>=1)landed();update()};
+function landed(){const c=S.cap;S.Ib=c.end;S.need=true;if(c.closed&&c.end>0.4)S.fl.on=true;
+  if(!c.closed&&c.min<-100){S.fl.spike=true}if(!c.closed&&S.diode==='ok'&&c.min>-1&&S.fl.onD)S.fl.calm=true;if(c.closed&&S.diode==='ok')S.fl.onD=true}
+[['#dN','none'],['#dOk','ok'],['#dRev','rev']].forEach(([id,d])=>$(id).onclick=()=>{if(S.cap&&S.rp<1)return;S.diode=d;if(d!=='ok')S.fl.onD=false;
+  if(d==='rev'&&S.sw){S.fuse=true;S.Ib=0;boomAt(V3(-4,0.5,-1.8))}update()});
+$('#fix').onclick=()=>{S.fuse=false;S.sw=false;S.Ib=0;S.cap=null;update()};
+let pwT=0;const pwRe=()=>{clearTimeout(pwT);pwT=setTimeout(()=>{S.pw=pwmWave();update()},60)};
+$('#du').oninput=e=>{S.duty=+e.target.value/100;pwRe();update()};$('#bl').oninput=e=>{S.bl=+e.target.value;buildCoil();pwRe();update()};
+function boomAt(p){flashT=1;flashAt.copy(p)}
+function splashGo(){splash.forEach(s=>{s.life=1;s.m.position.set(VX,WY1+0.3,0);s.v.set((Math.random()-.5)*2.4,1.5+Math.random()*2.5,(Math.random()-.5)*2.4)});needleA=-2.6}
+
+let C=solve();
+function update(){
+  const st=STEPS[S.step],ui=st.ui;C=solve();
+  /* water readouts */
+  if(st.sc==='w'){const uL=S.wv==='open'?VS-wRo()*S.wI:0;
+    $('#wnI').textContent=fI(S.wI);$('#wnU').textContent=fV(Math.max(0,uL));$('#wnTau').textContent=fL(wLH())+' / '+fR(wRo())+' = '+fT(wTau());
+    $('#wnKick').textContent=S.kick?(S.kick.slam?'≈ '+fV(S.kick.peak):fV(S.kick.peak)):'—';
+    $('#wlO').textContent=fL(wLH());$('#wrO').textContent=fR(wRo());$('#wl').value=S.wl;$('#wr').value=S.wr;
+    $('#wv').textContent=_t(S.wv==='open'?'Close the valve':'Open the valve');
+    $('#wvS').disabled=$('#wvH').disabled=S.wv!=='open';$('#wvO').disabled=S.wv==='open'||S.wv==='closing';
+    let f='';
+    if(S.step===0)f=_t('Wheel’s push-back: U = 12 − I × R = {0}<br>Final flow: I = U / R = 12 V / {1} = <b>{2}</b>',fV(Math.max(0,uL)),fR(wRo()),fI(wMax()));
+    else if(S.step===2)f=S.kick?(S.kick.slam?_t('Slam in 1 µs: U = L × ΔI / Δt = {0} × {1} / 1 µs ≈ <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak)):_t('Close over 0.5 ms: U = 12 V + L × ΔI / Δt = 12 V + {0} × {1} / 0.5 ms = <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak))):_t('Energy in the wheel: E = ½ × L × I² = {0}',fE(0.5*wLH()*S.wI*S.wI));
+    $('#wF').innerHTML=f;
+    LwValve.el.textContent=_t(S.wv==='open'?'Valve open':S.wv==='closing'?'Valve closing…':'Valve shut');
+    LwHam.el.textContent=_t('Water hammer!');LwPump.el.textContent=_t(S.wv==='open'?'Pump = source, 12 V':'Pump = source, 12 V')}
+  /* board */
+  const dd=S.diode;gD.visible=dd!=='none';gD.rotation.y=-Math.atan2(DB.z-DA.z,DB.x-DA.x)+(dd==='rev'?Math.PI:0);
+  lever.rotation.z=(S.cap&&S.rp<1?S.cap.closed:S.sw)?0:0.6;if(S.pwm)lever.rotation.z=C.V>1?0:0.6;
+  fWire.visible=!S.fuse;fSoot.visible=S.fuse;
+  Lfuse.el.textContent=_t(S.fuse?'Fuse · blown':'Fuse');Lsw.el.textContent=_t(S.pwm?'Switch · flipping 20 000 times a second':S.sw?'Switch · closed':'Switch · open');
+  Lcoil.el.textContent=_t('Coil · {0}',fL(BL[S.bl]));Llamp.el.textContent=_t('Lamp · 12 V');Ld.el.textContent=_t(dd==='rev'?'Diode · backwards!':'Flyback diode');Ld.el.className='lb '+(dd==='rev'?'bad':'part');
+  $('#bsw').textContent=_t(S.sw?'Open the switch':'Close the switch');$('#bsw').disabled=!!(S.cap&&S.rp<1);
+  [['#dN','none'],['#dOk','ok'],['#dRev','rev']].forEach(([id,d])=>$(id).setAttribute('aria-pressed',dd===d));
+  $('#fix').hidden=!S.fuse;
+  $('#du').value=Math.round(S.duty*100);$('#duO').textContent=nf(S.duty*100,0)+'%';$('#bl').value=S.bl;$('#blO').textContent=fL(BL[S.bl]);
+  $('#nI').textContent=fI(C.I);$('#nSW').textContent=fV(C.V);
+  if(S.pw){$('#nAvg').textContent=fV(S.pw.vl);$('#nRip').textContent=nf(S.pw.avg>0?S.pw.rip/S.pw.avg*100:0,0)+'%'}
+  const pills=[];
+  if(st.sc==='b'&&ui.length){
+    if(S.fuse)pills.push(['r','Fuse blown: the diode shorted the rail']);
+    else if(S.pwm){const r=S.pw?S.pw.rip/Math.max(1e-6,S.pw.avg):0;pills.push(r>1?['r','The current swings more than its average: the lamp flickers']:r<0.2?['g','Steady current']:['y','Noticeable ripple']);
+      pills.push(S.pw&&S.pw.vl>=5.5&&S.pw.vl<=6.5?['g','About 6 V on the lamp']:['m','Aim for about 6 V'])}
+    else{const c=S.cap;if(c&&S.rp>=1&&!c.closed&&c.min<-100)pills.push(['r','Spark at the switch!']);else if(c&&S.rp>=1&&!c.closed&&dd==='ok')pills.push(['g','No spike: the diode caught it']);
+      pills.push(dd==='ok'?['g','Diode fitted']:dd==='rev'?['r','Diode backwards']:['m','No diode']);
+      pills.push(C.I>0.3?['g','Lamp lit']:C.I>0.02?['y','Lamp dim']:['m','Lamp off'])}}
+  $('#pills').innerHTML=pills.map(([c,t])=>`<span class="pill ${c}">${_t(t)}</span>`).join('');
+  let f='';const L=BL[S.bl];
+  if(S.fuse)f=_t('Backwards, the diode connects 12 V straight to ground when the switch closes. The fuse blew.');
+  else if(S.pwm&&S.pw)f=_t('Lamp average ≈ D × 12 V = {0} × 12 V = {1} (measured {2})<br>Coil current {3}, ripple {4} ({5}%)',nf(S.duty,2),fV(S.duty*VS),fV(S.pw.vl),fI(S.pw.avg),fI(S.pw.rip),nf(S.pw.avg>0?S.pw.rip/S.pw.avg*100:0,0));
+  else if(st.sc==='b'&&ui.length){const c=S.cap;
+    if(c&&S.rp>=1&&!c.closed)f=c.min<-100?_t('Opened: the coil drove SW to <b>{0}</b>, so <b>{1}</b> across the open switch.',fV(c.min),fV(VS-c.min)):_t('Opened: SW stopped at <b>{0}</b>; the current faded through the diode with τ = L / R = {1}.',fV(c.min),fT(L/RL));
+    else f=_t('Closed: I = U / R = 12 V / 24 Ω = 0.5 A, reached with τ = L / R = {0}<br>Energy in the coil at 0.5 A: E = ½ × L × I² = {1}',fT(L/RL),fE(0.5*L*0.25))}
+  $('#formula').innerHTML=f;
+  /* task */
+  if(PED.ready(S.step)&&st.ok(C))S.done.add(S.step);saveQ();
+  const okd=S.done.has(S.step);$('#task').className='task'+(okd?' ok':'');PED.after(okd);$('#task').innerHTML='<i class="tick" aria-hidden="true"></i><span><span class="sr">'+_t(okd?'Done: ':'Task: ')+'</span>'+st.task+'</span>';
+  $('#after').hidden=!(okd&&st.after);if(okd&&st.after&&$('#after').dataset.s!==String(S.step)){$('#after').innerHTML=st.after;$('#after').dataset.s=S.step}
+  [...$('#dots').children].forEach((bt,i)=>bt.className=(i&&STEPS[i].part!==STEPS[i-1].part?'pb ':'')+(i===S.step?'on ':'')+(S.done.has(i)?'done':''));
+  drawScope();
+}
+
+/* ---------- render loop ---------- */
+function size(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;gl.setSize(w,h,false);cam.aspect=w/h;const pw=window.PW?PW():0;if(w<h)cam.setViewOffset(w,h,0,-Math.round(topInset()/2),w,h);else if(pw)cam.setViewOffset(w,h,Math.round(pw/2),0,w,h);else cam.clearViewOffset();cam.updateProjectionMatrix();if(Math.abs(w-lastW)>40){lastW=w;fit()}drawScope()}
+$('#reset').onclick=fit;
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+const clock=new THREE.Clock(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;let uiT=0;
+function frame(){
+  const raw=Math.min(clock.getDelta(),0.25),dt=Math.min(raw,0.05),slow=reduce?0.3:1;let dirty=false;
+  if(curSc==='w'){
+    ctl.update();
+    /* the loop in slow motion: 1 s on screen = 1 ms of real time */
+    const rt=raw/SLOW,L=wLH(),R=wRo();
+    if(S.wv==='open'){const sub=40,h=rt/sub;for(let i=0;i<sub;i++)S.wI+=h*(VS-R*S.wI)/L;S.wt+=rt;dirty=true;
+      if(S.wI>0.99*wMax()&&!S.fl.full){S.fl.full=true;S.need=true}
+      if(S.step===1&&S.run&&Math.abs(S.run.tau-wTau())<1e-12&&S.wI>0.95*wMax()&&wTau()>=0.95e-3&&wTau()<=1.05e-3&&!S.fl.tau){S.fl.tau=true;S.need=true}}
+    else if(S.wv==='closing'){S.tc+=rt;S.wt+=rt;const f=Math.max(0,1-S.tc/TCLOSE);S.wI=S.I0*f;const pk=VS-R*S.wI+L*S.I0/TCLOSE;S.kick={slam:false,peak:VS+L*S.I0/TCLOSE,I0:S.I0,at:0,show:0};
+      if(S.tc>=TCLOSE){S.wv='closed';S.wI=0;S.tEv=S.wt;if(S.I0>0.8*wMax())S.fl.slow=true;S.need=true}S.wlog[S.wlog.length]=[S.wt,S.wI,pk];dirty=true}
+    else if(S.wt-(S.tEv||0)<0.6e-3){S.wt+=rt;dirty=true}
+    if(S.wv==='open'&&(!S.wlog.length||S.wt-S.wlog[S.wlog.length-1][0]>2e-5)){S.wlog.push([S.wt,S.wI,VS-R*S.wI>0?0:0]);if(S.wlog.length>3000)S.wlog.shift()}
+    if(S.wv==='closed'&&S.wt-(S.tEv||0)<0.6e-3&&(!S.wlog.length||S.wt-S.wlog[S.wlog.length-1][0]>2e-5))S.wlog.push([S.wt,0,0]);
+    const I=S.wI,sp=I>0.001?Math.min(4,0.3+3*I/1.2):0;wflow+=sp*dt*slow;impW.rotation.z-=(S.wv==='open'?2.5:0)*dt*slow;flyA+=sp*dt*slow*2.2/flyR;fly.rotation.z=-flyA;
+    for(let i=0;i<NDW;i++){pathAt(WPATH,wflow+i*WPATH.T/NDW,pv);dummy.position.copy(pv);dummy.scale.setScalar(sp?1:0);dummy.updateMatrix();dropsW.setMatrixAt(i,dummy.matrix)}dropsW.instanceMatrix.needsUpdate=true;
+    const gO=wValve();gate.position.set(VX,WY1+0.33*gO+0.0,0);gate.scale.y=1;stem.position.y=WY1+0.75+0.33*gO;wheelTop.position.set(VX,WY1+1.15+0.33*gO,0);
+    const press=S.wv==='closing'&&S.kick?Math.min(48,S.kick.peak):S.wv==='open'?VS-wRo()*I:0;const tN=2.3-Math.min(48,press)/48*4.6;needleA+=(tN-needleA)*Math.min(1,dt*8);needle.rotation.z=needleA;
+    splash.forEach(s=>{if(s.life>0){s.life-=dt*0.9;s.v.y-=dt*6;s.m.position.addScaledVector(s.v,dt);s.m.material.opacity=Math.max(0,s.life)}else s.m.material.opacity=0});
+    if(S.kick&&S.kick.show>0){S.kick.show-=dt;if(S.kick.show<=0)dirty=true}
+    gl.render(scW,cam);
+  }else{
+    ctl.update();
+    if(S.cap&&S.rp<1){S.rp=Math.min(1,S.rp+raw/2.4);if(!S.cap.closed&&S.diode!=='ok'&&S.rp>S.cap.t0/S.cap.T&&sparkT<=0&&S.rp<S.cap.t0/S.cap.T+0.05){sparkT=1;boomAt(V3(-2.35,0.4,-1.8));sparks.forEach(p=>{p.life=1;p.m.position.set(-2.35,0.3,-1.8);p.v.set((Math.random()-.5)*3,1+Math.random()*2.5,(Math.random()-.5)*3)})}
+      if(S.rp>=1)landed();dirty=true}
+    if(S.pwm){S.ph=(S.ph+raw/1.4)%1;dirty=true}
+    C=solve();
+    const I=Math.abs(C.I),fw=C.V<0||(S.pwm&&C.V<1),P=fw?PFW:PON,spd=I>0.002?Math.min(10,0.6+12*I):0;flow+=spd*dt*slow;
+    for(let i=0;i<NP;i++){pathAt(P,flow+i*P.T/NP,pv);dummy.position.set(pv.x,0.11,pv.z);dummy.scale.setScalar(spd?1:0);dummy.updateMatrix();parts.setMatrixAt(i,dummy.matrix)}parts.instanceMatrix.needsUpdate=true;
+    const br=Math.min(1,(I*RL)*(I*RL)/144);mBulb.emissiveIntensity=br*1.6;mFil.emissiveIntensity=br*3;lampLight.intensity=br*3.5;
+    flashL.intensity=flashT*10;flashL.position.copy(flashAt).add(V3(0,0.6,0));flashT=Math.max(0,flashT-dt*1.6);sparkT=Math.max(0,sparkT-dt*0.5);
+    sparks.forEach(s=>{if(s.life>0){s.life-=dt*1.6;s.v.y-=dt*7;s.m.position.addScaledVector(s.v,dt);s.m.material.opacity=Math.max(0,s.life)}else s.m.material.opacity=0});
+    if(S.fuse&&Math.random()<dt*4){const s=smoke.find(o=>o.life<=0);if(s){s.life=1;s.m.position.set(-4+(Math.random()-.5)*0.3,0.5,-1.8)}}
+    smoke.forEach(o=>{if(o.life>0){o.life-=dt*0.55;o.m.position.y+=dt*0.7;o.m.scale.setScalar(1+(1-o.life)*2.2);o.m.material.opacity=Math.max(0,o.life*0.45)}else o.m.material.opacity=0});
+    gl.render(scB,cam);
+  }
+  uiT+=raw;if(S.need||dirty&&uiT>0.08){S.need=false;uiT=0;update()}
+  const W=stage.clientWidth,H=stage.clientHeight;
+  labels.forEach(L=>{let vis=L.sc===curSc&&L.vis();if(vis){pv.copy(L.p).project(cam);vis=pv.z<1&&Math.abs(pv.x)<1.1&&Math.abs(pv.y)<1.1}
+    L.el.style.display=vis?'block':'none';if(vis){let x=(pv.x*.5+.5)*W;if(L.tr===TR.up||L.tr===TR.down){const ow=L.el.offsetWidth;x=Math.max(8+ow/2,Math.min(W-(window.PW?PW():0)-8-ow/2,x))}L.el.style.transform=`translate(${x}px,${(-pv.y*.5+.5)*H}px) ${L.tr}`}});
+  requestAnimationFrame(frame);
+}
+try{$('#more').open=localStorage.getItem('moreOpen')==='1'}catch(e){}
+$('#more').addEventListener('toggle',()=>{try{localStorage.setItem('moreOpen',$('#more').open?'1':'0')}catch(e){}});
+renderStep=PED.wrap(renderStep,()=>S.step);function saveQ(){const need=STEPS.length-1,ok=[...Array(need).keys()].every(i=>S.done.has(i));let was=false;try{const q=JSON.parse(localStorage.getItem('quest_v1')||'{}');q.steps=q.steps||{};q.done=q.done||{};was=!!q.done[3];q.steps[3]=[...S.done];if(ok)q.done[3]=true;localStorage.setItem('quest_v1',JSON.stringify(q))}catch(e){}if(window.PED&&PED.complete)PED.complete(ok,was)}
+try{(JSON.parse(localStorage.getItem('quest_v1')||'{}').steps||{})[3]?.forEach(i=>S.done.add(i))}catch(e){}
+renderStep();frame();
+window.__L3={S,STEPS,update,capture,pwmWave,cam,ctl};
+}
+}
+</script>
+<script>/* polish v2 */
+(function(){var hud=document.getElementById('hud'),task=document.getElementById('task');if(!hud||!task)return;
+var side=document.createElement('div');side.className='side';task.insertAdjacentElement('beforebegin',side);
+hud.querySelectorAll('.formula,.st').forEach(function(e){side.appendChild(e)});
+var st=document.getElementById('stage'),c=document.getElementById('gl');
+if(st&&c)['pointerdown','wheel'].forEach(function(ev){c.addEventListener(ev,function(){st.classList.add('touched')},{once:true,passive:true})});})();
+</script>
+</body>
+</html>

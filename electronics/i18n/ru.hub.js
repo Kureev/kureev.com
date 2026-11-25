@@ -82,5 +82,10 @@ I18N.add({
 "SO-101 · moving":"SO-101 · двигается",
 "Unpowered":"Без питания",
 "Powered":"Питание есть",
-"Moving":"Двигается"
+"Moving":"Двигается",
+"A heavy wheel: U = L × ΔI / Δt, τ = L / R":"Тяжёлое колесо: U = L × ΔI / Δt, τ = L / R",
+"Flyback diode":"Обратный диод",
+"Catches the coil’s kick":"Ловит удар катушки",
+"Duty cycle":"Коэффициент заполнения",
+"A share of 12 V without the heat":"Доля от 12 В без нагрева"
 });

@@ -281,7 +281,7 @@ input[type=range]{accent-color:#7d8cff}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l2",{
-"win":{"lv":2,"title":"Capacitor, done","line":"Your servos can lunge all at once and the rail barely flinches.","next":{"t":"Inductor","soon":true}},
+"win":{"lv":2,"title":"Capacitor, done","line":"Your servos can lunge all at once and the rail barely flinches.","next":{"t":"Inductor","href":"/electronics/lesson3"}},
 "brief":{"short":"Six servos lunge at once and the 12 V rail sags. Add the part that rides it out.","problem":"When all six servos start together, they grab several amps within tens of microseconds. The supply needs a fraction of a millisecond to catch up, and in that gap the 12 V rail sags. Anything that needs a steady voltage reboots. In this level you add the part that covers the gap: a capacitor.","goals":["Explain a capacitor as a tank: Q = C × U and τ = R × C","Size a bulk capacitor for a load jump: C = I × Δt / ΔU","Fit an electrolytic the right way round, with a safe voltage rating"]},
 "pr":{
  "0":{"q":"All six servos start at once. For a moment, the rail voltage…","o":["stays at 12 V","dips","rises"],"a":1,"ex":"The supply can’t raise its current instantly. For a fraction of a millisecond the servos take current that hasn’t arrived yet, and the voltage sags."},
