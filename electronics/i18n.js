@@ -11,9 +11,22 @@ document.documentElement.lang=lang;
 const D={},miss=new Set();
 const UNITS={ru:{V:'В',mV:'мВ',A:'А',mA:'мА','µA':'мкА','Ω':'Ом','kΩ':'кОм','MΩ':'МОм',W:'Вт',mW:'мВт',F:'Ф','µF':'мкФ',nF:'нФ',s:'с',ms:'мс','µs':'мкс',J:'Дж',C:'Кл',mC:'мКл',Wh:'Вт·ч',mAh:'мА·ч',H:'Гн',mH:'мГн','µH':'мкГн',mJ:'мДж','µJ':'мкДж'}};
 const NF={};
-function nf(x,d){const k=d|0;return(NF[k]||(NF[k]=new Intl.NumberFormat(locale,{minimumFractionDigits:k,maximumFractionDigits:k}))).format(x)}
+function nf(x,d){const k=d|0;return(NF[k]||(NF[k]=new Intl.NumberFormat(locale,{minimumFractionDigits:k,maximumFractionDigits:k,useGrouping:lang==='ru'?'min2':true}))).format(x)}
+/* typography: keep numbers with their units, formulas in one piece, and (in Russian) short words with the next one */
+const NB=' ',UN='(?:(?:мк|[кмМµн])?(?:В|А|Ом|Ф|Гн|Вт|Дж|Гц|Кл)|мс|мкс|с|[kmMµn]?(?:V|A|Ω|F|H|W|J|Hz)|ms|µs|s|°C|%)';
+const RX_U=new RegExp('(\\d) (?='+UN+'(?![\\p{L}]))','gu');
+/* the last "= value" of an equation stays on the line with its value */
+const RX_END=/ = (?=(?:<b>)?[^\s<]{1,12}(?: [^\s<]{1,8}){0,3}(?:<\/b>)?(?:[.,;:!?)](?=\s|$|<)|\s\(|<br>|\s*$))/g;
+function typo(r){if(typeof r!=='string'||r.length<3)return r;
+  r=r.replace(RX_U,'$1'+NB).replace(/ ([×\/·≈+−]) /g,NB+'$1'+NB)
+   .replace(/(^|[ \n>(:;«])([^\s<>]{1,4}) = /gu,'$1$2'+NB+'='+NB)
+   .replace(RX_END,NB+'='+NB).replace(/ = /g,NB+'= ').replace(/ (=|≈)$/,NB+'$1').replace(/ —/g,NB+'—')
+   .replace(/(\d) (из|of) (?=\d)/g,'$1'+NB+'$2'+NB).replace(/\((\p{L}+) (?=\d)/gu,'($1'+NB)
+   .replace(/ ([^\s<>]{1,2}[.,;:!?])(?=\s|$|<)/g,NB+'$1');
+  if(lang==='ru')r=r.replace(/(?<=^|[ \t\n>(«„]|[^\d\s]\u00a0)(в|к|с|у|о|я|и|а|не|из|на|по|за|до|от|во|ко|со|об) /giu,'$1'+NB);
+  return r}
 function t(s){let r=s;if(lang!=='en'&&typeof s==='string'){if(D[s]!=null)r=D[s];else{const k=s.trim();if(k!==s&&D[k]!=null)r=s.replace(k,D[k]);else if(/[A-Za-z]{2}/.test(s))miss.add(k)}}
-  if(arguments.length>1){const a=arguments;r=String(r).replace(/\{(\d+)\}/g,(m,i)=>a[+i+1]!=null?a[+i+1]:m)}return r}
+  if(arguments.length>1){const a=arguments;r=String(r).replace(/\{(\d+)\}/g,(m,i)=>a[+i+1]!=null?a[+i+1]:m)}return typo(r)}
 const u=x=>lang!=='en'&&UNITS[lang]&&UNITS[lang][x]||x;
 const PR=new Intl.PluralRules(locale);
 /* plural: pl(n,{one,few,many,other}) */
@@ -36,7 +49,7 @@ function switcher(){const w=document.createElement('div');w.className='langsw';w
     b.setAttribute('aria-label',l==='ru'?'Русский':'English');b.onclick=()=>{if(l!==lang)setLang(l)};w.appendChild(b)});return w}
 window.I18N={lang,locale,t,nf,u,pl,deep,apply,switcher,setLang,add:o=>Object.assign(D,o),miss};
 /* load the dictionaries for this page before the page scripts run */
-if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=6';
+if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=8';
   document.write('<script src="/electronics/i18n/'+lang+'.js'+v+'"><\/script><script src="/electronics/i18n/'+lang+'.'+page+'.js'+v+'"><\/script>')}
 /* alternate-language links for search engines */
 {const base=location.origin+location.pathname;Object.keys(SUP).forEach(l=>{const k=document.createElement('link');k.rel='alternate';k.hreflang=l;k.href=base+(l==='en'?'':'?lang='+l);document.head.appendChild(k)})}

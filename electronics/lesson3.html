@@ -275,7 +275,7 @@ input[type=range]{accent-color:#7d8cff}
         <div class="row" data-ui="bDiode"><button id="dN" aria-pressed="true">No diode</button><button id="dOk" aria-pressed="false">Fit the diode</button><button id="dRev" class="danger" aria-pressed="false">Fit it backwards</button></div>
         <div data-ui="bDuty"><label for="du">Duty cycle, D <output id="duO"></output></label><input type="range" id="du" min="0" max="100" step="5" value="30"></div>
         <div data-ui="bL"><label for="bl">Coil, L <output id="blO"></output></label><input type="range" id="bl" min="0" max="4" step="1" value="1"></div>
-        <button id="bsw" class="pri" data-ui="bSw" style="width:100%">Close the switch</button>
+        <button id="bsw" class="run" data-ui="bSw" style="width:100%">Close the switch</button>
         <button id="fix" class="fix" hidden>Replace the fuse</button>
       </section>
       <div class="task" id="task"></div>
@@ -297,7 +297,7 @@ input[type=range]{accent-color:#7d8cff}
  "2":{"q":"The flow is steady and you slam the valve shut. The pressure at the valve…","o":["drops to zero","stays at the pump’s level","spikes far above the pump"],"a":2,"ex":"The wheel can’t stop at once, so it keeps shoving water into a shut valve. U = L × ΔI / Δt: a tiny Δt makes a huge U."},
  "3":{"q":"Current flows through the coil and you open the switch. Across the open switch you get…","o":["0 V","12 V","hundreds of volts"],"a":2,"ex":"The coil keeps its current going and drives the switch node as far as it takes. With nowhere to go, that’s hundreds of volts and a spark."},
  "4":{"q":"With the diode fitted, when the switch opens the coil’s current…","o":["stops at once","keeps circling through the diode and fades","flows back into the supply"],"a":1,"ex":"The diode gives the current a loop: coil → lamp → ground → diode → coil. It fades with τ = L / R instead of spiking."},
- "5":{"q":"You flip the switch on and off fast, closed half the time. The lamp gets…","o":["12 V flashes, 20 000 a second","a steady voltage of about 6 V","nothing"],"a":1,"ex":"The coil won’t let the current change fast, so the lamp sees the average: about half of 12 V. That’s how a switching regulator works."}},
+ "5":{"q":"You flip the switch on and off fast, closed half the time. The lamp gets…","o":["12 V flashes, 20,000 a second","a steady voltage of about 6 V","nothing"],"a":1,"ex":"The coil won’t let the current change fast, so the lamp sees the average: about half of 12 V. That’s how a switching regulator works."}},
 "recall":{
  "0":[{"q":"1 kΩ and 1000 µF give τ =","o":["1 ms","1 s","1000 s"],"a":1,"ex":"τ = R × C = 1000 × 0.001 = 1 s."},{"q":"A capacitor won’t let this jump instantly:","o":["its voltage","its current"],"a":0,"ex":"Its level can only change as charge flows in or out."},{"q":"A Schottky diode passes current…","o":["both ways","towards the stripe, dropping about 0.45 V","only above 12 V"],"a":1}],
  "3":[{"q":"τ = L / R for 10 mH and 10 Ω is…","o":["1 µs","1 ms","1 s"],"a":1,"ex":"0.01 / 10 = 0.001 s."},{"q":"Shutting the valve faster makes the kick…","o":["smaller","bigger"],"a":1}]},
@@ -522,22 +522,24 @@ function plot(o){const dpr=Math.min(devicePixelRatio||1,2),W=scv.clientWidth,H=s
   if(o.hline!=null){const py=H-3-(o.hline-o.ilo)/(o.ihi-o.ilo)*(H-6);x.strokeStyle='rgba(255,178,107,.6)';x.setLineDash([5,4]);x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();x.setLineDash([])}
   draw(o.I,o.ilo,o.ihi,CI_,o.I?o.I.length:0);draw(o.V,o.vlo,o.vhi,CV_,o.V?o.V.length:0);
   if(o.clip){x.fillStyle='#ff8a70';x.font='700 13px Manrope,sans-serif';x.fillText(o.clip,Math.min(W-160,Math.max(6,o.clipX*W+6)),H-10)}}
+const nice=v=>{const e=Math.pow(10,Math.floor(Math.log10(v))),m=v/e;return(m<=1?1:m<=2?2:m<=5?5:10)*e};
 function drawScope(){const fig=$('#scope');if(fig.hidden)return;const st=STEPS[S.step];let sub='',rd='',xs='',ys='',lg='',bad=false;
-  if(st.sc==='w'){const L=S.wlog,ws=S.step===1?6*wTau():S.step===2?3e-3:5e-3,imax=wMax()*1.15,o=S.step===2?Math.max(0,S.wt-0.8*ws):0;
+  if(st.sc==='w'){
+    const L=S.wlog,ws=S.step===1?10*nice(6*wTau()/10):S.step===2?2e-3:5e-3,imax=6*nice(wMax()*1.15/6),o=S.step===2?Math.max(0,S.wt-0.8*ws):0;
     const pts=L.filter(p=>p[0]>=o&&p[0]<=o+ws).map(p=>[(p[0]-o)/ws,p[1]]);
-    if(S.step<2){plot({I:pts,ilo:0,ihi:imax,mark:S.step===1?1/6:null,hline:S.step===1?0.632*wMax():null});sub=_t('flow');ys=_t('{0} / square',fI(imax/6))}
+    if(S.step<2){plot({I:pts,ilo:0,ihi:imax,mark:S.step===1?wTau()/ws:null,hline:S.step===1?0.632*wMax():null});sub=_t('flow');ys=_t('{0} / square',fI(imax/6))}
     else{const vp=L.filter(p=>p[0]>=o&&p[0]<=o+ws).map(p=>[(p[0]-o)/ws,p[2]]);const k=S.kick;
-      plot({I:pts,ilo:0,ihi:imax,V:vp,vlo:0,vhi:48,clip:k&&k.slam?_t('↑ {0}, off the scale',fV(k.peak)):'',clipX:k?(k.at-o)/ws:0});sub=_t('flow and pressure at the valve');ys=_t('{0} / square',fV(8))}
+      plot({I:pts,ilo:0,ihi:imax,V:vp,vlo:0,vhi:60,clip:k&&k.slam?_t('↑ {0}, off the scale',fV(k.peak)):'',clipX:k?(k.at-o)/ws:0});sub=_t('flow and pressure at the valve');ys=_t('{0} / square',nf(10,0)+' '+_u('V'))}
     xs=_t('{0} / square',fT(ws/10));rd=fI(S.wI);lg=`<span><i style="background:${CI_}"></i>${_t('flow (current)')}</span>`+(S.step===2?`<span><i style="background:${CV_}"></i>${_t('pressure at the valve (voltage)')}</span>`:'')}
-  else if(S.pwm&&S.pw){const n=S.pw.I.length,ih=Math.max(0.6,S.pw.hi*1.2),I=[],V=[];for(let r=0;r<4;r++)for(let i=0;i<n;i++){I.push([(r*n+i)/(4*n),S.pw.I[i]]);V.push([(r*n+i)/(4*n),S.pw.V[i]])}
-    plot({I,ilo:0,ihi:ih,V,vlo:-2,vhi:14,zeroV:1});sub=_t('SW and coil current · 4 cycles');xs=_t('{0} / square',fT(4*TPWM/10));ys=_t('{0} / square',fV(16/6));rd=_t('{0} average',fV(S.pw.vl));
+  else if(S.pwm&&S.pw){const n=S.pw.I.length,ih=6*nice(Math.max(0.6,S.pw.hi*1.2)/6),I=[],V=[];for(let r=0;r<4;r++)for(let i=0;i<n;i++){I.push([(r*n+i)/(4*n),S.pw.I[i]]);V.push([(r*n+i)/(4*n),S.pw.V[i]])}
+    plot({I,ilo:0,ihi:ih,V,vlo:-5,vhi:25,zeroV:1});sub=_t('SW and coil current · 4 cycles');xs=_t('{0} / square',fT(4*TPWM/10));ys=_t('{0} / square',nf(5,0)+' '+_u('V'));rd=_t('{0} average',fV(S.pw.vl));
     lg=`<span><i style="background:${CV_}"></i>${_t('SW voltage')}</span><span><i style="background:${CI_}"></i>${_t('coil current')}</span>`}
-  else{const c=S.cap;sub=_t('SW and coil current · single shot');xs=_t('{0} / square',fT(1e-4));ys=_t('{0} / square',fV(8));
+  else{const c=S.cap;sub=_t('SW and coil current · single shot');xs=_t('{0} / square',fT(1e-4));ys=_t('{0} / square',nf(10,0)+' '+_u('V'));
     lg=`<span><i style="background:${CV_}"></i>${_t('SW voltage')}</span><span><i style="background:${CI_}"></i>${_t('coil current')}</span>`;
     if(c){const n=c.V.length,m=Math.max(1,Math.floor(S.rp*(n-1))),I=[],V=[];for(let i=0;i<=m;i++){I.push([i/(n-1),c.I[i]]);V.push([i/(n-1),c.V[i]])}
-      const off=!c.closed&&c.min<-40;plot({I,ilo:0,ihi:0.6,V,vlo:-34,vhi:14,zeroV:1,clip:off&&S.rp>=1?_t('↓ {0}, off the scale',fV(c.min)):'',clipX:c.t0/c.T});
+      const off=!c.closed&&c.min<-40;plot({I,ilo:0,ihi:0.6,V,vlo:-40,vhi:20,zeroV:1,clip:off&&S.rp>=1?_t('↓ {0}, off the scale',fV(c.min)):'',clipX:c.t0/c.T});
       rd=S.rp<1?_t('capturing…'):c.closed?_t('switched on'):_t('lowest {0}',fV(c.min));bad=S.rp>=1&&c.min<-40}
-    else{plot({I:[[0,S.Ib],[1,S.Ib]],ilo:0,ihi:0.6,V:[[0,swNode(S.sw,S.Ib,S.diode)],[1,swNode(S.sw,S.Ib,S.diode)]],vlo:-34,vhi:14,zeroV:1});rd=_t('waiting for a switch')}}
+    else{plot({I:[[0,S.Ib],[1,S.Ib]],ilo:0,ihi:0.6,V:[[0,swNode(S.sw,S.Ib,S.diode)],[1,swNode(S.sw,S.Ib,S.diode)]],vlo:-40,vhi:20,zeroV:1});rd=_t('waiting for a switch')}}
   $('#scS').textContent=sub;$('#scR').textContent=rd;$('#scR').className='sr'+(bad?' bad':'');$('#scX').textContent=xs;$('#scY').textContent=ys;$('#scL').innerHTML=lg}
 
 /* ---------- lesson ---------- */
@@ -562,8 +564,8 @@ STEPS=[
  b:'<p>A Schottky diode (level 1) between ground and SW, stripe towards SW. While the switch is closed, SW is at 12 V and the diode is shut: it does nothing.</p><p>Open the switch and the coil pulls SW below ground. At −0.45 V the diode opens, and the current keeps circling coil → lamp → ground → diode, fading with τ = L / R. No spike, no spark.</p><p>Fit it backwards and it’s a short from 12 V to ground the moment the switch closes. The fuse from level 1 blows and saves the board.</p><p>On relays and motors this part is called a <b>flyback</b> or freewheeling diode. Every relay module has one next to the coil.</p>',
  after:'<p>SW stopped at −0.45 V and the lamp faded out in about a tenth of a millisecond. The diode turned a destructive spike into a gentle fade.</p>',
  task:'Fit the diode, close the switch, then open it',ok:()=>S.fl.calm},
-{sc:'b',part:'Towards the regulator',t:'Switching fast: the coil smooths',s:"Now the switch flips 20 000 times a second. The coil won’t let the current jump, so the lamp gets the <b>average</b>: about D × 12 V, where D is the share of time the switch is closed.",bt:["The duty cycle","Ramp up, ramp down","The average","Ripple","Next"],ui:['bDuty','bL','scope','nAvg','nRip','pills','bF'],build:{diode:'ok'},enter:()=>{S.bl=1;S.duty=0.3;S.fuse=false;S.pwm=true;S.pw=pwmWave();S.ph=0},
- b:'<p>The switch now opens and closes 20 000 times a second; a transistor does it (level 5). The share of time it’s closed is the <b>duty cycle</b>, D.</p><p>While it’s closed, the current ramps up. While it’s open, it keeps flowing through the diode and ramps down. The coil keeps those ramps shallow.</p><p>The lamp gets the average: about D × 12 V. At 50% that’s about 6 V, and the other 6 V aren’t burnt as heat in a resistor.</p><p>The leftover wobble is the <b>ripple</b>. A heavier coil, smaller ripple. Too light, and the current swings by more than its average every cycle, and the lamp flickers.</p><p class="note">Add the capacitor from level 2 at the output to smooth the voltage too, and you have a <b>buck converter</b>: 12 V in, 5 V out, almost no heat. That’s level 4.</p>',
+{sc:'b',part:'Towards the regulator',t:'Switching fast: the coil smooths',s:"Now the switch flips 20,000 times a second. The coil won’t let the current jump, so the lamp gets the <b>average</b>: about D × 12 V, where D is the share of time the switch is closed.",bt:["The duty cycle","Ramp up, ramp down","The average","Ripple","Next"],ui:['bDuty','bL','scope','nAvg','nRip','pills','bF'],build:{diode:'ok'},enter:()=>{S.bl=1;S.duty=0.3;S.fuse=false;S.pwm=true;S.pw=pwmWave();S.ph=0},
+ b:'<p>The switch now opens and closes 20,000 times a second; a transistor does it (level 5). The share of time it’s closed is the <b>duty cycle</b>, D.</p><p>While it’s closed, the current ramps up. While it’s open, it keeps flowing through the diode and ramps down. The coil keeps those ramps shallow.</p><p>The lamp gets the average: about D × 12 V. At 50% that’s about 6 V, and the other 6 V aren’t burnt as heat in a resistor.</p><p>The leftover wobble is the <b>ripple</b>. A heavier coil, smaller ripple. Too light, and the current swings by more than its average every cycle, and the lamp flickers.</p><p class="note">Add the capacitor from level 2 at the output to smooth the voltage too, and you have a <b>buck converter</b>: 12 V in, 5 V out, almost no heat. That’s level 4.</p>',
  after:'<p>About 6 V on the lamp from a 12 V rail, and the current barely wobbles. You just built the heart of a switching regulator.</p>',
  task:'Get about 6 V on the lamp with the ripple under 20% of the current',ok:()=>S.pw&&S.pw.vl>=5.5&&S.pw.vl<=6.5&&S.pw.rip/S.pw.avg<0.2},
 {sc:'b',part:'Towards the regulator',t:'Size it on paper',s:"<b>U = L × ΔI / Δt</b>. Example: a 1 mH coil with 5 V across it; in 1 ms its current grows by 5 × 0.001 / 0.001 = 5 A.",bt:["Rearranged","Units"],ui:['scope'],build:{diode:'ok'},enter:()=>{S.bl=3;S.duty=0.5;S.pwm=true;S.pw=pwmWave()},
@@ -621,7 +623,7 @@ $('#wv').onclick=()=>{if(S.wv==='open'){S.wv='closing';S.I0=S.wI;S.tc=0;wLog()}e
 $('#wvO').onclick=wOpen;
 $('#wvS').onclick=()=>{if(S.wv!=='open')return;S.wv='closing';S.I0=S.wI;S.tc=0;wLog();update()};
 $('#wvH').onclick=()=>{if(S.wv!=='open')return;const I0=S.wI,pk=wLH()*I0/TSLAM;S.wv='closed';S.kick={slam:true,peak:pk,I0,at:S.wt,show:2};if(I0>0.8*wMax())S.fl.slam=true;
-  S.wlog.push([S.wt,I0,0],[S.wt,I0,48],[S.wt+1e-6,0,48],[S.wt+2e-6,0,0]);S.wI=0;S.tEv=S.wt;splashGo();update()};
+  S.wlog.push([S.wt,I0,0],[S.wt,I0,60],[S.wt+1e-6,0,60],[S.wt+2e-6,0,0]);S.wI=0;S.tEv=S.wt;splashGo();update()};
 $('#wl').oninput=e=>{S.wl=+e.target.value;S.run=null;buildW();update()};$('#wr').oninput=e=>{S.wr=+e.target.value;S.run=null;buildW();update()};
 /* board controls */
 $('#bsw').onclick=()=>{if(S.cap&&S.rp<1)return;const to=!S.sw;
@@ -644,12 +646,12 @@ function update(){
   /* water readouts */
   if(st.sc==='w'){const uL=S.wv==='open'?VS-wRo()*S.wI:0;
     $('#wnI').textContent=fI(S.wI);$('#wnU').textContent=fV(Math.max(0,uL));$('#wnTau').textContent=fL(wLH())+' / '+fR(wRo())+' = '+fT(wTau());
-    $('#wnKick').textContent=S.kick?(S.kick.slam?'≈ '+fV(S.kick.peak):fV(S.kick.peak)):'—';
+    $('#wnKick').textContent=S.kick?(S.kick.slam?'≈ '+fV(S.kick.peak):fV(S.kick.peak)):'—';$('#wnKick').classList.toggle('nil',!S.kick);
     $('#wlO').textContent=fL(wLH());$('#wrO').textContent=fR(wRo());$('#wl').value=S.wl;$('#wr').value=S.wr;
     $('#wv').textContent=_t(S.wv==='open'?'Close the valve':'Open the valve');
     $('#wvS').disabled=$('#wvH').disabled=S.wv!=='open';$('#wvO').disabled=S.wv==='open'||S.wv==='closing';
     let f='';
-    if(S.step===0)f=_t('Wheel’s push-back: U = 12 − I × R = {0}<br>Final flow: I = U / R = 12 V / {1} = <b>{2}</b>',fV(Math.max(0,uL)),fR(wRo()),fI(wMax()));
+    if(S.step===0)f=S.wv==='open'?_t('Wheel’s push-back: U = 12 V − I × R = {0}<br>Final flow: I = U / R = 12 V / {1} = <b>{2}</b>',fV(Math.max(0,uL)),fR(wRo()),fI(wMax())):_t('Valve shut: no flow, the wheel stands still.<br>Once open, the flow settles at I = U / R = 12 V / {0} = <b>{1}</b>',fR(wRo()),fI(wMax()));
     else if(S.step===2)f=S.kick?(S.kick.slam?_t('Slam in 1 µs: U = L × ΔI / Δt = {0} × {1} / 1 µs ≈ <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak)):_t('Close over 0.5 ms: U = 12 V + L × ΔI / Δt = 12 V + {0} × {1} / 0.5 ms = <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak))):_t('Energy in the wheel: E = ½ × L × I² = {0}',fE(0.5*wLH()*S.wI*S.wI));
     $('#wF').innerHTML=f;
     LwValve.el.textContent=_t(S.wv==='open'?'Valve open':S.wv==='closing'?'Valve closing…':'Valve shut');
@@ -658,14 +660,14 @@ function update(){
   const dd=S.diode;gD.visible=dd!=='none';gD.rotation.y=-Math.atan2(DB.z-DA.z,DB.x-DA.x)+(dd==='rev'?Math.PI:0);
   lever.rotation.z=(S.cap&&S.rp<1?S.cap.closed:S.sw)?0:0.6;if(S.pwm)lever.rotation.z=C.V>1?0:0.6;
   fWire.visible=!S.fuse;fSoot.visible=S.fuse;
-  Lfuse.el.textContent=_t(S.fuse?'Fuse · blown':'Fuse');Lsw.el.textContent=_t(S.pwm?'Switch · flipping 20 000 times a second':S.sw?'Switch · closed':'Switch · open');
+  Lfuse.el.textContent=_t(S.fuse?'Fuse · blown':'Fuse');Lsw.el.textContent=_t(S.pwm?'Switch · flipping 20,000 times a second':S.sw?'Switch · closed':'Switch · open');
   Lcoil.el.textContent=_t('Coil · {0}',fL(BL[S.bl]));Llamp.el.textContent=_t('Lamp · 12 V');Ld.el.textContent=_t(dd==='rev'?'Diode · backwards!':'Flyback diode');Ld.el.className='lb '+(dd==='rev'?'bad':'part');
   $('#bsw').textContent=_t(S.sw?'Open the switch':'Close the switch');$('#bsw').disabled=!!(S.cap&&S.rp<1);
   [['#dN','none'],['#dOk','ok'],['#dRev','rev']].forEach(([id,d])=>$(id).setAttribute('aria-pressed',dd===d));
   $('#fix').hidden=!S.fuse;
   $('#du').value=Math.round(S.duty*100);$('#duO').textContent=nf(S.duty*100,0)+'%';$('#bl').value=S.bl;$('#blO').textContent=fL(BL[S.bl]);
   $('#nI').textContent=fI(C.I);$('#nSW').textContent=fV(C.V);
-  if(S.pw){$('#nAvg').textContent=fV(S.pw.vl);$('#nRip').textContent=nf(S.pw.avg>0?S.pw.rip/S.pw.avg*100:0,0)+'%'}
+  if(S.pw){const rr=S.pw.avg>0?S.pw.rip/S.pw.avg:0,nb=$('#nRip').parentNode;$('#nAvg').textContent=fV(S.pw.vl);$('#nRip').textContent=nf(rr*100,0)+'%';nb.classList.toggle('ok',rr<0.2);nb.classList.toggle('bad',rr>=0.2)}
   const pills=[];
   if(st.sc==='b'&&ui.length){
     if(S.fuse)pills.push(['r','Fuse blown: the diode shorted the rail']);

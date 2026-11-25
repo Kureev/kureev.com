@@ -25,7 +25,7 @@ h1,h2,.ltitle,#stepT{font-family:var(--f-display);font-weight:600;letter-spacing
 .lead b,#stepS b{color:var(--ink);font-weight:700}
 .blk p,.blk li,.after,.stepx p{font-size:var(--t-ui)!important;line-height:1.6!important;color:var(--soft)}
 .blk h3{font:700 var(--t-meta)/1.3 var(--f-text)!important;text-transform:none!important;letter-spacing:0!important;color:var(--copper)!important;margin:0 0 6px!important}
-.blk table{font-size:14px!important}.blk th{font-weight:600;color:var(--mute)}
+.blk table{font-size:var(--t-meta)!important}.blk th{font-weight:600;color:var(--mute)}
 /* controls */
 label{font:600 var(--t-ui)/1.4 var(--f-text)!important;color:var(--ink)}
 output{font:700 var(--t-ui)/1.4 var(--f-text)!important;color:var(--copper)!important;font-variant-numeric:tabular-nums}
@@ -34,7 +34,7 @@ button,.row button,.power,.fix,a.go{font:600 var(--t-ui)/1.2 var(--f-text)!impor
 .power{border-radius:var(--r-pill)!important}
 .card.ctl.ped-lock .power{background:transparent!important;border-color:var(--line)!important;color:var(--mute)!important}
 .task{font:600 var(--t-ui)/1.45 var(--f-text)!important}
-.side .formula,.formula{font:400 14px/1.55 var(--f-text)!important;color:var(--soft)!important;font-variant-numeric:tabular-nums}
+.side .formula,.formula{font:400 var(--t-ui)/1.55 var(--f-text)!important;color:var(--soft)!important;font-variant-numeric:tabular-nums}
 .side .formula b,.formula b{font-weight:700;color:var(--ink)}
 .pill,.st .pill{font:600 var(--t-meta)/1.2 var(--f-text)!important;padding:5px 11px!important}
 details.more summary{font:600 var(--t-ui)/1.3 var(--f-text)!important}
@@ -47,8 +47,10 @@ details.more summary{font:600 var(--t-ui)/1.3 var(--f-text)!important}
 .ped-k span{color:var(--mute)!important;font-weight:500}
 .pq-q{font:600 var(--t-body)/1.45 var(--f-text)!important;color:var(--ink)!important}
 .pq-o{gap:8px!important}
-.pq-o button{font:600 var(--t-ui)/1.3 var(--f-text)!important;min-height:40px!important;padding:8px 16px!important}
-.pq-f,.pq-done{font-size:14px!important;line-height:1.5!important}
+.pq-o button{font:600 var(--t-ui)/1.3 var(--f-text)!important;min-height:44px!important;padding:10px 16px!important}
+.pq-o button:disabled{opacity:1!important;color:var(--mute)!important;border-color:rgba(91,156,255,.14)!important;background:none!important}
+.pq-f,.pq-done{font-size:var(--t-ui)!important;line-height:1.55!important}
+.pq-f{color:var(--soft)!important}
 .pq-done{color:var(--mute)!important}.pq-done em{color:var(--soft)!important}
 .ped-note{font:500 var(--t-meta)/1.4 var(--f-text)!important;color:var(--mute)!important}
 .ped.brief summary{font:400 var(--t-ui)/1.5 var(--f-text)!important;color:var(--soft)!important}
@@ -77,13 +79,54 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 .info[hidden]{display:none!important}
 .info{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:6px 12px;padding:16px 16px 16px 18px!important;border-radius:14px!important}
 .info>b,.info #infoT{grid-column:1;grid-row:1;margin:0!important;font:700 16px/1.3 var(--f-text)!important;color:var(--ink)}
-.info .x{grid-column:2;grid-row:1;position:static!important;width:28px;height:28px;margin:-4px -4px -4px 0!important;display:grid;place-items:center;border-radius:8px;border:0;background:transparent;color:var(--mute);font-size:18px;line-height:1;cursor:pointer}
+.info .x{grid-column:2;grid-row:1;position:static!important;width:44px;height:44px;min-height:44px!important;margin:-10px -10px -10px 0!important;display:grid;place-items:center;border-radius:8px;border:0;background:transparent;color:var(--mute);font-size:18px;line-height:1;cursor:pointer}
 .info .x:hover{background:rgba(140,160,255,.12);color:var(--ink)}
 .info p,.info #infoP{grid-column:1/-1;margin:0!important;font-size:15px!important;line-height:1.5!important;color:var(--soft)}
-.info .go{grid-column:1/-1;justify-self:start;margin-top:8px!important;min-height:36px!important;padding:0 16px!important;display:inline-flex;align-items:center;border-radius:10px!important;font:600 14px/1 var(--f-text)!important}
+.info .go{grid-column:1/-1;justify-self:start;margin-top:8px!important;min-height:44px!important;padding:0 16px!important;display:inline-flex;align-items:center;border-radius:10px!important;font:600 var(--t-ui)/1 var(--f-text)!important}
 
 /* quiz feedback: a separate block under the answer, tinted by verdict */
 .fb:empty{display:none}
 .fb:not(:empty){margin:12px 0 4px!important;padding:10px 14px;border-radius:12px;border-left:3px solid var(--copper);background:rgba(255,178,107,.08);color:var(--ink)!important}
 .fb.ok{border-left-color:var(--ok);background:rgba(89,243,168,.08)}
 .fb button{margin-top:10px}
+
+/* text roles: no orphans, no squeezed rows */
+#stepT{text-wrap:balance}
+#stepS,.lead,.pq-q,.pq-f,.pq-done,.after p,.task,.blk p,.blk li,.stepx p,.fb,.info p,.ped.brief summary,.ped.cando label{text-wrap:pretty}
+.ph{flex-wrap:nowrap!important;align-items:center!important}
+.ph .ltitle{flex:1 1 auto;min-width:0}
+.ph>a,.ph .lesson{flex:none;white-space:nowrap}
+.ph .langsw{flex:none;margin-left:auto}
+.ped-k{flex-wrap:wrap;row-gap:4px}
+.pq-again.k{font:600 var(--t-meta)/1.3 var(--f-text)!important;min-height:0!important}
+.ctl label{flex-wrap:wrap;row-gap:2px}
+.ctl label>output{margin-left:auto;text-align:right}
+.row{flex-wrap:wrap}.row button{flex:1 1 auto;white-space:nowrap}
+.hw label,.hw li label{font:400 var(--t-ui)/1.5 var(--f-text)!important;color:var(--soft)!important}
+/* the explanation after a task: same left edge as everything else */
+.after{border:0!important;padding:12px 0 0!important;border-top:1px solid var(--line)!important}
+/* a calculator answer */
+.quiz{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.quiz input{flex:1 1 160px;min-width:0;padding:0 14px!important;border-radius:12px!important;border:1px solid rgba(143,155,196,.35)!important;background:rgba(5,8,23,.6)!important;color:var(--ink)!important}
+.quiz input:focus-visible{border-color:var(--focus)!important}
+.quiz button{flex:none;padding:0 18px!important;border-radius:12px!important}
+/* HUD values: colour means a quantity (current blue, voltage copper), not success */
+.num.g b{color:var(--ink)!important}
+.num.g.ok b{color:var(--ok)!important}.num.g.bad b{color:var(--copper)!important}
+.num .nil,.num b.nil{color:var(--mute)!important}
+/* the chosen answer keeps its state colour even though the buttons are disabled */
+.pq-o button.pick{color:var(--ink)!important;border-color:#8a9bff!important;background:rgba(91,156,255,.18)!important}
+.pq-o button.pick.yes,.pq-o button.right{color:var(--ink)!important;border-color:var(--ok)!important;background:rgba(89,243,168,.08)!important}
+.pq-o button.right{border-style:dashed!important;background:none!important}
+.pq-o button.pick.no{color:var(--ink)!important;border-color:var(--copper)!important;background:rgba(255,178,107,.1)!important}
+.ph .back{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;margin-left:-8px}
+.langsw button{min-width:44px!important;min-height:44px!important}
+.reset{min-height:44px!important}
+details.more summary{min-height:44px!important;display:flex;align-items:center}
+.hw label,.ped.cando label{min-height:44px;align-items:center}
+/* in-scene actions: one style to run the experiment, one for the destructive try; the white pill is only Next */
+.ctl button.run{background:var(--copper)!important;border-color:var(--copper)!important;color:#1a0f05!important;border-radius:var(--r-pill)!important}
+.ctl button.run:hover{background:#ffc58f!important}.ctl button.run:disabled{background:transparent!important;color:var(--mute)!important;border-color:var(--line)!important}
+.ctl button.danger{background:transparent!important;border:1px solid rgba(255,138,112,.55)!important;color:#ffb08a!important}
+.ctl button.danger[aria-pressed=true]{background:rgba(255,138,112,.12)!important}
+.row button:disabled,.card.ctl button:disabled{opacity:1!important;color:var(--mute)!important;border-color:var(--line)!important;background:transparent!important}

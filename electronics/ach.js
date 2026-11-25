@@ -13,11 +13,12 @@ const read=()=>{try{return JSON.parse(localStorage.getItem('ach_v1')||'{}')}catc
 const css=`.am{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:#a9b6ff;background:radial-gradient(circle at 35% 30%,#1f2b6b,#0b1135 75%);border:1.5px solid rgba(138,155,255,.75);box-shadow:0 0 0 3px rgba(91,156,255,.08)}
 .am.k-intuition,.am.k-memory,.am.k-check,.am.k-streak{color:#ffc58f;border-color:rgba(255,178,107,.8);box-shadow:0 0 0 3px rgba(255,178,107,.08)}
 .am.k-level{color:#fff;border-color:transparent;background:linear-gradient(135deg,#5b9cff,#8a6bff)}
-.am.off{color:#4d5682;background:none;border:1.5px dashed rgba(143,155,196,.35);box-shadow:none}
+.am.off{color:#7380b0;background:none;border:1.5px dashed rgba(143,155,196,.5);box-shadow:none}
 .al{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;text-align:left}
 .al li{display:flex;align-items:center;gap:10px;min-width:0;font-size:13px;line-height:1.3;color:#dfe4fb}
 .al li.off{color:#8f9bc4}
 .al li span:last-child{min-width:0}
+.al .ad{display:block;margin-top:2px;font-size:13px;line-height:1.35;color:#8f9bc4}
 .al .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:420px){.al{grid-template-columns:1fr}}`;
 const st=document.createElement('style');st.textContent=css;(document.head||document.documentElement).appendChild(st);

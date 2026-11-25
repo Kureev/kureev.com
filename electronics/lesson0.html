@@ -44,11 +44,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,syste
 .x{position:absolute;right:6px;top:4px;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}
 .meter{position:absolute;left:16px;bottom:16px;width:236px;background:#f2c230;color:#1d1a10;border-radius:16px;padding:10px 12px 12px;box-shadow:0 6px 0 #a3801a,0 14px 30px rgba(0,0,0,.45)}
 .mtop{display:flex;justify-content:space-between;font:800 13px Manrope,sans-serif}
-.lcd{margin:6px 0 8px;background:#b8c9a2;color:#14200f;font:700 34px/1 'JetBrains Mono',monospace;text-align:right;padding:8px 10px;border-radius:7px;box-shadow:inset 0 2px 0 rgba(0,0,0,.18)}
+.lcd{margin:6px 0 8px;background:#b8c9a2;color:#14200f;font:800 34px/1 Manrope,sans-serif;font-variant-numeric:tabular-nums;text-align:right;padding:8px 10px;border-radius:7px;box-shadow:inset 0 2px 0 rgba(0,0,0,.18)}
 .lcd small{font-size:16px;margin-left:4px}
 .probes{display:flex;gap:12px;font-size:13px;font-weight:600}
 .pr i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.next{font-size:12px;margin-top:4px;color:#4b4120}
+.next{font-size:13px;margin-top:4px;color:#4b4120}
 .panel{overflow-y:auto;border-left:1px solid var(--line);background:var(--panel);padding:22px 20px 28px}
 h1{font:800 31px/1.06 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
 .sub{margin:0 0 16px;color:var(--mute);font-size:15px}
@@ -555,7 +555,7 @@ const STEPS=[
  task:'Flip the switch and turn on “Show electrons”',ok:()=>S.swT&&S.el},
 {sc:'b',part:'Building the board',t:'Test points and the multimeter',s:"A multimeter measures the <b>difference</b> between the red and black probes. Click a TP: first click places the red probe, second the black.",bt:["Test points", "At a point vs across a part", "How to measure", "Kirchhoff’s law"],ui:['meter','bMap','bSw','bNums'],build:ALL,map:true,enter:()=>{S.closed=true;S.red='TP1';S.black='TP4';S.next='red'},
  b:'<p>We added yellow <b>test points</b> TP1–TP4, where you touch the multimeter probes. The red-blue fence above the traces is a height map, like in the water model.</p><ul><li><b>Voltage at a point</b> is its height relative to ground. It’s labelled at each TP.</li><li><b>Drop across a part</b> is the difference between its two legs: how much the height fell as current passed through it. The numbers in the corner of the scene show it.</li></ul><p>A multimeter measures the difference between the red and black probes. The first click on a TP places the red probe, the second the black.</p><p><b>Kirchhoff’s law:</b> the drops around a loop add up to the source voltage. The source lifted by 12 V, so together the parts must bring it down by 12.</p>',
- after:'<p>10.1 + 1.9 = 12. It adds up. Open the switch and measure TP1–TP2: current disappears and all 12 V end up across the gap.</p>',
+ after:'<p>10.1 V + 1.9 V = 12 V. It adds up. Open the switch and measure TP1–TP2: current disappears and all 12 V end up across the gap.</p>',
  task:'Measure the drop across the resistor (TP2–TP3) and across the LED (TP3–TP4)',ok:()=>S.meas.has('TP2-TP3')&&S.meas.has('TP3-TP4')},
 {sc:'b',part:'Building the board',t:'The LED holds its own voltage',s:"The LED always takes ~1.9 V and the resistor gets the rest. The order of parts in the loop doesn’t matter.",bt:["Trap", "Why 1.9 V", "The box picture", "“Before” and “after”"],ui:['meter','bMap','bSwap','bNums'],build:ALL,map:true,enter:()=>{S.closed=true},
  b:'<p>A common trap: thinking the resistor comes “first”, spends its share, and the LED gets what’s left. Voltage isn’t used up along the way like fuel. All the heights settle at once, across the whole circuit.</p><p>When current flows through an LED, its legs always differ by about 1.9 V. The lower leg is at ground (0 V), so the upper one is at 1.9 V. The resistor gets the rest: 12 − 1.9 = 10.1 V. This doesn’t depend on resistance; only the current does.</p><p>A box 1.9 m tall stands on the floor (the LED), and a rubber band stretches 12 m from the ceiling to its lid (the resistor). The lid is at 1.9 m because of the box, not the band.</p><p class="note">And “before” and “after” is just a convention: for electrons running from minus, the LED actually comes first.</p>',
@@ -643,8 +643,8 @@ function update(){
   const w=water();
   $('#tu').value=S.tU;$('#tr').value=S.tri;$('#tuO').textContent=fV(S.tU);$('#trO').textContent=fR(w.R);
   $('#wU').textContent=fV(w.U);$('#wI').textContent=fI(w.I);$('#wR').textContent=fR(w.R);$('#wP').textContent=fP(w.P);
-  $('#wF').innerHTML=_t('I = U / R = {0} / {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),w.R+' '+_u('Ω'),fI(w.I))+(ui.includes('tnP')?_t('<br>P = U × I = {0} × {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),nf(w.I,4)+' '+_u('A'),fP(w.P))+(w.P>P_RATED?_t(', over 0.25 W, overheating'):''):'');
-  LwU.el.textContent='U = '+fV(w.U);LwN.el.textContent=_t('Narrow section · {0}',fR(w.R));LwC1.el.textContent=LwC2.el.textContent=fI(w.I);LwGa.el.textContent=_t('Gauge: {0} above ground',fV(w.U));LwTh.el.textContent=_t('Heat: {0} · limit 0.25',w.P<1?Math.round(w.P*1000)+' '+_u('mW'):fP(w.P));
+  $('#wF').innerHTML=_t('I = U / R = {0} / {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),fR(w.R),fI(w.I))+(ui.includes('tnP')?_t('<br>P = U × I = {0} × {1} = <b>{2}</b>',nf(w.U,1)+' '+_u('V'),fI(w.I),fP(w.P))+(w.P>P_RATED?_t(', over 0.25 W, overheating'):''):'');
+  LwU.el.textContent='U = '+fV(w.U);LwN.el.textContent=_t('Narrow section · {0}',fR(w.R));LwC1.el.textContent=LwC2.el.textContent=fI(w.I);LwGa.el.textContent=_t('Gauge: {0} above ground',fV(w.U));LwTh.el.textContent=_t('Heat: {0} · limit {1}',w.P<1?Math.round(w.P*1000)+' '+_u('mW'):fP(w.P),'250 '+_u('mW'));
   /* board 3D */
   jSw.visible=!S.hasSw;gSw.visible=S.hasSw;jR.visible=!S.hasR;gR.visible=S.hasR;gTP.visible=S.tpOn;
   lever.rotation.z=S.closed?0:0.6;
@@ -684,8 +684,8 @@ function update(){
   else if(C.gap==='res')f=_t('The resistor burnt out and became a gap: current is 0, all the voltage is across it.');
   else if(C.gap==='led')f=S.ledDead?_t('The LED burnt out and became a gap: current is 0, all the voltage ({0}) is across it.',fV(C.V))+(ui.includes('bR')?_t(' Fit a bigger resistor and press “Replace”.'):''):_t('Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.');
   else if(C.R===0)f=_t('No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.');
-  else{f=_t('Across the resistor: U = {0} − {1} = <b>{2}</b><br>Ohm’s law: I = U / R = {3} / {4} = <b>{5}</b><br>Heat: P = U × I = <b>{6}</b> (the resistor handles 250 mW)',fV(C.V),fV(C.UL),fV(C.UR),nf(C.UR,1)+' '+_u('V'),C.R+' '+_u('Ω'),fI(C.I),fP(C.P));
-    if(S.step>=11)f+=_t('<br>LED: {0} × I = {1}; the source delivers {2} × I = <b>{3}</b> = {4} + {5}',nf(C.UL,1)+' '+_u('V'),fP(C.PL),nf(C.V,1)+' '+_u('V'),fP(C.V*C.I),fP(C.P),fP(C.PL))}
+  else{f=_t('Across the resistor: U = {0} − {1} = <b>{2}</b><br>Ohm’s law: I = U / R = {3} / {4} = <b>{5}</b><br>Heat: P = U × I = {3} × {5} = <b>{6}</b> (the resistor handles 250 mW)',fV(C.V),fV(C.UL),fV(C.UR),nf(C.UR,1)+' '+_u('V'),fR(C.R),fI(C.I),fP(C.P));
+    if(S.step>=11)f+=_t('<br>LED: P = {0} × {6} = {1}<br>Source: P = {2} × {6} = <b>{3}</b> = {4} + {5}',nf(C.UL,1)+' '+_u('V'),fP(C.PL),nf(C.V,1)+' '+_u('V'),fP(C.V*C.I),fP(C.P),fP(C.PL),fI(C.I))}
   $('#formula').innerHTML=f;
   /* task */
   if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();

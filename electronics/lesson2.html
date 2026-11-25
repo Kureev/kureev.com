@@ -267,7 +267,7 @@ input[type=range]{accent-color:#7d8cff}
         <div class="row"><button id="cap2" data-ui="cap2" aria-pressed="false">Add a second one in parallel</button><button id="flip" class="danger" data-ui="flip">Fit one backwards</button></div>
         <div data-ui="rat"><label for="ra">Voltage rating (change it and new ones go in) <output id="raO"></output></label><input type="range" id="ra" min="0" max="4" step="1" value="2"></div>
         <div class="row"><button id="srv" data-ui="servos" aria-pressed="true">Disconnect the servos</button><button id="plug" data-ui="plug" aria-pressed="true">Unplug the supply</button></div>
-        <button id="jerk" class="danger" data-ui="jerk" style="width:100%">Make the arm lunge</button>
+        <button id="jerk" class="run" data-ui="jerk" style="width:100%">Make the arm lunge</button>
         <button id="fix" class="fix" hidden>Fit new capacitors</button>
       </section>
       <div class="task" id="task"></div>
@@ -397,7 +397,7 @@ function buildW(){[pipeG,tankG].forEach(g=>{while(g.children.length){const c=g.c
   WPATH=polyPath([V3(SX+SR-0.1,Y0+0.2,0),V3(TX-tankR+0.1,Y0+0.2,0)],false);
   LwPipe.el.textContent=_t('Narrow pipe = resistor R · {0}',fR(WR[S.wr]));LwTank.el.textContent=_t('Tank = capacitor C · {0}',fC(WC[S.wc]));LwTank.p.set(TX,Y0+HT+0.15,0)}
 const LwSrc=lab('w','',V3(SX,Y0+HT+0.15,0),'part',null,'up'),LwPipe=lab('w','',V3((SX+TL)/2,Y0+0.2,0.25),'part',null,'down'),
-  LwTank=lab('w','',V3(),'part',null,'up'),LwLvl=lab('w','',V3(),'good',null,'right'),
+  LwTank=lab('w','',V3(),'part',null,'up'),LwLvl=lab('w','',V3(),'part',null,'right'),
   Lw63=lab('w','63% = 7.6 V',V3(),'flow',()=>S.step===2,'right');
 const line63=new THREE.Mesh(new THREE.BoxGeometry(1,0.02,0.02),M(0xffb26b,{emissive:0xffb26b,emissiveIntensity:.4}));scW.add(line63);
 const NDW=18,dropsW=new THREE.InstancedMesh(new THREE.SphereGeometry(0.035,8,6),new THREE.MeshBasicMaterial({color:0xcfe9ff}),NDW);scW.add(dropsW);
@@ -449,7 +449,7 @@ const Lled=lab('b','Indicator',V3(0.75,0.6,0.8),'part',null,'right');
 mkRes(P(2.4,-1.4),P(2.4,-0.2),10000);mkRes(P(2.4,0.2),P(2.4,1.4),2200);
 add(scB,new THREE.Mesh(new THREE.BoxGeometry(1.1,0.3,1.3),M(0x30353a)),'meter').position.set(3.7,0.15,0);
 add(scB,new THREE.Mesh(new THREE.BoxGeometry(0.8,0.02,0.5),M(0xb8c9a2,{emissive:0x4a5a30,emissiveIntensity:.3})),'meter').position.set(3.7,0.31,-0.1);
-const Lmet=lab('b','',V3(3.7,0.3,0.95),'good',null,'down');
+const Lmet=lab('b','',V3(3.7,0.3,0.95),'part',null,'down');
 /* bulk capacitors: two radial electrolytics across the rail, right after the protection */
 const CX=[-0.45,0.05],capG=[],mSleeve=M(0x0b1236,{roughness:.5}),mTop=M(0xb9c2d6,{metalness:.7,roughness:.35});
 const gCapT=new THREE.Group();scB.add(gCapT);
@@ -507,7 +507,7 @@ function drawScope(){const fig=$('#scope');if(fig.hidden)return;
   if(scv.width!==Math.round(W*dpr)||scv.height!==Math.round(H*dpr)){scv.width=Math.round(W*dpr);scv.height=Math.round(H*dpr)}
   const x=sx;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
   const st=STEPS[S.step],mode=st.sc==='w'?'w':S.step===7?'slow':'fast';
-  const VMAX=mode==='fast'?24:14,nx=10,ny=mode==='fast'?6:7;
+  const VMAX=mode==='fast'?30:14,nx=10,ny=mode==='fast'?6:7;
   x.strokeStyle='rgba(143,155,196,.13)';x.lineWidth=1;
   for(let i=0;i<=nx;i++){const px=Math.round(i*W/nx)+.5;x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke()}
   for(let j=0;j<=ny;j++){const py=Math.round(j*H/ny)+.5;x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke()}
@@ -515,13 +515,13 @@ function drawScope(){const fig=$('#scope');if(fig.hidden)return;
   const hl=(v,c,dash)=>{x.strokeStyle=c;x.setLineDash(dash||[]);x.lineWidth=1.2;x.beginPath();x.moveTo(0,Y(v));x.lineTo(W,Y(v));x.stroke();x.setLineDash([])};
   const trace=(pts,c)=>{x.strokeStyle=c;x.lineWidth=2;x.lineJoin='round';x.beginPath();pts.forEach(([px,v],i)=>i?x.lineTo(px,Y(v)):x.moveTo(px,Y(v)));x.stroke()};
   let sub='',rd='',bad=false,xs='',ys='';
-  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub=_t('rail · single shot');xs=_t('{0} / square',nf(0.5,1)+' '+_u('ms'));ys=_t('{0} / square · red: 7 V line',4+' '+_u('V'));
+  if(mode==='fast'){hl(12,'rgba(201,210,245,.45)',[4,4]);hl(LINE,'#ff8a70',[6,4]);sub=_t('rail · single shot');xs=_t('{0} / square',nf(0.5,1)+' '+_u('ms'));ys=_t('{0} / square · red: 7 V line',5+' '+_u('V'));
     if(S.tr){const n=S.tr.V.length,m=Math.max(1,Math.floor(S.rp*(n-1))),pts=[];for(let i=0;i<=m;i++)pts.push([i/(n-1)*W,S.tr.V[i]]);trace(pts,'#8fd0ff');
       if(S.rp>=1){rd=_t('lowest {0}',fV(S.tr.min));bad=S.tr.min<LINE}else rd=_t('capturing…')}
     else{trace([[0,VS-BASE*RPATH],[W,VS-BASE*RPATH]],'#8fd0ff');rd=_t('waiting for a lunge')}}
   else if(mode==='slow'){hl(12,'rgba(201,210,245,.45)',[4,4]);sub=_t('rail · rolling');xs=_t('{0} / square',1+' '+_u('s'));ys=_t('{0} / square',2+' '+_u('V'));
     const L=S.ulog,t1=S.ut,t0=t1-10,pts=L.filter(p=>p[0]>=t0).map(([t,v])=>[(t-t0)/10*W,v]);if(pts.length>1)trace(pts,'#8fd0ff');rd=fV(solve().Vr)}
-  else{hl(12,'rgba(201,210,245,.45)',[4,4]);const tau=wTau(),span=S.step===2?Math.max(6*tau,1):6;sub=_t('tank level');xs=_t('{0} / square',(span>=10?nf(span/10,0):nf(span/10,span<1?2:1))+' '+_u('s'));ys=_t('{0} / square',2+' '+_u('V'));
+  else{hl(12,'rgba(201,210,245,.45)',[4,4]);const tau=wTau(),nice=v=>{const e=Math.pow(10,Math.floor(Math.log10(v))),m=v/e;return(m<=1?1:m<=2?2:m<=5?5:10)*e},span=S.step===2?10*nice(Math.max(6*tau,1)/10):5;sub=_t('tank level');xs=_t('{0} / square',(span>=10?nf(span/10,0):nf(span/10,span<1?2:1))+' '+_u('s'));ys=_t('{0} / square',2+' '+_u('V'));
     if(S.step===2){const tx=Math.min(W,tau/span*W);x.strokeStyle='rgba(255,178,107,.8)';x.setLineDash([5,4]);x.beginPath();x.moveTo(tx,0);x.lineTo(tx,H);x.stroke();x.setLineDash([]);hl(12*0.632,'rgba(255,178,107,.8)',[5,4]);
       x.fillStyle='#ffb26b';x.font='600 13px Manrope,sans-serif';x.fillText('τ',Math.min(W-12,tx+4),14)}
     const L=S.wlog,t1=S.step===2?span:Math.max(S.wt,span),t0=Math.max(0,t1-span),pts=L.filter(p=>p[0]>=t0).map(([t,v])=>[(t-t0)/span*W,v]);if(pts.length>1)trace(pts,'#8fd0ff');rd=fV(S.lvl)}

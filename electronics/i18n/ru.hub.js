@@ -92,5 +92,13 @@ I18N.add({
 "Clear a stage of any level to get the first one.":"Пройди этап любого уровня, чтобы получить первую.",
 "<b>{0} of {1}</b> earned":"Получено <b>{0} из {1}</b>",
 "predictions on target: {0} of {1}":"прогнозов в точку: {0} из {1}",
-"Each new level you open adds its own achievements.":"Каждый новый уровень добавляет свои ачивки."
+"Each new level you open adds its own achievements.":"Каждый новый уровень добавляет свои ачивки.",
+"Clear any stage to get the first one.":"Пройди любой этап — получишь первую.",
+"A level’s achievements appear here once you open it.":"Ачивки уровня появляются здесь, когда открываешь его.",
+"Every step of this stage is done.":"Все шаги этого этапа выполнены.",
+"Every prediction on this level right the first time.":"Все прогнозы уровня верны с первого раза.",
+"Every warm-up answer right on the first try.":"Все ответы разминки верны с первой попытки.",
+"The end check without a single mistake.":"Итоговая проверка без единой ошибки.",
+"Every task on this level done.":"Все задания уровня выполнены.",
+"Five predictions in a row right.":"Пять верных прогнозов подряд."
 });
