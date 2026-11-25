@@ -92,7 +92,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 
 /* text roles: no orphans, no squeezed rows */
 #stepT{text-wrap:balance}
-#stepS,.lead,.pq-q,.pq-f,.pq-done,.after p,.task,.blk p,.blk li,.stepx p,.fb,.info p,.ped.brief summary,.ped.cando label{text-wrap:pretty}
+#stepS,.lead,.pq-q,.pq-f,.pq-done,.after p,.task,.blk p,.blk li,.stepx p,.fb,.info p,.ped.brief summary,.ped.cando label,.al .ad,#ach .achi,.pw-an,.pt-d,.hw label{text-wrap:pretty}
+.pw-s,.pw-l{text-wrap:balance}
+/* quantities keep one colour everywhere, matching the scopes: voltage blue, current copper */
+.num.u b{color:#8fd0ff!important}.num.i b{color:var(--copper)!important}
 .ph{flex-wrap:nowrap!important;align-items:center!important}
 .ph .ltitle{flex:1 1 auto;min-width:0}
 .ph>a,.ph .lesson{flex:none;white-space:nowrap}
@@ -110,7 +113,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[
 .quiz input{flex:1 1 160px;min-width:0;padding:0 14px!important;border-radius:12px!important;border:1px solid rgba(143,155,196,.35)!important;background:rgba(5,8,23,.6)!important;color:var(--ink)!important}
 .quiz input:focus-visible{border-color:var(--focus)!important}
 .quiz button{flex:none;padding:0 18px!important;border-radius:12px!important}
-/* HUD values: colour means a quantity (current blue, voltage copper), not success */
+/* HUD values: colour means a quantity, not success */
 .num.g b{color:var(--ink)!important}
 .num.g.ok b{color:var(--ok)!important}.num.g.bad b{color:var(--copper)!important}
 .num .nil,.num b.nil{color:var(--mute)!important}

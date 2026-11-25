@@ -45,7 +45,7 @@ I18N.add({
 "both ways": "в обе стороны",
 "towards the stripe, dropping about 0.45 V": "в сторону полоски, теряя около 0,45 В",
 "only above 12 V": "только выше 12 В",
-"τ = L / R for 10 mH and 10 Ω is…": "τ = L / R для 10 мГн и 10 Ом —",
+"τ = L / R for 10 mH and 10 Ω is…": "τ = L / R для 10 мГн и 10 Ом равно…",
 "Shutting the valve faster makes the kick…": "Если закрыть кран быстрее, удар будет…",
 "A coil won’t let this jump instantly:": "Катушка не даст мгновенно скакнуть:",
 "1 mH, and the current changes by 1 A in 1 µs. U =": "1 мГн, ток меняется на 1 А за 1 мкс. U =",
@@ -93,7 +93,7 @@ I18N.add({
 "<p>The flow climbed and settled at I = U / R = 12 V / 10 Ω = 1.2 A. At the start the whole 12 V went into spinning up the wheel; at the end the wheel took nothing.</p>": "<p>Поток вырос и встал на I = U / R = 12 В / 10 Ом = 1,2 А. Вначале все 12 В уходили на раскрутку колеса, в конце колесо не забирало ничего.</p>",
 "Open the valve and wait until the flow levels off": "Открой кран и дождись, пока поток выйдет на полку",
 "How fast: τ = L / R": "Как быстро: τ = L / R",
-"A heavier wheel starts slower. The time scale is <b>τ = L / R</b>: after one τ the flow reaches 63% of its final value.": "Тяжёлое колесо разгоняется медленнее. Масштаб времени — <b>τ = L / R</b>: за одну τ поток доходит до 63% конечного.",
+"A heavier wheel starts slower. The time scale is <b>τ = L / R</b>: after one τ the flow reaches 63% of its final value.": "Тяжёлое колесо разгоняется медленнее. Масштаб времени — <b>τ = L / R</b>: за одно τ поток доходит до 63% конечного.",
 "τ, tau": "τ, тау",
 "The same curve as the capacitor": "Та же кривая, что у конденсатора",
 "Less resistance, slower": "Меньше сопротивление — медленнее",
@@ -239,5 +239,12 @@ I18N.add({
 "3 V": "3 В",
 "9 V": "9 В",
 "Wheel’s push-back: U = 12 V − I × R = {0}<br>Final flow: I = U / R = 12 V / {1} = <b>{2}</b>": "Противодействие колеса: U = 12 В − I × R = {0}<br>Конечный поток: I = U / R = 12 В / {1} = <b>{2}</b>",
-"Valve shut: no flow, the wheel stands still.<br>Once open, the flow settles at I = U / R = 12 V / {0} = <b>{1}</b>": "Кран закрыт: потока нет, колесо стоит.<br>Открытый кран выйдет на I = U / R = 12 В / {0} = <b>{1}</b>"
+"Valve shut: no flow, the wheel stands still.<br>Once open, the flow settles at I = U / R = 12 V / {0} = <b>{1}</b>": "Кран закрыт: потока нет, колесо стоит.<br>Откроешь кран — поток выйдет на I = U / R = 12 В / {0} = <b>{1}</b>",
+"Switch open: no current.<br>Close it and the current settles at I = U / R = 12 V / 24 Ω = 0.5 A within about 3τ, τ = L / R = {0}": "Выключатель разомкнут: тока нет.<br>Замкнёшь — ток выйдет на I = U / R = 12 В / 24 Ом = 0,5 А примерно за 3τ, τ = L / R = {0}",
+"Closing…": "Закрываем…",
+"Open the valve and wait: the buttons unlock once the flow is up to speed.": "Открой кран и подожди: кнопки включатся, когда поток разгонится.",
+"Open the valve and watch the flow build up on the scope.": "Открой кран и смотри, как поток растёт на осциллографе.",
+"The flow is building up: {0}% of full": "Поток разгоняется: {0}% от полного",
+"Full flow. Now close it, slowly or all at once.": "Поток полный. Теперь закрывай: плавно или сразу.",
+"The flow has levelled off at {0}.": "Поток вышел на полку: {0}."
 });

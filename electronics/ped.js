@@ -28,7 +28,7 @@ function layout(){const step=document.querySelector('.panel .step');if(!step)ret
 function tidy(){if(!seg)return;
   const shown=c=>!c.hidden&&getComputedStyle(c).display!=='none';
   if(ctl)ctl.querySelectorAll('.row').forEach(r=>{const v=[...r.children].some(shown),want=v?'':'none';if(r.style.display!==want)r.style.display=want});
-  const sd=seg.try.querySelector('.side');if(sd){const v=[...sd.children].some(c=>shown(c)&&c.textContent.trim()),want=v?'':'none';if(sd.style.display!==want)sd.style.display=want}
+  const sd=seg.try.querySelector('.side');if(sd){const v=[...sd.children].some(c=>shown(c)&&c.textContent.trim()),want=v?'':'none';if(sd.style.display!==want)sd.style.display=want;const kids=[...seg.try.children],lead=!kids.slice(0,kids.indexOf(sd)).some(c=>shown(c)&&c.offsetHeight>0);if(sd.classList.contains('lead')!==lead)sd.classList.toggle('lead',lead)}
   Object.values(seg).forEach(d=>{const v=[...d.children].some(c=>shown(c)&&c.offsetHeight>0);if(d.classList.contains('empty')===v)d.classList.toggle('empty',!v)})}
 let tq=0;const queue=()=>{if(tq)return;tq=requestAnimationFrame(()=>{tq=0;layout();tidy();syncNext()})};
 
@@ -50,7 +50,7 @@ function render(step){
     const u=items.findIndex((_,i)=>g(key+i)==null);
     items.forEach((q,i)=>{const p=g(key+i);
       if(p!=null){const d=document.createElement('p');d.className='pq-done'+(p===q.a?' ok':'');
-        d.innerHTML=`<span>${q.q}</span>&nbsp;<b>${p===q.a?q.o[q.a]:T('“{0}”, not right',q.o[p])}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
+        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?q.o[q.a]:T('“{0}”, not right',q.o[p]).replace(/, not right$/,',\u00a0not\u00a0right').replace(/— неверно$/,'—\u00a0неверно')}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
         if(p!==q.a)d.appendChild(again(T('Try again'),()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
       if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);if(g('F'+key+i)==null)s('F'+key+i,v);render(cur);check()}))});
     c.querySelector('.ped-k span').textContent=u<0?T('{0} / {1} right',ok,items.length):T('{0} of {1}',u+1,items.length);
@@ -172,7 +172,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .seg-think .ped+.ped{margin-top:14px;padding-top:14px;border-top:1px solid rgba(140,160,255,.1)}
 .seg-try .card.ctl{margin:0!important;padding:0!important;border:0!important;background:none!important}
 .seg-try .side{margin:6px 0 0!important;padding-top:12px;border-top:1px solid rgba(140,160,255,.1)}
-.seg-try .side:empty{display:none}.seg-try .side:first-child{border-top:0;padding-top:0;margin-top:0!important}
+.seg-try .side:empty{display:none}.seg-try .side.lead{border-top:0;padding-top:0;margin-top:0!important}
 .seg-try .ped-note{margin:10px 0 0}
 .seg-goal .task{margin:0;background:none!important;border:0!important;padding:0!important}.seg-goal .after:not([hidden]),.seg-goal .stepx:not(:empty){margin-top:14px}
 .seg-goal #ped{margin:14px 0 0}

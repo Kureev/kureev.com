@@ -117,7 +117,7 @@ I18N.add({
 "Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.":"Напряжения меньше, чем нужно светодиоду (≈1,9 В): он закрыт, ток 0.",
 "No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.":"Резистора нет: ток ограничивают только сам светодиод и провода. Он улетает почти к амперу.",
 "Across the resistor: U = {0} − {1} = <b>{2}</b><br>Ohm’s law: I = U / R = {3} / {4} = <b>{5}</b><br>Heat: P = U × I = {3} × {5} = <b>{6}</b> (the resistor handles 250 mW)":"На резисторе: U = {0} − {1} = <b>{2}</b><br>Закон Ома: I = U / R = {3} / {4} = <b>{5}</b><br>Тепло: P = U × I = {3} × {5} = <b>{6}</b> (резистор держит 250 мВт)",
-"<br>LED: P = {0} × {6} = {1}<br>Source: P = {2} × {6} = <b>{3}</b> = {4} + {5}":"<br>Светодиод: P = {0} × {6} = {1}<br>Источник: P = {2} × {6} = <b>{3}</b> = {4} + {5}",
+"<br>LED: P = {0} × {6} = <b>{1}</b><br>Source: P = {2} × {6} = <b>{3}</b> = {4} + {5}":"<br>Светодиод: P = {0} × {6} = <b>{1}</b><br>Источник: P = {2} × {6} = <b>{3}</b> = {4} + {5}",
 /* info */
 "Power supply":"Блок питания",
 "The pump from the water model. It holds a constant voltage between plus and minus. How much current flows is decided not by the supply but by the parts in the circuit. Minus is zero, “ground” (GND).":"Насос из модели с водой. Держит постоянное напряжение между плюсом и минусом. Сколько потечёт тока, решает не блок, а детали в цепи. Минус — это ноль, «земля» (GND).",
@@ -238,7 +238,7 @@ I18N.add({
 "At home":"Дома",
 "Homework on real hardware":"Домашка на настоящем железе",
 "Four multimeter measurements on your own hardware.":"Четыре замера мультиметром на твоём железе.",
-"Multimeter: black probe in the COM jack, red in the V jack. Set the dial to DC voltage (V with a straight line), 20 V range.":"Мультиметр: чёрный щуп в гнездо COM, красный — в V. Переключатель на постоянное напряжение (V с прямой линией), предел 20 В.",
+"Multimeter: black probe in the COM jack, red in the V jack. Set the dial to DC voltage (V with a straight line), 20 V range.":"Мультиметр: чёрный щуп в гнездо COM, красный — в V. Переключатель на постоянное напряжение (V с прямой линией), предел 20 В.",
 "Measure your power supply: black on minus, red on plus. If it shows “−12”, the probes are swapped, no harm done.":"Измерь свой блок питания: чёрный на минус, красный на плюс. Если показывает «−12», щупы перепутаны, ничего страшного.",
 "Connect the ESP32 over USB and measure between the 3V3 and GND pins. It should read about 3.3 V.":"Подключи ESP32 по USB и измерь между пинами 3V3 и GND. Должно быть около 3,3 В.",
 "On the same board, between 5V and GND: about 5 V from USB.":"На той же плате между 5V и GND: около 5 В от USB.",

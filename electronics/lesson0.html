@@ -205,7 +205,7 @@ h2{font-size:23px;margin:10px 0 6px}
  .stage{height:46svh;min-height:300px}
  .meter{left:auto;right:8px;top:8px;bottom:auto;width:150px;padding:7px 9px 8px}
  .meter .lcd{font-size:20px;margin:4px 0 5px}.meter .next{display:none}
- .hud .num:nth-child(n+3){display:none}
+ .hud{flex-wrap:wrap}
 }
 /* brand v1 */
 :root{--blue:#5b9cff;--violet:#8a6bff;--grad:linear-gradient(100deg,#5b9cff,#8a6bff 60%,#c77dff);--ok:#59f3a8;--warn:#ffb26b}
@@ -685,7 +685,7 @@ function update(){
   else if(C.gap==='led')f=S.ledDead?_t('The LED burnt out and became a gap: current is 0, all the voltage ({0}) is across it.',fV(C.V))+(ui.includes('bR')?_t(' Fit a bigger resistor and press “Replace”.'):''):_t('Less voltage than the LED needs (≈1.9 V): it’s shut, current is 0.');
   else if(C.R===0)f=_t('No resistor: only the LED itself and the wires limit current. It shoots up to almost an amp.');
   else{f=_t('Across the resistor: U = {0} − {1} = <b>{2}</b><br>Ohm’s law: I = U / R = {3} / {4} = <b>{5}</b><br>Heat: P = U × I = {3} × {5} = <b>{6}</b> (the resistor handles 250 mW)',fV(C.V),fV(C.UL),fV(C.UR),nf(C.UR,1)+' '+_u('V'),fR(C.R),fI(C.I),fP(C.P));
-    if(S.step>=11)f+=_t('<br>LED: P = {0} × {6} = {1}<br>Source: P = {2} × {6} = <b>{3}</b> = {4} + {5}',nf(C.UL,1)+' '+_u('V'),fP(C.PL),nf(C.V,1)+' '+_u('V'),fP(C.V*C.I),fP(C.P),fP(C.PL),fI(C.I))}
+    if(S.step>=11)f+=_t('<br>LED: P = {0} × {6} = <b>{1}</b><br>Source: P = {2} × {6} = <b>{3}</b> = {4} + {5}',nf(C.UL,1)+' '+_u('V'),fP(C.PL),nf(C.V,1)+' '+_u('V'),fP(C.V*C.I),fP(C.P),fP(C.PL),fI(C.I))}
   $('#formula').innerHTML=f;
   /* task */
   if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();

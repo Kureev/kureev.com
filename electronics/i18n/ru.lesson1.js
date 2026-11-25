@@ -102,7 +102,7 @@ I18N.add({
 ", off the scale":", зашкаливает",
 "Fuse · {0}":"Предохранитель · {0}",
 "Indicator · {0}":"Индикатор · {0}",
-"Meter: {0} → supply {1}":"Измеритель: {0} → блок {1}",
+"Meter: {0} → supply {1}":"Измеритель: {0} → шина {1}",
 "6 servos · stalled: {0}":"6 серво · упёрлось: {0}",
 "{0} of 6":"{0} из 6",
 "burnt":"сгорел",
@@ -136,7 +136,7 @@ I18N.add({
 "<br>Diode: P = 0.45 V × {0} = <b>{1}</b>":"<br>Диод: P = 0,45 В × {0} = <b>{1}</b>",
 "<br>MOSFET: P = I × I × R = {0} × {0} × {2} = <b>{1}</b>":"<br>MOSFET: P = I × I × R = {0} × {0} × {2} = <b>{1}</b>",
 "<br>Indicator: I = ({0} − {3}) / {1} = <b>{2}</b>":"<br>Индикатор: I = ({0} − {3}) / {1} = <b>{2}</b>",
-"<br>Divider: {0} × {1} / ({2} + {1}) = <b>{3}</b> at the meter":"<br>Делитель: {0} × {1} / ({2} + {1}) = <b>{3}</b> на измерителе",
+"<br>At the meter: {0} × {1} / ({2} + {1}) = <b>{3}</b>":"<br>На измерителе: {0} × {1} / ({2} + {1}) = <b>{3}</b>",
 /* info */
 "Holds 12 V and can deliver up to 10 A. Ask for more and it goes into protection and shuts off. The “12V ⎓ 10A” label is exactly these two numbers.":"Держит 12 В и может отдать до 10 А. Попросишь больше — уйдёт в защиту и отключится. Надпись «12 В ⎓ 10 А» — ровно эти два числа.",
 "Power connector":"Разъём питания",
@@ -229,5 +229,6 @@ I18N.add({
 "Find the STS3215 stall current at 12 V in its datasheet and recalculate the worst case.":"Найди в даташите STS3215 ток упора при 12 В и пересчитай худший случай.",
 "Find which side is plus on your supply: a barrel plug has a polarity symbol printed next to it.":"Найди, где плюс у твоего блока: рядом с круглым штекером нарисован значок полярности.",
 "Think about which fuse you would fit for your supply.":"Подумай, какой предохранитель поставил бы для своего блока.",
-"<p class=\"note\">Next up, lesson 2: the capacitor, a tank of spare water. Why boards carry those little “barrels”, and what happens when servos suddenly yank current.</p>":"<p class=\"note\">Дальше урок 2: конденсатор, бак с запасом воды. Зачем на платах стоят «бочонки» и что бывает, когда серво резко дёргают ток.</p>"
+"<p class=\"note\">Next up, lesson 2: the capacitor, a tank of spare water. Why boards carry those little “barrels”, and what happens when servos suddenly yank current.</p>":"<p class=\"note\">Дальше урок 2: конденсатор, бак с запасом воды. Зачем на платах стоят «бочонки» и что бывает, когда серво резко дёргают ток.</p>",
+"Swap the wires and watch the servos":"Перепутай провода и посмотри на серво"
 });

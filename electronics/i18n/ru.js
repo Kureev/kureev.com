@@ -20,7 +20,7 @@ I18N.add({
 "Task:":"Задание:",
 "Done:":"Готово:",
 "Tick all four items":"Отметь все четыре пункта",
-"What we built, and homework":"Что собрали, и домашка",
+"What we built, and homework":"Что собрали и домашка",
 "Wrap-up":"Итог",
 "Language":"Язык",
 /* pedagogy layer */

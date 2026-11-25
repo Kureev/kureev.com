@@ -189,7 +189,7 @@ h2{font-size:23px;margin:10px 0 6px}
  .stage{height:46svh;min-height:300px}
  .meter{left:auto;right:8px;top:8px;bottom:auto;width:150px;padding:7px 9px 8px}
  .meter .lcd{font-size:20px;margin:4px 0 5px}.meter .next{display:none}
- .hud .num:nth-child(n+3){display:none}
+ .hud{flex-wrap:wrap}
 }
 /* brand v1 */
 :root{--blue:#5b9cff;--violet:#8a6bff;--grad:linear-gradient(100deg,#5b9cff,#8a6bff 60%,#c77dff);--ok:#59f3a8;--warn:#ffb26b}
@@ -568,7 +568,7 @@ STEPS=[
 {sc:'b',part:'Power',t:'Swapped wires',s:"Swap the wires and the rail gets −12 V. Almost all electronics die from that.",bt:["Polarity", "Why it dies", "Rule"],ui:['rev','nV','pills','bF'],build:B(true,'none',false,false),enter:()=>{repair();S.rev=false;S.k=0;S.fi=4},
  b:'<p><b>Polarity</b> is which side is plus and which is minus. Electronics is designed for one polarity. Swap the wires and the rail gets −12 V.</p><p>Inside almost every chip, tiny protection diodes run from each pin to the supply. With reversed polarity they all open at once, and current flows through the chip that it was never designed for.</p><p>Connectors that can be plugged in backwards will one day be plugged in backwards. Especially at 2 am.</p>',
  after:'<p>The servos burnt. The fuse didn’t help: the current wasn’t huge, just going the wrong way, and it never reached the rating. We need a part that lets current through in the right direction only.</p>',
- task:'Swap the wires',ok:()=>S.servosDead},
+ task:'Swap the wires and watch the servos',ok:()=>S.servosDead},
 {sc:'v',part:'Protection',t:'The diode is a check valve',s:"<b>Diode</b> — a check valve: it passes current one way and takes ~0.45 V for itself.",bt:["Check valve", "Opening threshold", "The price: a drop and heat", "What it looks like in real life"],ui:['wU','wRev','wType','wnU','wnI','wnD','wF'],enter:()=>{S.wRev=false;S.wU=12;S.vSi=false;S.fl.below=false},
  b:'<p><b>Diode</b> passes current in one direction only. In plumbing it’s a <b>check valve</b>: a hinged flap. Flow in the right direction pushes it open and passes; flow backwards presses it against the seat, and that’s it.</p><p>The flap is held by a <b>spring</b>. To open it you need pressure above a threshold: about <b>0.45 V</b> for a Schottky diode and about <b>0.7 V</b> for a regular silicon one. While the pump is weaker, the valve stays shut and there’s no current, just like the LED in lesson 0 stayed dark below 1.9 V.</p><p>Even an open valve takes those 0.45 V from the flow: compare the gauges before and after. That’s why a diode heats up: P = 0.45 V × current.</p><p>In front lies a real diode: the stripe on the body is the cathode, and current flows towards it, like an arrow.</p>',
  after:'<p>The pump pushes backwards, so the flap is pressed against the seat and nothing flows. That’s exactly what we want from protection: swap the wires and current simply doesn’t flow.</p>',
@@ -705,7 +705,7 @@ function update(){
     if(S.prot==='diode')f+=_t('<br>Diode: P = 0.45 V × {0} = <b>{1}</b>',nf(C.I,1)+' '+_u('A'),fP(C.Pp));
     if(S.prot==='fet')f+=_t('<br>MOSFET: P = I × I × R = {0} × {0} × {2} = <b>{1}</b>',fI(C.I),fP(C.Pp),nf(RFET,3)+' '+_u('Ω'));
     if(S.hasLed)f+=_t('<br>Indicator: I = ({0} − {3}) / {1} = <b>{2}</b>',fV(C.Vr),fR(LR[S.lri]),fI(C.led),nf(1.9,1)+' '+_u('V'));
-    if(S.hasDiv)f+=_t('<br>Divider: {0} × {1} / ({2} + {1}) = <b>{3}</b> at the meter',fV(C.Vr),fR(DR[S.b2]),fR(DR[S.b1]),fV(C.tap))}
+    if(S.hasDiv)f+=_t('<br>At the meter: {0} × {1} / ({2} + {1}) = <b>{3}</b>',fV(C.Vr),fR(DR[S.b2]),fR(DR[S.b1]),fV(C.tap))}
   $('#formula').innerHTML=f;
   /* task */
   if(!PED.ready(S.step)){}else if(st.ok(C))S.done.add(S.step);saveQ();
