@@ -223,7 +223,7 @@ const LEVELS=[
  {t:'Power input',g:'The board survives a dropped screwdriver and swapped wires.',href:'/electronics/lesson1',sec:0},
  {t:'Capacitor',g:'Servos yank current, but the supply doesn’t sag.',href:'/electronics/lesson2',sec:1},
  {t:'Inductor',g:'The inertia of current: you need it to understand a switching converter.',sec:2,href:'/electronics/lesson3'},
- {t:'Regulator',g:'Making 5 and 3.3 V from 12 V. Why one heats up and the other doesn’t.',sec:3,href:'/electronics/lesson4'},
+ {t:'Regulator',g:'Making 5 and 3.3 V from 12 V. Why a linear regulator heats up and a switching one doesn’t.',sec:3,href:'/electronics/lesson4'},
  {t:'Transistor switch',g:'Turning a load on and off with a signal.',sec:4},
  {t:'Digital signals',g:'Ones and zeros on a wire: how the servo bus talks.',sec:5},
  {t:'Brain: ESP32',g:'Swapping understood pieces for a microcontroller.',sec:6},
@@ -231,9 +231,9 @@ const LEVELS=[
  {t:'Your own board',g:'Layout in KiCad, ordering from JLCPCB, first power-up.',sec:'all'}];
 const INV=[
  [0,'Voltage','Height: the difference between two points, V'],[0,'Current','Flow: charge per second, A'],[0,'Resistance','Pipe narrowness, Ω. I = U / R'],
- [0,'Power','Heat and work, W. P = U × I'],[0,'Resistor','Sets the current and heats up'],[0,'LED','1.9 V step, doesn’t limit current by itself'],[0,'Multimeter','Measures the difference between probes'],
+ [0,'Power','Heat and work, W. P = U × I'],[0,'Resistor','Sets the current and heats up'],[0,'LED','1.9 V step, doesn’t limit current by itself'],[0,'Multimeter','Measures the voltage between its two probes'],
  [1,'Parallel','One voltage, currents add up'],[1,'Fuse','A deliberately weak point'],[1,'Diode','A check valve with a threshold'],[1,'MOSFET','A valve opened by voltage'],[1,'Divider','A staircase of two resistors'],
- [2,'Capacitor','A tank: Q = C × U, τ = R × C'],[2,'Oscilloscope','Voltage against time'],[3,'Inductor','A heavy wheel: U = L × ΔI / Δt, τ = L / R'],[3,'Flyback diode','Catches the coil’s kick'],[3,'Duty cycle','A share of 12 V without the heat'],[4,'Linear regulator','A float valve: burns (U in − U out) × I'],[4,'Dropout','The input stays about 1.1 V above the output'],[4,'Buck converter','Trades voltage for current, about 90% efficient'],[5,'Transistor switch','?'],[6,'Digital signal','?'],[7,'ESP32','?'],[8,'Servo bus','?']];
+ [2,'Capacitor','A tank: Q = C × U, τ = R × C'],[2,'Oscilloscope','Voltage against time'],[3,'Inductor','A heavy wheel: U = L × ΔI / Δt, τ = L / R'],[3,'Flyback diode','Catches the coil’s kick'],[3,'Duty cycle','A share of 12 V without the heat'],[4,'Linear regulator','A float valve: burns (U in − U out) × I'],[4,'Dropout','The input must stay at least about 1.1 V above the output'],[4,'Buck converter','Trades voltage for current, about 90% efficient'],[5,'Transistor switch','?'],[6,'Digital signal','?'],[7,'ESP32','?'],[8,'Servo bus','?']];
 let Q={done:{},steps:{}};try{Q=Object.assign(Q,JSON.parse(localStorage.getItem('quest_v1')||'{}'))}catch(e){}
 const isDone=i=>!!(Q.done&&Q.done[i]),built=i=>!!LEVELS[i].href,avail=i=>i===0||isDone(i-1);
 const nDone=LEVELS.filter((_,i)=>isDone(i)).length;

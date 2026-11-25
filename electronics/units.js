@@ -59,7 +59,7 @@ function grade(input,spec){const p=parse(input,{unit:spec.unit,e:spec.e||0});
   const r=v/a;
   for(const k of [3,6,9,-3,-6,-9]){if(near(r,Math.pow(10,k),tol*1.2)){
     const f=Math.pow(10,Math.abs(k)),big=k>0;
-    return{ok:false,kind:'scale',v,msg:T(big?'That’s {0} times too big. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.':'That’s {0} times too small. A prefix slipped: convert everything to base units (A, Ω, F, H, s) before you divide or multiply.',{1000:'1000',1000000:'1\u00a0000\u00a0000',1000000000:'1\u00a0000\u00a0000\u00a0000'}[f])}}}
+    return{ok:false,kind:'scale',v,msg:T(big?'That’s {0} times too big. A prefix slipped: convert everything to base units (V, A, Ω, F, H, s) before you divide or multiply.':'That’s {0} times too small. A prefix slipped: convert everything to base units (V, A, Ω, F, H, s) before you divide or multiply.',{1000:'1000',1000000:'1\u00a0000\u00a0000',1000000000:'1\u00a0000\u00a0000\u00a0000'}[f])}}}
   for(const k of [1,2,-1,-2]){if(near(r,Math.pow(10,k),tol*1.2))return{ok:false,kind:'scale',v,msg:T('Off by a factor of {0}: check where the decimal point went.',String(Math.pow(10,Math.abs(k))))}}
   return{ok:false,kind:'off',v,msg:T(spec.off||'Not quite. Check each step, and the units at each step.')}}
 
