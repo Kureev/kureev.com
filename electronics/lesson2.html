@@ -280,7 +280,7 @@ input[type=range]{accent-color:#7d8cff}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l2",{
+<!-- ped --><script src="/electronics/ach.js"></script><script src="/electronics/ped.js"></script><script>PED.init("l2",{
 "win":{"lv":2,"title":"Capacitor, done","line":"Your servos can lunge all at once and the rail barely flinches.","next":{"t":"Inductor","href":"/electronics/lesson3"}},
 "brief":{"short":"Six servos lunge at once and the 12 V rail sags. Add the part that rides it out.","problem":"When all six servos start together, they grab several amps within tens of microseconds. The supply needs a fraction of a millisecond to catch up, and in that gap the 12 V rail sags. Anything that needs a steady voltage reboots. In this level you add the part that covers the gap: a capacitor.","goals":["Explain a capacitor as a tank: Q = C × U and τ = R × C","Size a bulk capacitor for a load jump: C = I × Δt / ΔU","Fit an electrolytic the right way round, with a safe voltage rating"]},
 "pr":{
@@ -566,7 +566,7 @@ STEPS=[
 {sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"The rail now has a reserve: two 1000 µF / 25 V capacitors, stripe to ground, right after the protection.",bt:["-","Next"],ui:[],build:B(true,5,2),enter:()=>{fresh();S.plugged=S.servos=true;S.ri=3;S.tr=null;S.rp=1},
  b:_t('<p>Connector → fuse → MOSFET → 12 V rail → <b>two 1000 µF / 25 V capacitors</b>, then the indicator, the meter and six servos. The servos can lunge together and the rail stays above 11 V.</p>')+'<ul class="hw">'+['Find the big capacitors on your servo driver board. Read the µF and V on the can and find the stripe.','Check that their rating is at least 1.5× your supply voltage.','Redo C = I × Δt / ΔU for an allowed dip of 0.5 V. What would you fit?','Unplug your supply with nothing connected and watch its LED: does it fade? It has output capacitors too.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="note">Next up, level 3: the inductor. Why current has inertia, and why the supply couldn’t keep up.</p>'),
  task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
-STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
+PED.parts(STEPS.map(x=>x.part));STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
 
 function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
   document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}

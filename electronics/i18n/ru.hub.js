@@ -87,5 +87,10 @@ I18N.add({
 "Flyback diode":"Обратный диод",
 "Catches the coil’s kick":"Ловит удар катушки",
 "Duty cycle":"Коэффициент заполнения",
-"A share of 12 V without the heat":"Доля от 12 В без нагрева"
+"A share of 12 V without the heat":"Доля от 12 В без нагрева",
+"7 · Мозг ESP32":"7 · Мозг ESP32",
+"Clear a stage of any level to get the first one.":"Пройди этап любого уровня, чтобы получить первую.",
+"<b>{0} of {1}</b> earned":"Получено <b>{0} из {1}</b>",
+"predictions on target: {0} of {1}":"прогнозов в точку: {0} из {1}",
+"Each new level you open adds its own achievements.":"Каждый новый уровень добавляет свои ачивки."
 });

@@ -11,7 +11,9 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(_){}};
 const g=k=>st[L+':'+k],s=(k,v)=>{if(v==null)delete st[L+':'+k];else st[L+':'+k]=v;save()};
 const again=(label,fn)=>{const b=document.createElement('button');b.type='button';b.className='pq-again';b.textContent=label;b.onclick=fn;return b};
 const esc=t=>String(t);
-let box,ctl,note,cur=-1,doneShown={},seg=null,briefBox;
+let box,ctl,note,cur=-1,doneShown={},seg=null,briefBox,parts=[],busy=false,fresh=-1,primed=false;
+const MED=(k,on)=>window.ACH?ACH.med(k,on):'';
+const ICK='<svg class="pq-i" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',IX='<svg class="pq-i" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 /* the side panel as standalone blocks, one per intention: where am I · think · try · do · read more */
 function layout(){const step=document.querySelector('.panel .step');if(!step)return;
   if(!seg){seg={};['orient','think','try','goal','more'].forEach(k=>{const d=document.createElement('div');d.className='seg seg-'+k;seg[k]=d});
@@ -33,7 +35,7 @@ let tq=0;const queue=()=>{if(tq)return;tq=requestAnimationFrame(()=>{tq=0;layout
 function chips(id,q,opts,ans,picked,onPick){
   const w=document.createElement('div');w.className='pq';
   w.innerHTML=`<p class="pq-q" id="${id}q">${esc(q)}</p><div class="pq-o" role="group" aria-labelledby="${id}q" aria-label="${esc(q).replace(/<[^>]+>/g,'').replace(/"/g,'')}">`+
-    opts.map((o,i)=>`<button type="button" data-i="${i}" aria-pressed="${picked===i}" class="${picked==null?'':i===picked?(ans==null||i===ans?'pick':'pick no'):(ans!=null&&picked!=null&&i===ans?'right':'')}" ${picked!=null?'disabled':''}>${esc(o)}</button>`).join('')+'</div>';
+    opts.map((o,i)=>`<button type="button" data-i="${i}" aria-pressed="${picked===i}" class="${picked==null?'':i===picked?(ans==null?'pick':i===ans?'pick yes':'pick no'):(ans!=null&&picked!=null&&i===ans?'right':'')}" ${picked!=null?'disabled':''}>${ans!=null&&picked!=null?(i===ans?ICK:i===picked?IX:''):''}${esc(o)}</button>`).join('')+'</div>';
   w.querySelectorAll('button').forEach(b=>b.onclick=()=>onPick(+b.dataset.i));return w}
 
 function render(step){
@@ -50,18 +52,13 @@ function render(step){
       if(p!=null){const d=document.createElement('p');d.className='pq-done'+(p===q.a?' ok':'');
         d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?q.o[q.a]:T('Not {0}',q.o[p])}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
         if(p!==q.a)d.appendChild(again(T('Try again'),()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
-      if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);render(cur)}))});
+      if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);if(g('F'+key+i)==null)s('F'+key+i,v);render(cur);check()}))});
     c.querySelector('.ped-k span').textContent=u<0?T('{0} / {1} right',ok,items.length):T('{0} of {1}',u+1,items.length);
     if(u<0){const r=again(T('Start over'),()=>{items.forEach((_,i)=>s(key+i,null));render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
     box.appendChild(c)};
   const warm=rc&&rc.some((_,i)=>g('r'+step+'_'+i)==null);
   if(rc)quiz(rc,'r'+step+'_',T('Warm-up from memory'),T('No peeking'));
-  if(pr&&!warm){const c=document.createElement('section');c.className='ped predict';const p=g('p'+step);
-    c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):T('Your prediction')}</p>`;
-    c.appendChild(chips('p'+step,pr.q,pr.o,null,p,v=>{s('p'+step,v);render(cur)}));
-    if(p!=null){const f=document.createElement('p');f.className='pq-f';f.id='pedEx';f.textContent=T('Now try it and see.');c.appendChild(f);
-      const r=again(T('Change'),()=>{s('p'+step,null);doneShown[step]=false;render(cur)});r.classList.add('k');c.querySelector('.ped-k').appendChild(r)}
-    box.appendChild(c)}
+  if(pr&&!warm)box.appendChild(predSec(step));
   if(end){const t=document.getElementById('stepX')||document.getElementById('task');t.insertAdjacentElement('afterend',box);quiz(D.end.items,'e_',T('Check yourself'),T('Mixed, from the whole level'));
     const c=document.createElement('section');c.className='ped cando';
     c.innerHTML=`<p class="ped-k">${T('I can')}</p>`+D.brief.goals.map((x,i)=>`<label><input type="checkbox" data-i="${i}" ${g('c'+i)?'checked':''}> ${x}</label>`).join('');
@@ -70,12 +67,52 @@ function render(step){
   if(seg)queue();setTimeout(syncNext,0);
   const lock=!!(pr&&g('p'+step)==null);if(ctl){ctl.classList.toggle('ped-lock',lock);ctl.inert=lock;if(lock)ctl.setAttribute('aria-disabled','true');else ctl.removeAttribute('aria-disabled');note.hidden=!lock||!!warm;if(lock&&warm)note.hidden=false,note.textContent=T('Warm up, then make a prediction');else note.textContent=T('Pick a prediction first')}
   doneShown[step]=false;
+  const tk=document.getElementById('task');if(tk&&tk.classList.contains('ok'))after(true);
 }
+/* the prediction block: pick → try it → a clear verdict, scored once per prediction (the first reveal counts) */
+function predSec(step){const pr=D.pr[step],p=g('p'+step),rev=p!=null&&doneShown[step],hit=p===pr.a;
+  const c=document.createElement('section');c.className='ped predict'+(rev?(hit?' hit':' miss'):'')+(rev&&fresh===step?' fresh':'');c.id='pedPr';
+  const sc=score();
+  c.innerHTML=`<p class="ped-k">${p==null?T('Predict first'):rev?`<span class="pv">${hit?T('Intuition on target'):T('Intuition missed')}</span>`:T('Your prediction')}<span class="pq-sc">${sc.n?T('{0} of {1} on target',sc.h,sc.n)+(st.streak>1?T(' · streak {0}',st.streak):''):''}${rev&&hit&&fresh===step?'<i class="pq-plus" aria-hidden="true">+1</i>':''}</span></p>`;
+  c.appendChild(chips('p'+step,pr.q,pr.o,rev?pr.a:null,p,v=>{s('p'+step,v);render(cur)}));
+  if(p!=null){const f=document.createElement('p');f.className='pq-f'+(rev&&hit?' ok':'');f.id='pedEx';
+    f.innerHTML=rev?'<b class="wh">'+(hit?T('Your prediction held.'):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex:T('Now try it and see.');c.appendChild(f);
+    const r=again(T('Change'),()=>{s('p'+step,null);doneShown[step]=false;render(cur)});if(rev){r.classList.add('pq-ch');f.appendChild(r)}else{r.classList.add('k');c.querySelector('.ped-k .pq-sc').insertAdjacentElement('beforebegin',r)}}
+  if(fresh===step)fresh=-1;return c}
+function score(){let h=0,n=0;Object.keys(D.pr||{}).forEach(k=>{const v=g('v'+k);if(v!=null){n++;h+=v}});return{h,n}}
 function ready(step){const pr=D.pr&&D.pr[step];return!pr||g('p'+step)!=null}
-function after(ok){const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;const p=g('p'+cur);if(p==null)return;
-  const f=document.getElementById('pedEx');if(!f)return;doneShown[cur]=true;
-  f.className='pq-f'+(p===pr.a?' ok':'');f.innerHTML='<b class="wh">'+(p===pr.a?T('Your prediction held.'):T('What happened: {0}.',pr.o[pr.a]))+'</b> '+pr.ex}
-function wrap(fn,step){return function(){fn.apply(this,arguments);render(step())}}
+function after(ok){if(busy)return;const pr=D.pr&&D.pr[cur];if(!pr||!ok||doneShown[cur])return;const p=g('p'+cur);if(p==null)return;
+  const old=document.getElementById('pedPr');if(!old)return;doneShown[cur]=true;
+  if(g('v'+cur)==null){const hit=p===pr.a?1:0;s('v'+cur,hit);st.streak=hit?(st.streak||0)+1:0;st.streakMax=Math.max(st.streakMax||0,st.streak);save();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)fresh=cur}
+  old.replaceWith(predSec(cur));queue();check()}
+function wrap(fn,step){return function(){busy=true;try{fn.apply(this,arguments)}finally{busy=false}render(step())}}
+
+/* achievements: one per cleared stage, plus intuition, memory, a clean check, the level, and a streak across the course */
+function stages(){const out=[];parts.forEach((n,i)=>{const l=out[out.length-1];if(l&&l.n===n)l.s.push(i);else out.push({n,s:[i]})});return out.slice(0,-1)}
+function quest(){try{return JSON.parse(localStorage.getItem('quest_v1')||'{}')}catch(_){return{}}}
+const allFirst=(items,key)=>items.length&&items.every((q,i)=>g('F'+key+i)===q.a);
+function achList(){const lv=D.win?D.win.lv:0,q=quest(),done=new Set(((q.steps||{})[lv])||[]),A=[];
+  stages().forEach((x,k)=>A.push({id:'s'+k,kind:'stage',en:'Stage cleared: '+x.n,d:'Every step of this stage is done.',ok:x.s.every(i=>done.has(i))}));
+  const pk=Object.keys(D.pr||{});if(pk.length)A.push({id:'int',kind:'intuition',en:'Sharp intuition',d:'Every prediction on this level right the first time.',ok:pk.every(k=>g('v'+k)===1)});
+  const rc=[];Object.keys(D.recall||{}).forEach(k=>D.recall[k].forEach((q,i)=>rc.push([q,'r'+k+'_'+i])));
+  if(rc.length)A.push({id:'mem',kind:'memory',en:'Good memory',d:'Every warm-up answer right on the first try.',ok:rc.every(([q,k])=>g('F'+k)===q.a)});
+  if(D.end)A.push({id:'chk',kind:'check',en:'Clean check',d:'The end check without a single mistake.',ok:allFirst(D.end.items,'e_')});
+  A.push({id:'lv',kind:'level',en:'Level complete',d:'Every task on this level done.',ok:!!(q.done||{})[lv]});
+  const got=new Set(g('ach')||[]);A.forEach(a=>{a.got=got.has(a.id)||a.ok});return A}
+function check(silent){if(!D.win)return;const A=achList(),had=new Set(g('ach')||[]),fresh=A.filter(a=>a.got&&!had.has(a.id));
+  const cs=st['ach:course']||[];let fc=[];if((st.streakMax||0)>=5&&!cs.includes('streak5')){cs.push('streak5');st['ach:course']=cs;fc.push({id:'streak5',kind:'streak',en:'Five in a row',d:'Five predictions in a row right.'})}
+  if(fresh.length||fc.length){s('ach',A.filter(a=>a.got).map(a=>a.id));if(!silent&&primed)fresh.concat(fc).filter(a=>a.kind!=='level').forEach(toast)}
+  /* a summary for the map */
+  try{const S=JSON.parse(localStorage.getItem('ach_v1')||'{}'),sc=score();S[L]={lv:D.win.lv,list:A.map(a=>({kind:a.kind,en:a.en,got:a.got})),h:sc.h,n:sc.n};S.course=[{kind:'streak',en:'Five in a row',got:cs.includes('streak5')}];localStorage.setItem('ach_v1',JSON.stringify(S))}catch(_){}}
+let tbox=null,tq2=[],tbusy=false;
+function toast(a){tq2.push(a);if(!tbusy)nextToast()}
+function nextToast(){const a=tq2.shift();if(!a){tbusy=false;return}tbusy=true;
+  if(!tbox){tbox=document.createElement('div');tbox.className='ped-toast';tbox.setAttribute('role','status');tbox.setAttribute('aria-live','polite');document.body.appendChild(tbox);if(tbox.showPopover)tbox.popover='manual'}
+  tbox.style.left=innerWidth>900?Math.round((innerWidth-(window.PW?PW():0))/2)+'px':'50%';
+  tbox.innerHTML=`<div class="pt-c">${MED(a.kind,true)}<span class="pt-t"><span class="pt-k">${T('Achievement')}</span><b>${T(a.en)}</b><span class="pt-d">${T(a.d)}</span></span></div>`;
+  if(tbox.showPopover){try{tbox.hidePopover()}catch(_){}try{tbox.showPopover()}catch(_){}}
+  tbox.classList.remove('on');void tbox.offsetWidth;tbox.classList.add('on');
+  setTimeout(()=>{tbox.classList.remove('on');setTimeout(nextToast,400)},4200)}
 
 /* finishing a level: confetti in the course palette and a dialog that says what you can do now */
 let fin=false;
@@ -101,11 +138,14 @@ function celebrate(){const W=D.win;if(!W)return;let d=document.getElementById('p
     <div class="pw-art"><img src="/electronics/levels/lv${W.lv}.webp" alt="" width="320" height="320"></div>
     <p class="pw-k">${T('Level {0} complete',W.lv)}</p><h2 id="pedWinT">${W.title}</h2><p class="pw-l">${W.line}</p>
     <ul class="pw-g">${D.brief.goals.map(x=>`<li>${x}</li>`).join('')}</ul>
+    ${achStrip()}
     ${ea?`<p class="pw-s">${T('Check yourself: <b>{0} of {1}</b> right',eo,ei.length)}${eo<ei.length?T(' · worth another look'):''}</p>`:''}
     <div class="pw-a"><a class="pw-btn" href="/electronics">${T('Back to the map')}</a>${nx}</div>`;
   d.querySelector('.pw-x').onclick=()=>d.close();
   if(!d.open)d.showModal();d.tabIndex=-1;d.focus();confetti()}
-function complete(ok,was){fin=ok;if(ok&&!was)setTimeout(celebrate,350)}
+function achStrip(){if(!window.ACH)return'';const A=achList(),n=A.filter(a=>a.got).length;
+  return `<div class="pw-ach"><p class="pw-ak">${T('Achievements: {0} of {1}',n,A.length)}</p><ul class="al">${A.map(a=>`<li class="${a.got?'':'off'}">${MED(a.kind,a.got)}<span>${T(a.en)}${a.got?'':`<span class="sr"> · ${T('not yet')}</span>`}</span></li>`).join('')}</ul></div>`}
+function complete(ok,was){fin=ok;check(!primed);primed=true;if(ok&&!was)setTimeout(celebrate,350)}
 document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('#next');if(n&&n.dataset.fin==='1'){e.preventDefault();e.stopImmediatePropagation();celebrate()}},true);
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
   if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent=T('Finish')}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent=T('Next')}}
@@ -115,7 +155,7 @@ window.PED={init(k,data){L=k;D=window.I18N?I18N.deep(data):data;load();try{fin=!
     box=document.createElement('div');box.id='ped';lead.insertAdjacentElement('afterend',box);note=document.createElement('p');note.className='ped-note';note.hidden=true;ctl.insertAdjacentElement('afterend',note);
     const pn=document.querySelector('.panel');if(pn&&window.MutationObserver)new MutationObserver(queue).observe(pn,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','style','class']});queue()};
   if(document.getElementById('stepS'))mount();else document.addEventListener('DOMContentLoaded',mount)},
-  render,ready,after,wrap,complete(ok,was){complete(ok,was);syncNext()},celebrate};
+  render,ready,after,wrap,complete(ok,was){complete(ok,was);syncNext()},celebrate,parts(p){parts=p||[]}};
 const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 #ped:empty{display:none}
 .panel{background:#040716;border-left:0!important;padding:12px 12px 0!important;gap:0}
@@ -158,6 +198,27 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .pq-o button:hover:not(:disabled){background:rgba(91,156,255,.14)}
 .pq-o button:disabled{cursor:default;opacity:.5}
 .pq-o button.pick{opacity:1;border-color:#8a9bff;background:rgba(91,156,255,.18);color:#fff}
+.pq-o button.pick.yes,.pq-o button.right{opacity:1;border-color:#59f3a8;background:rgba(89,243,168,.1);color:#eef1ff}
+.pq-o button.right{border-style:dashed;background:none}
+.pq-o button.pick.no{opacity:1;border-color:#ffb26b;background:rgba(255,178,107,.1);color:#eef1ff}
+.pq-i{display:inline-block;vertical-align:-2px;margin:0 6px 0 -3px}.pick.yes .pq-i,.right .pq-i{color:#59f3a8}.pick.no .pq-i{color:#ffb26b}
+.ped-k>.pv{margin-left:0;display:inline-flex;align-items:center;gap:9px;font:700 16px/1.3 Manrope,sans-serif!important;color:#eef1ff!important}.ped-k .pq-sc{white-space:nowrap}.ped-k:has(.pv){align-items:center;margin-bottom:12px}.pv::before{content:'';flex:none;width:10px;height:10px;border-radius:50%;background:#59f3a8;box-shadow:0 0 0 4px rgba(89,243,168,.15)}
+.miss .pv::before{background:#ffb26b;box-shadow:0 0 0 4px rgba(255,178,107,.15)}
+.pq-sc{position:relative}.pq-plus{position:absolute;right:0;top:-2px;font-style:normal;font-weight:800;color:#59f3a8;opacity:0;animation:pq-plus 1.4s ease-out}
+@keyframes pq-plus{0%{opacity:0;transform:translateY(4px)}20%{opacity:1}100%{opacity:0;transform:translateY(-18px)}}
+.fresh .pv{animation:pv-pop .5s cubic-bezier(.3,1.6,.5,1)}@keyframes pv-pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.fresh.hit .pick.yes{animation:pq-ring 1s ease-out}@keyframes pq-ring{from{box-shadow:0 0 0 0 rgba(89,243,168,.55)}to{box-shadow:0 0 0 14px rgba(89,243,168,0)}}
+.fresh.miss .pick.no{animation:pq-shake .45s}@keyframes pq-shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.ped.predict.hit{background:rgba(89,243,168,.05)}.ped.predict.miss{background:rgba(255,178,107,.05)}
+.seg-think .ped.predict.hit,.seg-think .ped.predict.miss{margin:0 -18px;padding:14px 18px;border-radius:0}
+.pq-f.ok .wh{color:#9fe8c4}.pq-again.pq-ch{display:inline-block;padding:0;margin-left:8px;min-height:24px}
+.ped-toast{position:fixed;inset:auto;top:16px;left:50%;margin:0;padding:0;border:0;background:none;overflow:visible;transform:translate(-50%,-16px);opacity:0;pointer-events:none;transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1);z-index:1001}
+.ped-toast.on{opacity:1;transform:translate(-50%,0)}
+.pt-c{display:flex;align-items:center;gap:14px;min-width:260px;max-width:min(420px,calc(100vw - 32px));padding:12px 18px 12px 12px;border-radius:16px;background:rgba(10,15,40,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,178,107,.35);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.pt-c .am{width:48px;height:48px}.pt-c .am svg{width:24px;height:24px}
+.pt-t{display:flex;flex-direction:column;gap:2px;text-align:left}.pt-k{font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b}.pt-t b{font:600 15px/1.3 Manrope,sans-serif;color:#eef1ff}.pt-d{font-size:13px;line-height:1.35;color:#a3acd0}
+.pw-ach .am{width:32px;height:32px}.pw-ach .am svg{width:16px;height:16px}.ped-win:has(.pw-ach) .pw-art{width:170px;height:170px}.pw-ach{margin:0 0 18px;padding:14px 16px;border-radius:14px;background:rgba(91,156,255,.06)}.pw-ak{margin:0 0 12px;font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b;text-align:left}
+@media(prefers-reduced-motion:reduce){.ped-toast{transition:none}.pq-plus,.fresh .pv,.fresh .pick{animation:none!important}}
 .pq-f{margin:10px 0 0;font-size:14px;line-height:1.5;color:#8f9bc4}
 .pq-f .wh{color:#eef1ff;font-weight:600}
 .ped.cando label{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:#c9d2f5;padding:5px 0;cursor:pointer}

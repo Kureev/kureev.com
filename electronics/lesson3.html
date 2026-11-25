@@ -288,7 +288,7 @@ input[type=range]{accent-color:#7d8cff}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<!-- ped --><script src="/electronics/ped.js"></script><script>PED.init("l3",{
+<!-- ped --><script src="/electronics/ach.js"></script><script src="/electronics/ped.js"></script><script>PED.init("l3",{
 "win":{"lv":3,"title":"Inductor, done","line":"You know why current hates sudden stops, and how a diode tames the kick.","next":{"t":"Regulator","soon":true}},
 "brief":{"short":"Switch off a coil and it bites back with hundreds of volts. Learn its inertia and tame it.","problem":"In level 2 the supply couldn’t keep up because current has inertia. A coil is made of that inertia: it smooths current, stores energy, and kicks back with hundreds of volts when you cut it off. The regulator in level 4 is built around one. Here you learn how a coil behaves and how to stop its kick from killing the switch.","goals":["Explain a coil as a heavy wheel: U = L × ΔI / Δt and τ = L / R","Protect a switch from a coil’s kick with a flyback diode","Get a steady lower voltage by switching 12 V fast into a coil"]},
 "pr":{
@@ -573,7 +573,7 @@ STEPS=[
 {sc:'b',part:'Wrap-up',t:'What we built, and homework',s:"A coil holds its current, kicks back when you cut it, and smooths it when you switch fast.",bt:["-","Next"],ui:[],build:{diode:'ok'},enter:()=>{S.bl=3;S.duty=0.5;S.pwm=true;S.pw=pwmWave()},
  b:_t('<p>The test circuit: 12 V → switch → coil → lamp, with a flyback diode from ground to SW. Switched fast, it gives the lamp a steady share of 12 V. That’s a buck converter without its output capacitor.</p>')+'<ul class="hw">'+['Find the coils on any DC-DC module or charger board: toroids, or square black blocks printed 100, 220 or 4R7. 100 means 10 µH, 220 is 22 µH, 4R7 is 4.7 µH.','Find a relay module and spot the flyback diode next to the relay.','A 47 µH coil has 7 V across it. How many microseconds until its current rises by 1 A?','Measure the coil resistance of a 12 V relay or motor you own (Ω range). That R and its L set τ = L / R.'].map((t,i)=>`<li><input type="checkbox" id="hw${i}" ${hw[i]?'checked':''}><label for="hw${i}">${_t(t)}</label></li>`).join('')+'</ul>'+_t('<p class="note">Next up, level 4: the regulator. Linear and buck: why one heats up and the other doesn’t.</p>'),
  task:'Tick all four items',ok:()=>[0,1,2,3].every(i=>hw[i])}];
-STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
+PED.parts(STEPS.map(x=>x.part));STEPS.forEach(st=>{['t','s','b','after','task','part'].forEach(k=>{if(typeof st[k]==='string'&&!st[k].includes('class="hw"'))st[k]=_t(st[k])});if(st.bt)st.bt=st.bt.map(x=>x==='-'?x:_t(x))});
 
 function setUI(ui){document.querySelectorAll('[data-ui]').forEach(el=>el.hidden=!ui.includes(el.dataset.ui));
   document.querySelectorAll('[data-grp]').forEach(g=>g.hidden=![...g.querySelectorAll('[data-ui]')].some(e=>!e.hidden))}
