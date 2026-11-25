@@ -23,13 +23,18 @@ volt:'<path d="M-20 0h10M10 0h10"/><circle r="10"/><text x="0" y="4.5" text-anch
 src:'<path d="M-20 0h17M5 0h15M-3 -12v24"/><path d="M3 -6v12" stroke-width="4"/><path d="M-12 12h5M-9.5 9.5v5"/>',
 /* P-channel MOSFET for reverse protection: drain on the left (input), source on the right (rail), gate below */
 pmos:'<path d="M-20 0h8v-12M20 0h-8v-12"/><path d="M-14 -12h7M-3 -12h6M7 -12h7"/><path d="M-9 -6h18M0 -6v14"/><path d="M0 -12v-7h12v7"/><path d="M0 -19l-3 4h6z" fill="currentColor"/>',
+/* regulators: IN on the left, OUT on the right, GND below. DC/DC converter: a box split by a diagonal (IEC) */
+buck:'<rect x="-14" y="-12" width="28" height="24" rx="1"/><path d="M-20 0h6M14 0h6M0 12v6M-14 12L14 -12"/><path d="M-10 -6h7M-10 -3h7M3 4h7M3 7h7"/>',
+ldo:'<rect x="-14" y="-12" width="28" height="24" rx="1"/><path d="M-20 0h6M14 0h6M0 12v6"/><text x="0" y="3.5" text-anchor="middle" font-size="8.5" font-weight="700" stroke="none" fill="currentColor" font-family="Manrope,sans-serif">LDO</text>',
+ic:'<rect x="-12" y="-10" width="24" height="20" rx="1"/><path d="M-20 0h8M12 0h8"/>',
+isink:'<path d="M-20 0h10M10 0h10"/><circle r="10"/><path d="M-6 0h11M1 -4l4 4l-4 4"/>',
 term:'<path d="M-20 0h20M0 0h20"/><circle cx="0" cy="0" r="3"/>',
 gnd:'<path d="M0 -8v8M-9 0h18M-6 4h12M-3 8h6"/>'};
 const G=(x,y)=>`<g transform="translate(${x} ${y})" stroke="${W}"><path d="M0 0v6M-9 6h18M-6 10h12M-3 14h6" fill="none" stroke-width="1.6" stroke-linecap="round"/></g>`;
 function part(p,kind,x,y,rot,lab,sub){const sym=(SY[kind]||SY.res).replace(/<text /g,`<text transform="rotate(${-(rot||0)})" `),ly=kind==='pmos'?-27:-17;
   return `<g class="sp" data-p="${p}" transform="translate(${x} ${y}) rotate(${rot||0})" tabindex="0" role="button" aria-label="${T(NAME[p]||lab||p)}"><rect class="hit" x="-22" y="-18" width="44" height="36" rx="8"/><g class="ss" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${sym}</g></g>`+
     (lab?`<text class="sl" x="${x+(rot?16:0)}" y="${y+(rot?-2:ly)}" text-anchor="${rot?'start':'middle'}">${lab}</text>`+(sub?`<text class="sv" x="${x+(rot?16:0)}" y="${y+(rot?13:28)}" text-anchor="${rot?'start':'middle'}">${sub}</text>`:''):'')}
-const NAME={conn:'Connector',src:'Power supply',psu:'Power supply',fuse:'Fuse',diode:'Diode',fet:'MOSFET',servo:'Servos',res:'Resistor',led:'LED',r1:'R1, top of the divider',r2:'R2, bottom of the divider',meter:'Meter',cap:'Capacitor',coil:'Coil',lamp:'Lamp',sw:'Switch'};
+const NAME={buck:'Buck converter',ldo:'Linear regulator',esp:'ESP32',eload:'Electronic load',bench:'Bench supply',conn:'Connector',src:'Power supply',psu:'Power supply',fuse:'Fuse',diode:'Diode',fet:'MOSFET',servo:'Servos',res:'Resistor',led:'LED',r1:'R1, top of the divider',r2:'R2, bottom of the divider',meter:'Meter',cap:'Capacitor',coil:'Coil',lamp:'Lamp',sw:'Switch'};
 const wire=(d)=>`<path class="sw" d="${d}"/>`;
 const dot=(x,y)=>`<circle class="sd" cx="${x}" cy="${y}" r="2.6"/>`;
 const node=(x,y,t)=>`<text class="sn" x="${x}" y="${y}">${t}</text>`;
@@ -38,7 +43,7 @@ const TOP=46,BOT=160,MID=103;
 function draw(L){const x0=34;let svg='',cx=x0;const xs=[];let extraW=40;
   svg+=wire(`M${x0} ${TOP}V${MID-20}M${x0} ${MID+20}V${BOT}`)+part(L.src.p,'src',x0,MID,90,L.src.l,L.src.v);
   L.series.forEach(it=>{const nx=cx+66;svg+=wire(`M${cx} ${TOP}H${nx-20}`)+part(it.p,it.k,nx,TOP,0,it.l,it.v);
-    if(it.k==='pmos')svg+=G(nx,TOP+8);if(it.node){svg+=node(nx+24,TOP-8,it.node);xs.sw=nx+20}cx=nx+20});
+    if(it.k==='pmos')svg+=G(nx,TOP+8);if(it.k==='buck'||it.k==='ldo')svg+=wire(`M${nx} ${TOP+18}V${TOP+26}`)+G(nx,TOP+26);if(it.node){svg+=node(nx+24,TOP-8,it.node);xs.sw=nx+20}cx=nx+20});
   L.shunt.forEach((b,i)=>{const nx=cx+(i?(L.shunt[i-1].v?96:72):40);svg+=wire(`M${cx} ${TOP}H${nx}`);if(i<L.shunt.length-1)svg+=dot(nx,TOP);
     if(b.chain){const c1=b.chain[0],c2=b.chain[1],y1=TOP+30,y2=BOT-30,ty=(y1+20+y2-20)/2;
       svg+=wire(`M${nx} ${TOP}V${y1-20}M${nx} ${y1+20}V${y2-20}M${nx} ${y2+20}V${BOT}`)+part(c1.p,c1.k,nx,y1,90,c1.l,c1.v)+part(c2.p,c2.k,nx,y2,90,c2.l,c2.v);
@@ -47,7 +52,7 @@ function draw(L){const x0=34;let svg='',cx=x0;const xs=[];let extraW=40;
     xs.push(nx);cx=nx});
   if(L.gndRail)svg+=wire(`M${x0} ${BOT}H${xs[xs.length-1]}`)+G(x0,BOT);else{svg+=G(x0,BOT);xs.forEach(x=>{svg+=G(x,BOT)})}
   if(L.after)svg+=L.after(xs);
-  const lb=L.shunt.length?L.shunt[L.shunt.length-1]:null,ln=lb?Math.max(...(lb.chain||[lb]).map(c=>String(c.l||'').length+String(c.v||'').length*0)):0;
+  const lb=L.shunt.length?L.shunt[L.shunt.length-1]:null,ln=lb?Math.max(...(lb.chain||[lb]).map(c=>Math.max(String(c.l||'').length,String(c.v||'').length))):0;
   return{svg,w:Math.max(cx+Math.max(extraW,24+ln*8),280),h:BOT+26}}
 /* one builder per level, from the lesson's build state */
 const U=(x,u)=>window.UNITS?UNITS.eng(x,u):x+' '+u;
@@ -65,7 +70,13 @@ l2:s=>{const ser=[{p:'conn',k:'term',l:''},{p:'fuse',k:'fuse',l:'F1'},{p:'fet',k
 l3:s=>{const ser=[{p:'fuse',k:'fuse',l:'F1'},{p:'sw',k:s.closed?'swc':'sw',l:'S1',node:'SW'},{p:'coil',k:'coil',l:'L1',v:s.L?U(s.L,'H'):''}];
   const sh=[{p:'lamp',k:'lamp',l:'H1'}];
   const d=s.diode&&s.diode!=='none'?s.diode:null;
-  return{src:{p:'psu',l:'12\u00a0'+(window.UNITS?UNITS.sym('V',0):'V')},series:ser,shunt:sh,after:d?(xs=>{const x=xs.sw;return dot(x,TOP)+wire(`M${x} ${TOP}V${MID-20}M${x} ${MID+20}V${BOT}`)+part('diode','schottky',x,MID,d==='rev'?90:-90,'D1','')+G(x,BOT)}):null}}};
+  return{src:{p:'psu',l:'12\u00a0'+(window.UNITS?UNITS.sym('V',0):'V')},series:ser,shunt:sh,after:d?(xs=>{const x=xs.sw;return dot(x,TOP)+wire(`M${x} ${TOP}V${MID-20}M${x} ${MID+20}V${BOT}`)+part('diode','schottky',x,MID,d==='rev'?90:-90,'D1','')+G(x,BOT)}):null}},
+l4:s=>{const V=v=>(window.I18N?I18N.nf(v,v%1?1:0):v)+'\u00a0'+(window.UNITS?UNITS.sym('V',0):'V'),A=a=>window.UNITS?UNITS.eng(a,'A'):a+' A';
+  const buck={p:'buck',k:'buck',l:'U1',node:V(5)},esp={p:'esp',k:'ic',l:'U3',v:'ESP32'};
+  if(s.kind==='bench')return{src:{p:'bench',l:V(s.vin)},series:[{p:'ldo',k:'ldo',l:'U2',node:V(3.3)}],shunt:[esp]};
+  if(s.kind==='buck')return{src:{p:'psu',l:V(12)},series:[{p:'fuse',k:'fuse',l:'F1'},buck],shunt:[{p:'eload',k:'isink',l:T('Load'),v:A(s.o5)}]};
+  const ser=[{p:'fuse',k:'fuse',l:'F1'}];if(s.mode==='chain')ser.push(buck);ser.push({p:'ldo',k:'ldo',l:'U2',node:V(3.3)});
+  return{src:{p:'psu',l:V(12)},series:ser,shunt:[esp]}}};
 let key=null,get=null,open=false,box=null,btn=null,last='',hl=null,user=false,legend='',sel=null;
 function foot(){const n=box&&box.querySelector('.sc-n');if(!n)return;if(sel)n.innerHTML=`<b>${sel.t}</b><br>${sel.d}`;else n.textContent=legend;n.classList.toggle('sel',!!sel)}
 function render(){if(!box||!get)return;const s=get();const show=s.sc==='b';btn.hidden=!show;if(!show){box.hidden=true;document.body.classList.remove('sc-open');return}
@@ -73,8 +84,8 @@ function render(){if(!box||!get)return;const s=get();const show=s.sc==='b';btn.h
   const sig=JSON.stringify(s);if(sig===last)return;last=sig;
   const L=LV[key](s);const {svg,w,h}=draw(L);
   box.querySelector('.sc-svg').innerHTML=`<svg viewBox="0 0 ${w} ${h}" style="width:calc(${w}px * var(--sc,1.3))" role="group" aria-label="${T('Schematic of the board')}">${svg}</svg>`;
-  const used=[...new Set([...svg.matchAll(/class="sl"[^>]*>([A-Z])/g)].map(m=>m[1]))];
-  const LEG={R:'resistor',D:'diode or LED',Q:'transistor',F:'fuse',S:'switch',L:'coil',H:'lamp',M:'motor',C:'capacitor'};
+  const used=[...new Set([...svg.matchAll(/class="sl"[^>]*>([A-Z])[0-9]/g)].map(m=>m[1]))];
+  const LEG={U:'regulator or chip',R:'resistor',D:'diode or LED',Q:'transistor',F:'fuse',S:'switch',L:'coil',H:'lamp',M:'motor',C:'capacitor'};
   legend=T('The same board, as engineers draw it. Click a symbol to see its part. Every ⏚ is one node: ground, 0 V.')+' '+used.filter(l=>LEG[l]).map(l=>l+'\u00a0'+T(LEG[l])).join(', ')+'.';
   sel=null;foot();
   box.querySelectorAll('.sp').forEach(g=>{const p=g.dataset.p;const go=()=>{if(window.SHOWINFO&&INFOK(p))SHOWINFO(INFOK(p));mark(p)};g.onclick=go;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
@@ -97,7 +108,7 @@ function mount(){if(box)return;const stage=document.getElementById('stage');if(!
     if(!s){s=document.createElement('div');s.className='sc-sym';info.appendChild(s)}
     s.innerHTML=`<svg width="64" height="40" viewBox="-26 -22 52 44" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${SY[k]}</g></svg><span>${T('On a schematic')}</span>`}).observe(info,{attributes:true,childList:true,subtree:false});
   setInterval(render,300)}
-const SYMK={res:'res',led:'led',sw:'sw',src:'src',psu:'src',fuse:'fuse',diode:'schottky',fet:'pmos',cap:'cap',coil:'coil',lamp:'lamp',meter:'volt',servo:'motor'};
+const SYMK={buck:'buck',ldo:'ldo',esp:'ic',eload:'isink',bench:'src',res:'res',led:'led',sw:'sw',src:'src',psu:'src',fuse:'fuse',diode:'schottky',fet:'pmos',cap:'cap',coil:'coil',lamp:'lamp',meter:'volt',servo:'motor'};
 const css=`.sc-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(140,160,255,.25);background:rgba(10,15,40,.84);color:#dfe4fb;font:600 15px/1 Manrope,sans-serif;cursor:pointer;pointer-events:auto;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .sc-btn:hover{border-color:rgba(140,160,255,.45)}.sc-btn[aria-pressed=true]{border-color:#8a9bff;background:rgba(40,55,130,.85);color:#fff}
 .sc-box{position:absolute;left:16px;top:72px;z-index:6;width:max-content;max-width:calc(100% - 32px - var(--pw,0px));padding:12px 14px 12px;border-radius:16px;background:rgba(10,15,40,.88);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid rgba(140,160,255,.16);box-shadow:0 18px 50px rgba(0,0,0,.4);pointer-events:auto}

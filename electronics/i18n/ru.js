@@ -223,4 +223,7 @@ I18N.add({
 "The same board, as engineers draw it. Click a symbol to see its part. Every ⏚ is one node: ground, 0 V.":"Та же плата, как её рисуют инженеры. Кликни по символу, чтобы увидеть деталь. Все ⏚ — один узел: земля, 0 В.",
 "Achievements on this level: {0} of {1}":"Ачивки уровня: {0} из {1}",
 "Scroll the schematic sideways →":"Листай схему вбок →",
+"Stage: Holding the level":"Этап «Держим уровень»",
+"Stage: Linear":"Этап «Линейный»",
+"Stage: Switching":"Этап «Импульсный»",
 });

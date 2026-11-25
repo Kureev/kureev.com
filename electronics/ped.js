@@ -221,7 +221,7 @@ const css=`#ped{display:flex;flex-direction:column;gap:14px;margin:4px 0 16px}
 .fresh.miss .pick.no{animation:pq-shake .45s}@keyframes pq-shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .pq-f.ok .wh{color:#9fe8c4}.pq-again.pq-ch{display:inline;padding:0;margin:0;min-height:0!important;font-size:inherit!important}
 .ped-toast{position:fixed;inset:auto;top:16px;left:50%;margin:0;padding:0;border:0;background:none;overflow:visible;transform:translate(-50%,-16px);opacity:0;pointer-events:none;transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1);z-index:1001}
-.ped-toast.on{opacity:1;transform:translate(-50%,0)}
+.ped-toast.on{opacity:1;transform:translate(-50%,0)}@media(min-width:901px){body.sc-open .ped-toast{top:auto;bottom:24px}}
 .pt-c{display:flex;align-items:center;gap:14px;min-width:260px;max-width:min(420px,calc(100vw - 32px));padding:12px 18px 12px 12px;border-radius:16px;background:rgba(10,15,40,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,178,107,.35);box-shadow:0 18px 50px rgba(0,0,0,.45)}
 .pt-c .am{width:64px;height:64px}.pt-c .am svg{width:28px;height:28px}
 .pt-t{display:flex;flex-direction:column;gap:2px;text-align:left}.pt-k{font:600 13px/1.3 Manrope,sans-serif;color:#ffb26b}.pt-t b{font:600 15px/1.3 Manrope,sans-serif;color:#eef1ff}.pt-d{font-size:13px;line-height:1.35;color:#a3acd0}

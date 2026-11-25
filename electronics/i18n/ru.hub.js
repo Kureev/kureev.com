@@ -113,4 +113,10 @@ I18N.add({
 "Problems come back after 1, 3, 7 and 21 days. Right on the first try pushes one further; a miss brings it back tomorrow.":"Задачи возвращаются через 1, 3, 7 и 21 день. Верно с первой попытки — следующий раз позже, промах — завтра снова.",
 "Every one has its own art. Open to see what’s next.":"У каждой своя картинка. Открой, чтобы увидеть, что дальше.",
 "Review · {0}":"Повторение · {0}",
+"Linear regulator":"Линейный стабилизатор",
+"A float valve: burns (U in − U out) × I":"Поплавковый клапан: сжигает (U вх − U вых) × I",
+"Dropout":"Dropout",
+"The input stays about 1.1 V above the output":"Вход держится примерно на 1,1 В выше выхода",
+"Buck converter":"Понижающий преобразователь",
+"Trades voltage for current, about 90% efficient":"Меняет напряжение на ток, КПД около 90%",
 });
