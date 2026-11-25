@@ -192,4 +192,10 @@ I18N.add({
 "Spaced out":"С перерывами",
 "Reviews done on three different days.":"Повторения в три разных дня.",
 "Do a review on three different days.":"Сделай повторение в три разных дня.",
+"Schematic":"Схема",
+"Schematic of the board":"Схема платы",
+"On a schematic":"На схеме",
+"Switch":"Выключатель",
+"Lamp":"Лампа",
+"The same board, as engineers draw it. Click a symbol to see its part. Every ⏚ is one node: ground, 0 V.":"Та же плата, как её рисуют инженеры. Кликни по символу, чтобы увидеть деталь. Все ⏚ — один узел: земля, 0 В.",
 });
