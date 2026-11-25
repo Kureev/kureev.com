@@ -78,6 +78,7 @@ function render(){if(!box||!get)return;const s=get();const show=s.sc==='b';btn.h
   legend=T('The same board, as engineers draw it. Click a symbol to see its part. Every ⏚ is one node: ground, 0 V.')+' '+used.filter(l=>LEG[l]).map(l=>l+'\u00a0'+T(LEG[l])).join(', ')+'.';
   sel=null;foot();
   box.querySelectorAll('.sp').forEach(g=>{const p=g.dataset.p;const go=()=>{if(window.SHOWINFO&&INFOK(p))SHOWINFO(INFOK(p));mark(p)};g.onclick=go;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+  const sv=box.querySelector('.sc-svg');const cue=()=>{const more=sv.scrollWidth>sv.clientWidth+2;sv.classList.toggle('more',more&&sv.scrollLeft+sv.clientWidth<sv.scrollWidth-4);box.querySelector('.sc-cue').hidden=!more};sv.onscroll=cue;requestAnimationFrame(cue);
   if(hl)mark(hl)}
 const INFOK=p=>({r1:'res',r2:'res',src:'src'}[p]||p);
 function mark(p){hl=p;if(!box)return;box.querySelectorAll('.sp').forEach(g=>g.classList.toggle('on',INFOK(g.dataset.p)===INFOK(p)))}
@@ -86,7 +87,7 @@ function mount(){if(box)return;const stage=document.getElementById('stage');if(!
   btn.innerHTML=`<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 10h4M14 10h4"/><rect x="6" y="7" width="8" height="6" rx="1"/><path d="M10 3v4M10 13v4M6 17h8"/></svg><span>${T('Schematic')}</span>`;
   btn.onclick=()=>{open=!open;user=true;last='';render()};
   box=document.createElement('section');box.className='sc-box';box.hidden=true;box.setAttribute('aria-label',T('Schematic'));
-  box.innerHTML=`<div class="sc-h"><h2>${T('Schematic')}</h2><button type="button" class="sc-x" aria-label="${T('Close')}"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div><div class="sc-svg"></div><p class="sc-n" aria-live="polite"></p>`;
+  box.innerHTML=`<div class="sc-h"><h2>${T('Schematic')}</h2><button type="button" class="sc-x" aria-label="${T('Close')}"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div><div class="sc-svg"></div><p class="sc-cue" hidden>${T('Scroll the schematic sideways →')}</p><p class="sc-n" aria-live="polite"></p>`;
   box.querySelector('.sc-x').onclick=()=>{open=false;user=true;sel=null;render();btn.focus()};
   const tools=document.querySelector('.tools')||stage,rs=tools.querySelector('#reset');if(rs)rs.after(btn);else tools.appendChild(btn);stage.appendChild(box);
   /* the part's card shows its symbol, and the schematic marks it */
@@ -112,11 +113,12 @@ const css=`.sc-btn{display:inline-flex;align-items:center;gap:8px;min-height:44p
 .sc-svg .sp:focus-visible .hit{stroke:#8a9bff;stroke-width:1.5}
 .sc-svg .sp.on{color:#ffb26b}.sc-svg .sp.on .hit{fill:rgba(255,178,107,.12)}
 .sc-svg .sl{font:600 12px/1 Manrope,sans-serif;fill:#c9d2f5}.sc-svg .sv,.sc-svg .sn{font:600 12px/1 Manrope,sans-serif;fill:#8f9bc4}
+.sc-svg.more{-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}.sc-cue{margin:4px 0 0;font:600 13px/1.3 Manrope,sans-serif;color:#8a9bff}
 .sc-n b{color:#eef1ff;font-weight:600}.sc-n.sel{color:#c9d2f5;font-size:15px}
 .sc-n{width:0;min-width:100%;margin:6px 0 0;font-size:13px;line-height:1.45;color:#8f9bc4}
 .sc-sym{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:10px 0 0;padding-top:10px;border-top:1px solid rgba(140,160,255,.12);color:#dfe4fb;font:600 13px/1.3 Manrope,sans-serif}.sc-sym span{color:#8f9bc4}
 @media(max-width:900px){.sc-box{top:auto;bottom:12px;left:12px;right:12px;width:auto;max-width:none;padding:8px 12px 10px}.sc-btn span{display:none}.sc-btn{padding:0 12px}.sc-n{display:none}.sc-n.sel{display:block;width:auto;min-width:0}.sc-svg{overflow-x:auto;--sc:1.1}.sc-svg svg{max-width:none}}
-@media(max-width:900px){.sc-open .hud{visibility:hidden}}
+@media(max-width:900px){.sc-open .hud,.sc-open #scope,.sc-open .scope{visibility:hidden}.sc-box{max-height:calc(100% - 72px);overflow-y:auto}.sc-h{position:sticky;top:-8px;z-index:1;background:rgba(10,15,40,.96)}}
 body:has(#info:not([hidden])) .tools .hint{visibility:hidden}
 @media(prefers-contrast:more){.sc-box{background:#0a1230;border-color:#c9d2f5}}`;
 const e=document.createElement('style');e.textContent=css;document.head.appendChild(e);
