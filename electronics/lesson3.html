@@ -226,8 +226,8 @@ input[type=range]{accent-color:#7d8cff}
 .scope .sk{display:flex;justify-content:space-between;gap:8px;margin:6px 0 0;font:500 13px/1.3 Manrope,sans-serif;color:#8f9bc4;font-variant-numeric:tabular-nums}
 .scope .lg{display:flex;gap:14px;margin:6px 0 0;font:500 13px/1.3 Manrope,sans-serif;color:#8f9bc4}
 .scope .lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
-.wnote{margin:10px 0 0;font:500 13px/1.4 Manrope,sans-serif;color:#a3acd0;font-variant-numeric:tabular-nums}
-.card.ctl .row button.filling{background:linear-gradient(90deg,transparent calc(80% - 1px),rgba(255,178,107,.85) calc(80% - 1px),rgba(255,178,107,.85) calc(80% + 1px),transparent 0),linear-gradient(90deg,rgba(255,178,107,.28) calc(var(--p,0)*100%),rgba(255,178,107,.04) 0)!important;border-color:rgba(255,178,107,.45)!important;color:#c9d2f5!important}
+.wnote{text-wrap:pretty;margin:10px 0 0;font:500 13px/1.4 Manrope,sans-serif;color:#a3acd0;font-variant-numeric:tabular-nums}
+.card.ctl .row button.filling{background:linear-gradient(#ffb26b,#ffb26b) 80% 0/2px 7px no-repeat,linear-gradient(#ffb26b,#ffb26b) 80% 100%/2px 7px no-repeat,linear-gradient(90deg,rgba(255,178,107,.28) calc(var(--p,0)*100%),rgba(255,178,107,.04) 0)!important;border-color:rgba(255,178,107,.45)!important;color:#c9d2f5!important}
 .stepx .qq{margin:0 0 10px!important;color:#eef1ff!important;font-weight:600}
 .row button[aria-pressed=true].danger{border-color:#ff8a70}
 @media(min-width:901px){.app{--pw:calc(clamp(420px,31vw,500px) + 24px)}}
@@ -423,7 +423,7 @@ const needle=new THREE.Group();needle.position.set(0,1.05,0.06);gaugeG.add(needl
 const NDW=56,dropsW=new THREE.InstancedMesh(new THREE.SphereGeometry(0.075,10,8),new THREE.MeshBasicMaterial({color:0x9fd3ff}),NDW);scW.add(dropsW);
 const WPATH=polyPath(WP,true);
 const splash=[...Array(24)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6),new THREE.MeshBasicMaterial({color:0xcfe9ff,transparent:true,opacity:0}));scW.add(m);return{m,v:V3(),life:0}});
-const LwPump=lab('w','Pump = source, 12 V',V3(WX0,0.85,0.55),'part',null,'down'),LwValve=lab('w','',V3(VX,WY1+1.25,0),'',null,'up'),
+const LwPump=lab('w','Pump = source · 12 V',V3(WX0,0.85,0.55),'part',null,'down'),LwValve=lab('w','',V3(VX,WY1+1.25,0),'',null,'up'),
   LwFly=lab('w','',V3(HX,WY1+1.15,0),'part',null,'up'),LwN=lab('w','',V3(WX1-0.35,1.75,0),'part',null,'left'),
   LwHam=lab('w','',V3(VX-0.2,WY1-0.6,0.4),'bad',()=>S.kick&&S.kick.show>0,'down');
 let wflow=0,flyA=0,needleA=0;
@@ -440,7 +440,7 @@ const KP=P(-5,-0.3),KM=P(-5,0.3),F1=P(-4.5,-1.8),F2=P(-3.5,-1.8),S1=P(-3.0,-1.8)
 [[KP,P(-5,-1.8)],[P(-5,-1.8),F1],[F2,S1],[S2,SWN],[SWN,L1],[L2,LT],[LT,LA],[LB,GR],[GR,GL],[GL,KM]].forEach(([a,b])=>trace(scB,a,b));
 [[SWN,DA],[DB,P(-1.0,1.8)]].forEach(([a,b])=>trace(scB,a,b,0.16));
 [F1,F2,S1,S2,L1,L2,LA,LB,DA,DB].forEach(p=>add(scB,cyl(0.16,0.05,mGold,p.x,0.025,p.z)));
-lab('b','+12 V',V3(2.7,0.05,-2.25),'part');lab('b','GND (ground, 0 V)',V3(0.7,0.05,2.25),'part',null,'down');
+lab('b','+12 V',V3(-5.15,0.05,-1.1),'part',null,'left');lab('b','GND (ground, 0 V)',V3(0.7,0.05,2.25),'part',null,'down');
 /* supply and terminal, as in levels 1–2 */
 add(scB,new THREE.Mesh(new THREE.BoxGeometry(1.6,1.0,2.6),M(0x232826)),'psu').position.set(-7.4,0.5,0);
 add(scB,bar(P(-6.6,-0.3),P(-5.4,-0.3),0.1,0.08,0.12,M(0xe8332a)));add(scB,bar(P(-6.6,0.3),P(-5.4,0.3),0.1,0.08,0.12,M(0x1c1c1c)));
@@ -486,7 +486,7 @@ const stripe=add(gD,cyl(0.146,0.09,M(0xbfc5c8),-0.2,0.22,0,0,Math.PI/2),'diode')
 trace(scB,SWN,P(-1.0,-2.6),0.12);add(scB,cyl(0.2,0.08,mGold,-1.0,0.04,-2.6));
 const probe=new THREE.Mesh(new THREE.ConeGeometry(0.13,0.5,18),M(0x5b9cff,{emissive:0x5b9cff,emissiveIntensity:.3}));probe.rotation.x=Math.PI;probe.position.set(-1.0,0.5,-2.6);scB.add(probe);
 /* labels */
-const Lfuse=lab('b','',V3(-4,0.55,-1.8),'part'),Lsw=lab('b','',V3(-2.35,0.45,-1.45),'part',null,'down'),Lsn=lab('b','SW · switch node',V3(-1.15,0.45,-2.6),'',null,'left'),_pri=(Lsn.el.dataset.pri='1'),
+const Lfuse=lab('b','',V3(-4.55,0.4,-1.8),'part',null,'left'),Lsw=lab('b','',V3(-2.35,0.45,-1.45),'part',null,'down'),Lsn=lab('b','SW · switch node',V3(-1.15,0.45,-2.6),'',null,'left'),_pri=(Lsn.el.dataset.pri='1'),
   Lcoil=lab('b','',V3(0.7,1.6,-1.8),'part'),Llamp=lab('b','',V3(3.6,1.7,0),'part',null,'up'),Ld=lab('b','',V3(-1.25,0.3,-0.25),'part',()=>S.diode!=='none','left'),
   Lspark=lab('b','Spark!',V3(-2.35,0.7,-1.8),'bad',()=>sparkT>0,'up');
 /* current dots: the supply loop, and the freewheel loop through the diode */
@@ -660,15 +660,15 @@ function update(){
     $('#wnote').textContent=S.wv==='closing'?_t('Closing…'):S.wv!=='open'?(S.step===2?_t('Open the valve and wait: the buttons unlock once the flow is up to speed.'):_t('Open the valve and watch the flow build up on the scope.')):fill?(S.step===2?_t('The flow is building up. The buttons unlock at 80% of full.'):_t('The flow is building up…')):S.step===2?_t('Full flow. Now close it, slowly or all at once.'):_t('The flow has levelled off at {0}.',nf(full,1)+' '+_u('A'));
     let f='';
     if(S.step===0)f=S.wv==='open'?_t('Wheel’s push-back: U = 12 V − I × R = {0}<br>Final flow: I = U / R = 12 V / {1} = <b>{2}</b>',fV(Math.max(0,uL)),fR(wRo()),nf(wMax(),1)+' '+_u('A')):_t('Valve shut: no flow, the wheel stands still.<br>Once open, the flow settles at I = U / R = 12 V / {0} = <b>{1}</b>',fR(wRo()),nf(wMax(),1)+' '+_u('A'));
-    else if(S.step===2)f=S.kick?(S.kick.slam?_t('Slam in 1 µs: U = L × ΔI / Δt = {0} × {1} / 1 µs ≈ <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak)):_t('Close over 0.5 ms: U = 12 V + L × ΔI / Δt = 12 V + {0} × {1} / 0.5 ms = <b>{2}</b>',fL(wLH()),fI(S.kick.I0),fV(S.kick.peak))):_t('Energy in the wheel: E = ½ × L × I² = {0}',fE(0.5*wLH()*S.wI*S.wI));
+    else if(S.step===2)f=S.kick?(S.kick.slam?_t('Slam in 1 µs: U = L × ΔI / Δt = {0} × {1} / 1 µs ≈ <b>{2}</b>',fL(wLH()),nf(S.kick.I0,2)+' '+_u('A'),fV(S.kick.peak)):_t('Close over 0.5 ms: U = 12 V + L × ΔI / Δt = 12 V + {0} × {1} / 0.5 ms = <b>{2}</b>',fL(wLH()),nf(S.kick.I0,2)+' '+_u('A'),fV(S.kick.peak))):_t('Energy in the wheel: E = ½ × L × I² = {0}',fE(0.5*wLH()*S.wI*S.wI));
     $('#wF').innerHTML=f;
     LwValve.el.textContent=_t(S.wv==='open'?'Valve open':S.wv==='closing'?'Valve closing…':'Valve shut');
-    LwHam.el.textContent=_t('Water hammer!');LwPump.el.textContent=_t(S.wv==='open'?'Pump = source, 12 V':'Pump = source, 12 V')}
+    LwHam.el.textContent=_t('Water hammer!');LwPump.el.textContent=_t(S.wv==='open'?'Pump = source · 12 V':'Pump = source · 12 V')}
   /* board */
   const dd=S.diode;gD.visible=dd!=='none';gD.rotation.y=-Math.atan2(DB.z-DA.z,DB.x-DA.x)+(dd==='rev'?Math.PI:0);
   lever.rotation.z=(S.cap&&S.rp<1?S.cap.closed:S.sw)?0:0.6;if(S.pwm)lever.rotation.z=C.V>1?0:0.6;
   fWire.visible=!S.fuse;fSoot.visible=S.fuse;
-  Lfuse.el.textContent=_t(S.fuse?'Fuse · blown':'Fuse');Lsw.el.textContent=_t(S.pwm?'Switch · flipping 20,000 times a second':S.sw?'Switch · closed':'Switch · open');
+  Lfuse.el.textContent=_t(S.fuse?'Fuse · blown':'Fuse');Lfuse.el.className='lb '+(S.fuse?'bad':'part');Lsw.el.textContent=_t(S.pwm?'Switch · flipping 20,000 times a second':S.sw?'Switch · closed':'Switch · open');
   Lcoil.el.textContent=_t('Coil · {0}',fL(BL[S.bl]));Llamp.el.textContent=_t('Lamp · 12 V');Ld.el.textContent=_t(dd==='rev'?'Diode · backwards!':C.V<-0.1?'Flyback diode · conducting':'Flyback diode · shut');Ld.el.className='lb '+(dd==='rev'?'bad':'part');
   $('#bsw').textContent=_t(S.sw?'Open the switch':'Close the switch');$('#bsw').disabled=!!(S.cap&&S.rp<1);
   [['#dN','none'],['#dOk','ok'],['#dRev','rev']].forEach(([id,d])=>$(id).setAttribute('aria-pressed',dd===d));

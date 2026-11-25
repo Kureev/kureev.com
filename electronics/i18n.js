@@ -21,7 +21,7 @@ function typo(r){if(typeof r!=='string'||r.length<3)return r;
   r=r.replace(RX_U,'$1'+NB).replace(/ ([×\/·≈+−]) /g,NB+'$1'+NB)
    .replace(/(^|[ \n>(:;«])([^\s<>]{1,4}) = /gu,'$1$2'+NB+'='+NB)
    .replace(RX_END,NB+'='+NB).replace(/ = /g,NB+'= ').replace(/ (=|≈)$/,NB+'$1').replace(/ —/g,NB+'—')
-   .replace(/(\d) (из|of) (?=\d)/g,'$1'+NB+'$2'+NB).replace(/: (?=\d+\u00a0(?:из|of)\u00a0)/g,':'+NB).replace(/\((\p{L}+) (?=\d)/gu,'($1'+NB)
+   .replace(/(\d) (из|of) (?=\d)/g,'$1'+NB+'$2'+NB).replace(/: (?=\d+\u00a0(?:из|of)\u00a0)/g,':'+NB).replace(/(\d) (верно|right|в точку)/g,'$1'+NB+'$2').replace(/([\p{L}\d])–([\p{L}\d])/gu,'$1\u2060–\u2060$2').replace(/\((\p{L}+) (?=\d)/gu,'($1'+NB)
    .replace(/ ([^\s<>]{1,2}[.,;:!?])(?=\s|$|<)/g,NB+'$1');
   if(lang==='ru')r=r.replace(/(?<=^|[ \t\n>(«„]|[^\d\s]\u00a0)(в|к|с|у|о|я|и|а|не|из|на|по|за|до|от|во|ко|со|об|при|для|без|под|над|про|что|как|где) /giu,'$1'+NB);
   return r}
@@ -49,7 +49,7 @@ function switcher(){const w=document.createElement('div');w.className='langsw';w
     b.setAttribute('aria-label',l==='ru'?'Русский':'English');b.onclick=()=>{if(l!==lang)setLang(l)};w.appendChild(b)});return w}
 window.I18N={lang,locale,t,nf,u,pl,deep,apply,switcher,setLang,add:o=>Object.assign(D,o),miss};
 /* load the dictionaries for this page before the page scripts run */
-if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=11';
+if(lang!=='en'){const m=location.pathname.match(/(lesson\d+)/),page=m?m[1]:'hub',v='?v=13';
   document.write('<script src="/electronics/i18n/'+lang+'.js'+v+'"><\/script><script src="/electronics/i18n/'+lang+'.'+page+'.js'+v+'"><\/script>')}
 /* alternate-language links for search engines */
 {const base=location.origin+location.pathname;Object.keys(SUP).forEach(l=>{const k=document.createElement('link');k.rel='alternate';k.hreflang=l;k.href=base+(l==='en'?'':'?lang='+l);document.head.appendChild(k)})}

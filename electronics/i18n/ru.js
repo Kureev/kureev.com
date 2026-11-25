@@ -129,5 +129,6 @@ I18N.add({
 "Answer the warm-ups without a mistake.":"Ответь на разминку без ошибок.",
 "Pass the end check without a mistake.":"Пройди итоговую проверку без ошибок.",
 "Finish every task on this level.":"Выполни все задания уровня.",
-"Get five predictions right in a row.":"Угадай пять прогнозов подряд."
+"Get five predictions right in a row.":"Угадай пять прогнозов подряд.",
+"“{0}”, right":"«{0}» — верно"
 });

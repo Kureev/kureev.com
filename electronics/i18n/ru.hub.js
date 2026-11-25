@@ -101,5 +101,6 @@ I18N.add({
 "The end check without a single mistake.":"Итоговая проверка без единой ошибки.",
 "Every task on this level done.":"Все задания уровня выполнены.",
 "Five predictions in a row right.":"Пять верных прогнозов подряд.",
-"On target: {0} of {1}":"В точку: {0} из {1}"
+"On target: {0} of {1}":"В точку: {0} из {1}",
+"Earned: {0} of {1}":"Получено: {0} из {1}"
 });

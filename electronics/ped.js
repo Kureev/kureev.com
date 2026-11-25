@@ -50,7 +50,7 @@ function render(step){
     const u=items.findIndex((_,i)=>g(key+i)==null);
     items.forEach((q,i)=>{const p=g(key+i);
       if(p!=null){const d=document.createElement('p');d.className='pq-done'+(p===q.a?' ok':'');
-        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?q.o[q.a]:T('“{0}”, not right',q.o[p]).replace(/, not right$/,',\u00a0not\u00a0right').replace(/— неверно$/,'—\u00a0неверно')}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
+        d.innerHTML=`<span>${q.q}</span> <b>${p===q.a?T('“{0}”, right',q.o[q.a]).replace(/, right$/,',\u00a0right').replace(/— верно$/,'—\u00a0верно'):T('“{0}”, not right',q.o[p]).replace(/, not right$/,',\u00a0not\u00a0right').replace(/— неверно$/,'—\u00a0неверно')}</b>`+(p!==q.a?'':(i===u-1||u<0&&i===items.length-1)&&q.ex?`<em>${q.ex}</em>`:'');
         if(p!==q.a)d.appendChild(again(T('Try again'),()=>{s(key+i,null);render(cur)}));c.appendChild(d);return}
       if(i===u)c.appendChild(chips(key+i,q.q,q.o,q.a,null,v=>{s(key+i,v);if(g('F'+key+i)==null)s('F'+key+i,v);render(cur);check()}))});
     c.querySelector('.ped-k span').textContent=u<0?T('{0} / {1} right',ok,items.length):T('{0} of {1}',u+1,items.length);
@@ -150,10 +150,10 @@ document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest
 function syncNext(){const n=document.getElementById('next'),sc=document.getElementById('stepC');if(!n||!sc)return;const m=sc.textContent.match(/(\d+)\s*\/\s*(\d+)/),last=!!m&&m[1]===m[2];
   if(fin&&last){if(n.dataset.fin!=='1'||n.disabled){n.dataset.fin='1';n.disabled=false;n.textContent=T('Finish')}}else if(n.dataset.fin==='1'){delete n.dataset.fin;n.textContent=T('Next')}}
 /* 3D labels: never overlap each other, the HUD or the screen edge; the first (or a warning) wins */
-function declutter(){const st=document.getElementById('stage');if(!st)return;const sr=st.getBoundingClientRect(),pw=innerWidth>900&&window.PW?PW():0,hud=document.getElementById('hud'),hr=hud&&!hud.hidden&&hud.offsetHeight?hud.getBoundingClientRect():null,keep=[];
+function declutter(){const st=document.getElementById('stage');if(!st)return;const sr=st.getBoundingClientRect(),pw=innerWidth>900&&window.PW?PW():0,chips=[...document.querySelectorAll('#hud .num,#hud .pill')].filter(e=>e.offsetHeight).map(e=>e.getBoundingClientRect()),keep=[];
   [...document.querySelectorAll('#labels .lb')].filter(e=>e.style.display!=='none').sort((a,b)=>(b.classList.contains('bad')*2+(+b.dataset.pri||0))-(a.classList.contains('bad')*2+(+a.dataset.pri||0))).forEach(e=>{const r=e.getBoundingClientRect();if(!r.width)return;
     const ov=k=>!(r.right<=k.left+2||r.left>=k.right-2||r.bottom<=k.top+2||r.top>=k.bottom-2);
-    const hide=r.left<sr.left-1||r.right>sr.right-pw+1||(hr&&ov(hr))||keep.some(ov);
+    const hide=r.left<sr.left-1||r.right>sr.right-pw+1||chips.some(ov)||keep.some(ov);
     const v=hide?'hidden':'';if(e.style.visibility!==v)e.style.visibility=v;if(!hide)keep.push(r)})}
 setInterval(declutter,200);
 window.PW=()=>{if(innerWidth<=900)return 0;const p=document.querySelector('.panel');return p?p.offsetWidth+12:0};
